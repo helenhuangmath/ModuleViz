@@ -24,7 +24,7 @@ https://cran.r-project.org/web/packages/heatmaply/vignettes/heatmaply.html
 heatmaply( as.matrix(dt[,c(1:12)]),scale="row", 
 	scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(low = "blue", high = "red",), # default is viridis
 	file = paste0("heatmap_",comp,".pdf"), 
-  height = 900, showticklabels = c(FALSE, TRUE) 
+  height = 900, showticklabels = c(TRUE, FALSE) 
   )
 
 
