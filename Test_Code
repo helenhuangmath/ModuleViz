@@ -1,0 +1,5 @@
+sample_id=2_Multi_Exp1_test_T1
+csv_file=/project/wherrylab/HuaH/Sokratis_CITEseq/Config_Files/index_cellranger_multi_config_Exp1_T1_test.csv
+
+bsub -n 8 -M 198000 -e log_multi_Exp1_T1_test.e -o log_multi_Exp1_T1_test.o \
+cellranger multi --id=$sample_id --csv=$csv_file
