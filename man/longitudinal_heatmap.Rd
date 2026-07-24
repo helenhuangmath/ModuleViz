@@ -30,7 +30,7 @@ resolve_labels(obj, features = NULL, top_n = 0, rank_table = NULL,
 \item{cluster_palette}{Discrete module color palette. Defaults to \code{"spectral"}.}
 \item{label_fontsize, row_title_fontsize, column_name_fontsize, annotation_name_fontsize}{Text sizes for heatmap labels and annotations.}
 \item{show_stability}{Show module stability annotation when available.}
-\item{file}{Optional PDF output path.}
+\item{file}{Optional PDF or PNG output path.}
 \item{width, height}{PDF dimensions in inches.}
 \item{title}{Optional heatmap title.}
 \item{features}{Explicit features for \code{resolve_labels()}.}

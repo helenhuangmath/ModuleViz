@@ -13,6 +13,8 @@ data("heatmap_example")
 
 out_dir <- file.path("examples", "outputs", "moduleviz_gallery")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+preview_dir <- file.path("inst", "extdata", "results")
+dir.create(preview_dir, recursive = TRUE, showWarnings = FALSE)
 
 mat <- heatmap_example$mat
 meta <- heatmap_example$meta
@@ -43,15 +45,34 @@ longitudinal_heatmap(
   width = 8,
   height = 9
 )
+longitudinal_heatmap(
+  obj,
+  annotation_cols = c("Condition", "TimeHr"),
+  label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
+  top_n_label = 2,
+  cluster_palette = "spectral",
+  label_fontsize = 11,
+  title = "ModuleViz longitudinal heatmap",
+  file = file.path(preview_dir, "01_longitudinal_clustered_heatmap.png"),
+  width = 8,
+  height = 9
+)
 
 ## ---- 2. module line/pattern plots ------------------------------------------
-pattern_lineplot(
+p_lines <- pattern_lineplot(
   obj,
   file = file.path(out_dir, "02_module_line_patterns.pdf"),
   palette = "nature",
   base_size = 13,
   width = 7,
   height = 6
+)
+ggplot2::ggsave(
+  file.path(preview_dir, "02_module_line_patterns.png"),
+  p_lines,
+  width = 7,
+  height = 6,
+  dpi = 300
 )
 
 write_memberships(
@@ -89,5 +110,21 @@ dual_omics_heatmap(
   width = 11,
   height = 9
 )
+dual_omics_heatmap(
+  primary = obj,
+  secondary = atac,
+  primary_name = "RNA",
+  secondary_name = "ATAC",
+  gene_of_primary = function(id) id,
+  gene_of_secondary = function(id) sub("^.*_", "", id),
+  aggregate = "mean",
+  label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
+  cluster_palette = "spectral",
+  label_fontsize = 11,
+  file = file.path(preview_dir, "03_rna_atac_side_by_side_heatmap.png"),
+  width = 11,
+  height = 9
+)
 
 message("Example plots written to: ", normalizePath(out_dir))
+message("Preview plots written to: ", normalizePath(preview_dir))

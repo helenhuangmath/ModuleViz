@@ -51,6 +51,20 @@
   setNames(.moduleviz_discrete_palette(length(levels), palette), levels)
 }
 
+.moduleviz_write_plot <- function(file, width, height, draw_it) {
+  ext <- tolower(sub("^.*\\.([^.]+)$", "\\1", file))
+  if (identical(ext, "png")) {
+    grDevices::png(file, width = width, height = height, units = "in", res = 300)
+    on.exit(grDevices::dev.off(), add = TRUE)
+    draw_it()
+  } else {
+    grDevices::pdf(file, width = width, height = height)
+    on.exit(grDevices::dev.off(), add = TRUE)
+    draw_it()
+  }
+  message("wrote ", file)
+}
+
 ## =============================================================================
 ## Low-level helpers
 ## =============================================================================
@@ -555,7 +569,7 @@ resolve_labels <- function(obj, features = NULL, top_n = 0,
 #'   Defaults to "spectral"; "spectual" is accepted as a typo alias.
 #' @param label_fontsize,row_title_fontsize,column_name_fontsize text sizes.
 #' @param show_stability if TRUE and available, annotate module stability.
-#' @param file optional PDF path; if set the heatmap is written there.
+#' @param file optional PDF or PNG path; if set the heatmap is written there.
 #' @param width,height PDF size in inches.
 #' @param title optional heatmap title.
 #' @return the (invisibly returned) Heatmap object; drawn to the device / file.
@@ -675,8 +689,7 @@ longitudinal_heatmap <- function(obj,
                              annotation_legend_side = "bottom",
                              merge_legend = TRUE)
   if (!is.null(file)) {
-    pdf(file, width = width, height = height); draw_it(); dev.off()
-    message("wrote ", file)
+    .moduleviz_write_plot(file, width, height, draw_it)
   } else {
     draw_it()
   }
@@ -822,7 +835,7 @@ write_memberships <- function(obj, file = NULL, prefix = NULL,
 #' @param col_fun z-score colour map.
 #' @param cluster_palette discrete palette for the module annotation bar.
 #' @param label_fontsize,row_title_fontsize,column_name_fontsize text sizes.
-#' @param file optional PDF path (this is a *separate* new figure).
+#' @param file optional PDF or PNG path (this is a *separate* new figure).
 #' @param width,height PDF size.
 #' @param ... passed through to longitudinal_cluster when raw matrices are given.
 #' @return invisibly, a list(primary_obj, secondary_matrix, genes) plus the drawn
@@ -951,8 +964,7 @@ dual_omics_heatmap <- function(primary, secondary,
                              column_title = sprintf("%s + %s (linked by gene)",
                                                     primary_name, secondary_name))
   if (!is.null(file)) {
-    pdf(file, width = width, height = height); draw_it(); dev.off()
-    message("wrote ", file)
+    .moduleviz_write_plot(file, width, height, draw_it)
   } else {
     draw_it()
   }

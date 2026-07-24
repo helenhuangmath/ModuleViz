@@ -12,6 +12,8 @@ data("heatmap_example")
 
 out_dir <- file.path("examples", "outputs", "single_cell_pseudobulk")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+preview_dir <- file.path("inst", "extdata", "results")
+dir.create(preview_dir, recursive = TRUE, showWarnings = FALSE)
 
 bulk_mat <- heatmap_example$mat
 bulk_meta <- heatmap_example$meta
@@ -94,8 +96,20 @@ longitudinal_heatmap(
   width = 11,
   height = 10
 )
+longitudinal_heatmap(
+  obj,
+  annotation_cols = c("Group", "TimeHr"),
+  top_n_label = 2,
+  label_features = c("Gene001", "Gene016", "Gene031"),
+  label_fontsize = 11,
+  cluster_palette = "spectral",
+  title = "Single-cell pseudobulk temporal modules",
+  file = file.path(preview_dir, "04_single_cell_pseudobulk_heatmap.png"),
+  width = 11,
+  height = 10
+)
 
-pattern_lineplot(
+p_sc <- pattern_lineplot(
   obj,
   palette = "science",
   base_size = 12,
@@ -103,7 +117,15 @@ pattern_lineplot(
   width = 9,
   height = 7
 )
+ggplot2::ggsave(
+  file.path(preview_dir, "05_single_cell_pseudobulk_patterns.png"),
+  p_sc,
+  width = 9,
+  height = 7,
+  dpi = 300
+)
 
 write_memberships(obj, prefix = file.path(out_dir, "single_cell_pseudobulk"))
 
 message("Single-cell pseudobulk example written to: ", normalizePath(out_dir))
+message("Preview plots written to: ", normalizePath(preview_dir))
