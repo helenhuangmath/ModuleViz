@@ -139,6 +139,14 @@ It writes:
 - `examples/outputs/moduleviz_gallery/moduleviz_example_centroids.txt`
 - `examples/outputs/moduleviz_gallery/moduleviz_example_stability.txt`
 
+Preview images committed with the package:
+
+![Longitudinal clustered heatmap](inst/extdata/results/01_longitudinal_clustered_heatmap.png)
+
+![Module line patterns](inst/extdata/results/02_module_line_patterns.png)
+
+![RNA ATAC side-by-side heatmap](inst/extdata/results/03_rna_atac_side_by_side_heatmap.png)
+
 Single-cell-style pseudobulk example:
 
 ```r
@@ -150,6 +158,12 @@ It writes:
 - `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_heatmap.pdf`
 - `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_patterns.pdf`
 - pseudobulk membership/centroid/stability tables
+
+Preview images committed with the package:
+
+![Single-cell pseudobulk heatmap](inst/extdata/results/04_single_cell_pseudobulk_heatmap.png)
+
+![Single-cell pseudobulk line patterns](inst/extdata/results/05_single_cell_pseudobulk_patterns.png)
 
 ### Choosing the number of clusters
 

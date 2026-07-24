@@ -23,7 +23,7 @@ dual_omics_heatmap(primary, secondary, primary_name = "RNA",
 \item{col_fun}{Optional z-score color function.}
 \item{cluster_palette}{Discrete module color palette. Defaults to \code{"spectral"}.}
 \item{label_fontsize, row_title_fontsize, column_name_fontsize}{Text sizes for labels and heatmap titles.}
-\item{file}{Optional PDF output path.}
+\item{file}{Optional PDF or PNG output path.}
 \item{width, height}{PDF dimensions in inches.}
 \item{...}{Passed to \code{longitudinal_cluster()} when primary is raw.}
 }
