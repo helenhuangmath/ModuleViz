@@ -1,0 +1,148 @@
+---
+title: "Longitudinal Heatmap Tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Longitudinal Heatmap Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+This tutorial uses a real public RNA-seq time-course from the Bioconductor
+`timecoursedata` package: sorghum leaf samples collected across weekly
+drought/control conditions.
+
+If the data package is not installed:
+
+```{r install-timecoursedata, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+BiocManager::install("timecoursedata")
+```
+
+## 1. Load A Public Time-Course
+
+```{r load, eval=FALSE}
+library(HeatmapPlot)
+
+example <- load_real_timecourse_example(
+  dataset = "sorghum_leaf",
+  genotype = "BT642",
+  min_week = 3,
+  top_n_features = 1000
+)
+
+dim(example$mat)
+head(example$meta[, c(example$sample_col, example$time_col, example$group_col)])
+```
+
+The returned object is plain R data:
+
+- `example$mat`: numeric feature-by-sample matrix.
+- `example$meta`: one row per sample.
+- `example$sample_col`, `example$time_col`, `example$group_col`: column names to
+  pass into the plotting functions.
+
+## 2. Choose The Number Of Modules
+
+`choose_k()` calculates a simple within-cluster-sum-of-squares elbow diagnostic.
+Use it as a first pass, then choose a biologically interpretable value.
+
+```{r choose-k, fig.width=6, fig.height=4, eval=FALSE}
+diag <- choose_k(
+  zscore_rows(example$mat),
+  k_range = 2:10,
+  method = "kmeans"
+)
+
+diag
+attr(diag, "suggested_k")
+```
+
+## 3. Cluster Temporal Patterns
+
+```{r cluster, eval=FALSE}
+obj <- longitudinal_cluster(
+  example$mat,
+  example$meta,
+  sample_col = example$sample_col,
+  time_col = example$time_col,
+  group_col = example$group_col,
+  k = attr(diag, "suggested_k"),
+  method = "kmeans",
+  aggregate_replicates = TRUE,
+  stability = TRUE,
+  n_resample = 20
+)
+
+obj
+```
+
+Clusters are reordered by their temporal peak, so early-high modules appear
+before late-high modules.
+
+## 4. Draw The Heatmap
+
+```{r heatmap, fig.width=8, fig.height=10, eval=FALSE}
+longitudinal_heatmap(
+  obj,
+  annotation_cols = c(example$group_col, example$time_col),
+  top_n_label = 3,
+  title = "Sorghum leaf drought time course"
+)
+```
+
+To save a PDF:
+
+```{r save-heatmap, eval=FALSE}
+longitudinal_heatmap(
+  obj,
+  annotation_cols = c(example$group_col, example$time_col),
+  top_n_label = 3,
+  file = "sorghum_leaf_heatmap.pdf",
+  width = 9,
+  height = 12
+)
+```
+
+## 5. Plot Module Trajectories
+
+```{r lineplot, fig.width=7, fig.height=8, eval=FALSE}
+pattern_lineplot(obj)
+```
+
+## 6. Export Tables
+
+```{r write, eval=FALSE}
+write_memberships(obj, prefix = "sorghum_leaf")
+```
+
+This writes:
+
+- `sorghum_leaf_memberships.txt`
+- `sorghum_leaf_centroids.txt`
+- `sorghum_leaf_stability.txt`
+
+## Other Public Examples
+
+```{r available, eval=FALSE}
+available_real_timecourse_datasets()
+```
+
+For the mouse influenza microarray dataset:
+
+```{r influenza, eval=FALSE}
+flu <- load_real_timecourse_example(
+  dataset = "influenza_mouse",
+  group = c("C", "K", "M"),
+  top_n_features = 1000
+)
+```

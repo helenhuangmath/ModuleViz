@@ -1,7 +1,7 @@
 # Heatmap Plot
 
-Functions for longitudinal / time-course omics analysis (RNA-seq, ATAC-seq,
-Cut&Run, drug-treatment time courses, ...) built on
+An installable R package for longitudinal / time-course omics analysis
+(RNA-seq, ATAC-seq, Cut&Run, drug-treatment time courses, ...) built on
 [ComplexHeatmap](https://bioconductor.org/packages/ComplexHeatmap/).
 
 Give it a matrix of features (genes or peaks) measured across an ordered set of
@@ -24,15 +24,26 @@ Helpers: `choose_k()` (elbow + silhouette diagnostics to pick the number of
 clusters), `cluster_stability()` (resampling Jaccard per module),
 `run_longitudinal()` (one call that does cluster + heatmap + line plot + write).
 
-The code lives in [`R/longitudinal_heatmap.R`](R/longitudinal_heatmap.R); runnable
-templates are in [`examples/`](examples/).
+The package code lives in [`R/`](R/); runnable templates are in
+[`examples/`](examples/), including a real public-data example using
+Bioconductor `timecoursedata`.
 
-## Install dependencies
+## Install
 
 ```r
 install.packages(c("data.table", "circlize", "RColorBrewer", "ggplot2", "cluster"))
 if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install("ComplexHeatmap")
+BiocManager::install(c("ComplexHeatmap", "timecoursedata"))
+
+install.packages("remotes")
+remotes::install_github("helenhuangmath/Heatmap_Plot")
+```
+
+For local development from this folder:
+
+```r
+install.packages("devtools")
+devtools::load_all(".")
 ```
 
 ## Inputs
@@ -51,7 +62,7 @@ BiocManager::install("ComplexHeatmap")
 ## Quick start
 
 ```r
-source("R/longitudinal_heatmap.R")
+library(HeatmapPlot)
 
 # 1. cluster into temporal modules (ordered early-high -> late-high)
 obj <- longitudinal_cluster(
@@ -115,6 +126,59 @@ dual_omics_heatmap(
 See [`examples/example_single_omics.R`](examples/example_single_omics.R) and
 [`examples/example_dual_omics.R`](examples/example_dual_omics.R) for full,
 DESeq2-style templates.
+
+## Real public-data example
+
+The helper `load_real_timecourse_example()` loads public time-course data from
+Bioconductor `timecoursedata` and returns a plain matrix + metadata table ready
+for this package. The supported datasets are:
+
+```r
+available_real_timecourse_datasets()
+```
+
+Example using the Varoquaux 2019 sorghum leaf drought RNA-seq time course:
+
+```r
+library(HeatmapPlot)
+
+example <- load_real_timecourse_example(
+  dataset = "sorghum_leaf",
+  genotype = "BT642",
+  min_week = 3,
+  top_n_features = 1000
+)
+
+diag <- choose_k(zscore_rows(example$mat), k_range = 2:10,
+                 file = "choose_k_elbow.pdf")
+
+obj <- longitudinal_cluster(
+  example$mat,
+  example$meta,
+  sample_col = example$sample_col,
+  time_col = example$time_col,
+  group_col = example$group_col,
+  k = attr(diag, "suggested_k"),
+  aggregate_replicates = TRUE,
+  stability = TRUE,
+  n_resample = 20
+)
+
+longitudinal_heatmap(obj, top_n_label = 3,
+                     file = "sorghum_leaf_heatmap.pdf")
+pattern_lineplot(obj, file = "sorghum_leaf_patterns.pdf")
+write_memberships(obj, prefix = "sorghum_leaf")
+```
+
+See [`examples/example_real_timecoursedata.R`](examples/example_real_timecoursedata.R)
+and the tutorial
+[`vignettes/longitudinal-heatmap-tutorial.Rmd`](vignettes/longitudinal-heatmap-tutorial.Rmd).
+
+Data source links:
+
+- Bioconductor package page: <https://bioconductor.org/packages/timecoursedata/>
+- Dataset documentation: <https://bioconductor.posit.co/packages/release/data/experiment/vignettes/timecoursedata/inst/doc/documentation.html>
+- Sorghum tutorial context in `moanin`: <https://bioconductor.org/packages/release/bioc/vignettes/moanin/inst/doc/documentation.html>
 
 ## Notes on design
 
