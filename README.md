@@ -23,6 +23,9 @@ heatmaps and pattern plots.
 Helpers: `choose_k()` (elbow + silhouette diagnostics to pick the number of
 clusters), `cluster_stability()` (resampling Jaccard per module),
 `run_longitudinal()` (one call that does cluster + heatmap + line plot + write).
+Plot defaults use a publishable blue-white-red z-score heatmap, a Spectral
+module color bar, larger gene labels, and Nature-style line colors. Line plots
+can also use a Science-style palette with `palette = "science"`.
 
 The package code lives in [`R/`](R/); runnable templates are in
 [`examples/`](examples/), including a real public-data example using
@@ -102,11 +105,13 @@ longitudinal_heatmap(
   annotation_cols = c("Condition", "TimeHr"),
   top_n_label     = 2,                              # auto-label top genes...
   label_features  = c("Gene001", "Gene016"),        # ...plus chosen features
+  label_fontsize   = 11,
+  cluster_palette  = "spectral",
   file = "heatmap.pdf"
 )
 
 # 3. per-module pattern line plot
-pattern_lineplot(obj, file = "pattern_lines.pdf")
+pattern_lineplot(obj, palette = "nature", file = "pattern_lines.pdf")
 
 # 4. cluster memberships (+ centroids + stability)
 write_memberships(obj, prefix = "results")
@@ -133,6 +138,18 @@ It writes:
 - `examples/outputs/moduleviz_gallery/moduleviz_example_memberships.txt`
 - `examples/outputs/moduleviz_gallery/moduleviz_example_centroids.txt`
 - `examples/outputs/moduleviz_gallery/moduleviz_example_stability.txt`
+
+Single-cell-style pseudobulk example:
+
+```r
+source("examples/example_single_cell_pseudobulk.R")
+```
+
+It writes:
+
+- `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_heatmap.pdf`
+- `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_patterns.pdf`
+- pseudobulk membership/centroid/stability tables
 
 ### Choosing the number of clusters
 

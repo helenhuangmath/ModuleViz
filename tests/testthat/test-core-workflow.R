@@ -53,3 +53,24 @@ test_that("labels resolve from explicit IDs and top features", {
   expect_true("Gene001" %in% labels$label)
   expect_true(nrow(labels) >= 4)
 })
+
+test_that("pattern line plot accepts journal palette choices", {
+  data("heatmap_example", package = "ModuleViz")
+
+  obj <- longitudinal_cluster(
+    heatmap_example$mat,
+    heatmap_example$meta,
+    sample_col = "SampleID",
+    time_col = "TimeHr",
+    group_col = "Condition",
+    k = 4,
+    aggregate_replicates = TRUE,
+    stability = FALSE
+  )
+
+  p_nature <- pattern_lineplot(obj, palette = "nature")
+  p_science <- pattern_lineplot(obj, palette = "science")
+
+  expect_s3_class(p_nature, "ggplot")
+  expect_s3_class(p_science, "ggplot")
+})

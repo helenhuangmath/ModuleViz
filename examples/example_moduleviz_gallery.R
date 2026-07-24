@@ -36,6 +36,8 @@ longitudinal_heatmap(
   annotation_cols = c("Condition", "TimeHr"),
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   top_n_label = 2,
+  cluster_palette = "spectral",
+  label_fontsize = 11,
   title = "ModuleViz longitudinal heatmap",
   file = file.path(out_dir, "01_longitudinal_clustered_heatmap.pdf"),
   width = 8,
@@ -46,6 +48,8 @@ longitudinal_heatmap(
 pattern_lineplot(
   obj,
   file = file.path(out_dir, "02_module_line_patterns.pdf"),
+  palette = "nature",
+  base_size = 13,
   width = 7,
   height = 6
 )
@@ -79,6 +83,8 @@ dual_omics_heatmap(
   gene_of_secondary = function(id) sub("^.*_", "", id),
   aggregate = "mean",
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
+  cluster_palette = "spectral",
+  label_fontsize = 11,
   file = file.path(out_dir, "03_rna_atac_side_by_side_heatmap.pdf"),
   width = 11,
   height = 9

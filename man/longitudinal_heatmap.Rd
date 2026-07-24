@@ -10,8 +10,10 @@ metadata annotations, optional stability bars, and selected feature labels.
 longitudinal_heatmap(obj, annotation_cols = NULL, annotation_colors = NULL,
   label_features = NULL, top_n_label = 0, rank_table = NULL,
   id_field = "ID", value_field = "value", bigger_is_better = TRUE,
-  col_fun = NULL, show_stability = TRUE, file = NULL, width = 9,
-  height = 13, title = NULL)
+  col_fun = NULL, cluster_palette = "spectral", label_fontsize = 10,
+  row_title_fontsize = 10, column_name_fontsize = 9,
+  annotation_name_fontsize = 10, show_stability = TRUE, file = NULL,
+  width = 9, height = 13, title = NULL)
 
 resolve_labels(obj, features = NULL, top_n = 0, rank_table = NULL,
   id_field = "ID", value_field = "value", bigger_is_better = TRUE)
@@ -25,6 +27,8 @@ resolve_labels(obj, features = NULL, top_n = 0, rank_table = NULL,
 \item{rank_table}{Optional feature ranking table.}
 \item{id_field, value_field, bigger_is_better}{Ranking-table controls.}
 \item{col_fun}{Optional z-score color function.}
+\item{cluster_palette}{Discrete module color palette. Defaults to \code{"spectral"}.}
+\item{label_fontsize, row_title_fontsize, column_name_fontsize, annotation_name_fontsize}{Text sizes for heatmap labels and annotations.}
 \item{show_stability}{Show module stability annotation when available.}
 \item{file}{Optional PDF output path.}
 \item{width, height}{PDF dimensions in inches.}
