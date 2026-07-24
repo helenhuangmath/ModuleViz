@@ -4,10 +4,10 @@
 ## Data source: Bioconductor package `timecoursedata`.
 ## This script downloads/loads the public Varoquaux 2019 sorghum leaf RNA-seq
 ## dataset, keeps a small high-variance subset for speed, and runs the complete
-## HeatmapPlot workflow.
+## ModuleViz workflow.
 ## =============================================================================
 
-library(HeatmapPlot)
+library(ModuleViz)
 
 if (!requireNamespace("timecoursedata", quietly = TRUE)) {
   if (!requireNamespace("BiocManager", quietly = TRUE)) {

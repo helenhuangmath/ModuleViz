@@ -1,0 +1,5 @@
+*.Rcheck/
+*.tar.gz
+.Rproj.user/
+examples/outputs/
+results/

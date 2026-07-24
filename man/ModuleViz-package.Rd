@@ -1,6 +1,6 @@
-\name{HeatmapPlot-package}
-\alias{HeatmapPlot-package}
-\alias{HeatmapPlot}
+\name{ModuleViz-package}
+\alias{ModuleViz-package}
+\alias{ModuleViz}
 \title{Longitudinal Omics Heatmaps and Temporal Module Plots}
 \description{
 Cluster longitudinal omics features into temporal modules, draw ordered

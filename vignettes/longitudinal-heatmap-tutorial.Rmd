@@ -10,56 +10,48 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  eval = FALSE
+  comment = "#>"
 )
 ```
 
-This tutorial uses a real public RNA-seq time-course from the Bioconductor
-`timecoursedata` package: sorghum leaf samples collected across weekly
-drought/control conditions.
+## Introduction
 
-If the data package is not installed:
+`ModuleViz` clusters feature trajectories from longitudinal omics experiments
+and turns them into ordered temporal heatmaps, module trajectory plots, and
+exportable membership tables. The workflow is useful for RNA-seq, ATAC-seq,
+Cut&Run, or other feature-by-sample matrices where columns represent ordered
+time points, treatment conditions, or both.
 
-```{r install-timecoursedata, eval=FALSE}
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
-}
-BiocManager::install("timecoursedata")
-```
+This vignette uses the small bundled `heatmap_example` dataset so the tutorial
+runs without network access.
 
-## 1. Load A Public Time-Course
+## 1. Load The Example Time-Course
 
-```{r load, eval=FALSE}
-library(HeatmapPlot)
+```{r load}
+library(ModuleViz)
+data("heatmap_example")
 
-example <- load_real_timecourse_example(
-  dataset = "sorghum_leaf",
-  genotype = "BT642",
-  min_week = 3,
-  top_n_features = 1000
-)
+mat <- heatmap_example$mat
+meta <- heatmap_example$meta
 
-dim(example$mat)
-head(example$meta[, c(example$sample_col, example$time_col, example$group_col)])
+dim(mat)
+head(meta)
 ```
 
 The returned object is plain R data:
 
-- `example$mat`: numeric feature-by-sample matrix.
-- `example$meta`: one row per sample.
-- `example$sample_col`, `example$time_col`, `example$group_col`: column names to
-  pass into the plotting functions.
+- `mat`: numeric feature-by-sample matrix.
+- `meta`: one row per sample, with sample ID, condition, time, and replicate.
 
 ## 2. Choose The Number Of Modules
 
 `choose_k()` calculates a simple within-cluster-sum-of-squares elbow diagnostic.
 Use it as a first pass, then choose a biologically interpretable value.
 
-```{r choose-k, fig.width=6, fig.height=4, eval=FALSE}
+```{r choose-k}
 diag <- choose_k(
-  zscore_rows(example$mat),
-  k_range = 2:10,
+  zscore_rows(mat),
+  k_range = 2:5,
   method = "kmeans"
 )
 
@@ -69,18 +61,18 @@ attr(diag, "suggested_k")
 
 ## 3. Cluster Temporal Patterns
 
-```{r cluster, eval=FALSE}
+```{r cluster}
 obj <- longitudinal_cluster(
-  example$mat,
-  example$meta,
-  sample_col = example$sample_col,
-  time_col = example$time_col,
-  group_col = example$group_col,
-  k = attr(diag, "suggested_k"),
+  mat,
+  meta,
+  sample_col = "SampleID",
+  time_col = "TimeHr",
+  group_col = "Condition",
+  k = 4,
   method = "kmeans",
   aggregate_replicates = TRUE,
   stability = TRUE,
-  n_resample = 20
+  n_resample = 10
 )
 
 obj
@@ -91,12 +83,12 @@ before late-high modules.
 
 ## 4. Draw The Heatmap
 
-```{r heatmap, fig.width=8, fig.height=10, eval=FALSE}
+```{r heatmap, fig.width=8, fig.height=8}
 longitudinal_heatmap(
   obj,
-  annotation_cols = c(example$group_col, example$time_col),
+  annotation_cols = c("Condition", "TimeHr"),
   top_n_label = 3,
-  title = "Sorghum leaf drought time course"
+  title = "Example longitudinal heatmap"
 )
 ```
 
@@ -105,9 +97,9 @@ To save a PDF:
 ```{r save-heatmap, eval=FALSE}
 longitudinal_heatmap(
   obj,
-  annotation_cols = c(example$group_col, example$time_col),
+  annotation_cols = c("Condition", "TimeHr"),
   top_n_label = 3,
-  file = "sorghum_leaf_heatmap.pdf",
+  file = "example_heatmap.pdf",
   width = 9,
   height = 12
 )
@@ -115,26 +107,49 @@ longitudinal_heatmap(
 
 ## 5. Plot Module Trajectories
 
-```{r lineplot, fig.width=7, fig.height=8, eval=FALSE}
+```{r lineplot, fig.width=7, fig.height=7}
 pattern_lineplot(obj)
 ```
 
 ## 6. Export Tables
 
-```{r write, eval=FALSE}
-write_memberships(obj, prefix = "sorghum_leaf")
+```{r write}
+out_dir <- tempdir()
+write_memberships(obj, prefix = file.path(out_dir, "heatmap_example"))
 ```
 
 This writes:
 
-- `sorghum_leaf_memberships.txt`
-- `sorghum_leaf_centroids.txt`
-- `sorghum_leaf_stability.txt`
+- `heatmap_example_memberships.txt`
+- `heatmap_example_centroids.txt`
+- `heatmap_example_stability.txt`
 
-## Other Public Examples
+## Real Public Data
 
-```{r available, eval=FALSE}
+The package also includes a helper for public datasets in Bioconductor
+`timecoursedata`. These examples are optional because they require installing
+the experiment-data package.
+
+```{r available}
 available_real_timecourse_datasets()
+```
+
+Install the optional data package before running the real-data workflow:
+
+```{r install-timecoursedata, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+BiocManager::install("timecoursedata")
+```
+
+```{r sorghum, eval=FALSE}
+sorghum <- load_real_timecourse_example(
+  dataset = "sorghum_leaf",
+  genotype = "BT642",
+  min_week = 3,
+  top_n_features = 1000
+)
 ```
 
 For the mouse influenza microarray dataset:
@@ -145,4 +160,10 @@ flu <- load_real_timecourse_example(
   group = c("C", "K", "M"),
   top_n_features = 1000
 )
+```
+
+## Session Information
+
+```{r session-info}
+sessionInfo()
 ```

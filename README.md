@@ -1,4 +1,4 @@
-# Heatmap Plot
+# ModuleViz
 
 An installable R package for longitudinal / time-course omics analysis
 (RNA-seq, ATAC-seq, Cut&Run, drug-treatment time courses, ...) built on
@@ -23,6 +23,9 @@ heatmaps and pattern plots.
 Helpers: `choose_k()` (elbow + silhouette diagnostics to pick the number of
 clusters), `cluster_stability()` (resampling Jaccard per module),
 `run_longitudinal()` (one call that does cluster + heatmap + line plot + write).
+Plot defaults use a publishable blue-white-red z-score heatmap, a Spectral
+module color bar, larger gene labels, and Nature-style line colors. Line plots
+can also use a Science-style palette with `palette = "science"`.
 
 The package code lives in [`R/`](R/); runnable templates are in
 [`examples/`](examples/), including a real public-data example using
@@ -46,6 +49,25 @@ install.packages("devtools")
 devtools::load_all(".")
 ```
 
+## Package checks
+
+Before submitting to GitHub, CRAN, or Bioconductor, run:
+
+```bash
+R CMD build .
+env _R_CHECK_FORCE_SUGGESTS_=false R CMD check --no-manual ModuleViz_0.1.0.tar.gz
+```
+
+For Bioconductor-style checks:
+
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install("BiocCheck")
+BiocCheck::BiocCheck(".")
+```
+
+`timecoursedata` is optional and only needed for the public real-data examples.
+
 ## Inputs
 
 - **Matrix** — features (rows) × samples (columns). Feature IDs as rownames
@@ -62,13 +84,17 @@ devtools::load_all(".")
 ## Quick start
 
 ```r
-library(HeatmapPlot)
+library(ModuleViz)
+
+data("heatmap_example")
+mat <- heatmap_example$mat
+meta <- heatmap_example$meta
 
 # 1. cluster into temporal modules (ordered early-high -> late-high)
 obj <- longitudinal_cluster(
   mat, meta,
-  sample_col = "SampleID", time_col = "TimeHr", group_col = "Genotype",
-  k = 12, method = "kmeans",     # or "hierarchical" / "pam"
+  sample_col = "SampleID", time_col = "TimeHr", group_col = "Condition",
+  k = 4, method = "kmeans",      # or "hierarchical" / "pam"
   stability = TRUE               # per-module reproducibility (mean Jaccard)
 )
 print(obj)
@@ -76,14 +102,16 @@ print(obj)
 # 2. + 5. ordered heatmap with metadata bars and labelled genes
 longitudinal_heatmap(
   obj,
-  annotation_cols = c("Genotype", "TimeHr"),
-  top_n_label     = 5,                    # auto-label top 5 per module...
-  label_features  = c("Xkr4", "Sox2"),    # ...plus these specific features
+  annotation_cols = c("Condition", "TimeHr"),
+  top_n_label     = 2,                              # auto-label top genes...
+  label_features  = c("Gene001", "Gene016"),        # ...plus chosen features
+  label_fontsize   = 11,
+  cluster_palette  = "spectral",
   file = "heatmap.pdf"
 )
 
 # 3. per-module pattern line plot
-pattern_lineplot(obj, file = "pattern_lines.pdf")
+pattern_lineplot(obj, palette = "nature", file = "pattern_lines.pdf")
 
 # 4. cluster memberships (+ centroids + stability)
 write_memberships(obj, prefix = "results")
@@ -91,8 +119,37 @@ write_memberships(obj, prefix = "results")
 # --- or everything at once ---
 run_longitudinal(mat, meta, out_prefix = "results",
                  sample_col = "SampleID", time_col = "TimeHr",
-                 group_col = "Genotype", k = 12, top_n_label = 5)
+                 group_col = "Condition", k = 4, top_n_label = 2)
 ```
+
+## Example plot gallery
+
+Run the bundled gallery script to generate examples of all three main outputs:
+
+```r
+source("examples/example_moduleviz_gallery.R")
+```
+
+It writes:
+
+- `examples/outputs/moduleviz_gallery/01_longitudinal_clustered_heatmap.pdf`
+- `examples/outputs/moduleviz_gallery/02_module_line_patterns.pdf`
+- `examples/outputs/moduleviz_gallery/03_rna_atac_side_by_side_heatmap.pdf`
+- `examples/outputs/moduleviz_gallery/moduleviz_example_memberships.txt`
+- `examples/outputs/moduleviz_gallery/moduleviz_example_centroids.txt`
+- `examples/outputs/moduleviz_gallery/moduleviz_example_stability.txt`
+
+Single-cell-style pseudobulk example:
+
+```r
+source("examples/example_single_cell_pseudobulk.R")
+```
+
+It writes:
+
+- `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_heatmap.pdf`
+- `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_patterns.pdf`
+- pseudobulk membership/centroid/stability tables
 
 ### Choosing the number of clusters
 
@@ -140,7 +197,7 @@ available_real_timecourse_datasets()
 Example using the Varoquaux 2019 sorghum leaf drought RNA-seq time course:
 
 ```r
-library(HeatmapPlot)
+library(ModuleViz)
 
 example <- load_real_timecourse_example(
   dataset = "sorghum_leaf",

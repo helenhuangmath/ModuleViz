@@ -10,7 +10,9 @@ dual_omics_heatmap(primary, secondary, primary_name = "RNA",
   secondary_name = "ATAC", gene_of_primary = function(id) id,
   gene_of_secondary = function(id) sub("^.*_", "", id),
   aggregate = c("mean", "top"), label_features = NULL, col_fun = NULL,
-  file = NULL, width = 12, height = 13, ...)
+  cluster_palette = "spectral", label_fontsize = 10,
+  row_title_fontsize = 10, column_name_fontsize = 9, file = NULL,
+  width = 12, height = 13, ...)
 }
 \arguments{
 \item{primary, secondary}{\code{longi} objects or raw matrices.}
@@ -19,6 +21,8 @@ dual_omics_heatmap(primary, secondary, primary_name = "RNA",
 \item{aggregate}{How to collapse multiple secondary features per gene.}
 \item{label_features}{Optional genes to label.}
 \item{col_fun}{Optional z-score color function.}
+\item{cluster_palette}{Discrete module color palette. Defaults to \code{"spectral"}.}
+\item{label_fontsize, row_title_fontsize, column_name_fontsize}{Text sizes for labels and heatmap titles.}
 \item{file}{Optional PDF output path.}
 \item{width, height}{PDF dimensions in inches.}
 \item{...}{Passed to \code{longitudinal_cluster()} when primary is raw.}

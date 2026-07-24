@@ -4,6 +4,6 @@
 ^.*\\.Rproj$
 ^results$
 ^examples/outputs$
-^HeatmapPlot_[0-9.]+\\.tar\\.gz$
-^HeatmapPlot\\.Rcheck$
+^ModuleViz_[0-9.]+\\.tar\\.gz$
+^ModuleViz\\.Rcheck$
 ^\\.\\.Rcheck$
