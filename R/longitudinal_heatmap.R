@@ -22,19 +22,9 @@
 ## project.  Feature selection (which genes/peaks are "interesting") is expected
 ## to be done upstream; you pass in the matrix you want to plot.
 ##
-## Dependencies (install once):
-##   install.packages(c("data.table","circlize","RColorBrewer","ggplot2","cluster"))
-##   BiocManager::install("ComplexHeatmap")
+## Package dependencies are declared in DESCRIPTION. When using this file by
+## source(), install the packages listed in README.md first.
 ## =============================================================================
-
-suppressPackageStartupMessages({
-  library(data.table)
-  library(ComplexHeatmap)
-  library(circlize)
-  library(grid)
-  library(RColorBrewer)
-  library(ggplot2)
-})
 
 ## Default diverging palette for z-scores (blue-white-red).
 .longi_default_col_fun <- function() {

@@ -1,0 +1,9 @@
+^\\.git$
+^\\.gitignore$
+^\\.Rproj\\.user$
+^.*\\.Rproj$
+^results$
+^examples/outputs$
+^HeatmapPlot_[0-9.]+\\.tar\\.gz$
+^HeatmapPlot\\.Rcheck$
+^\\.\\.Rcheck$

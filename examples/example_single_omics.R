@@ -8,7 +8,14 @@
 
 library(data.table)
 library(dplyr)
-source("../R/longitudinal_heatmap.R")   # adjust path as needed
+
+## Preferred after installing the package:
+## install.packages("remotes")
+## remotes::install_github("helenhuangmath/Heatmap_Plot")
+library(HeatmapPlot)
+
+## During local development, you can instead source the R files:
+# source("../R/longitudinal_heatmap.R")
 
 set.seed(1)
 
