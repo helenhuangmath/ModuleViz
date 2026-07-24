@@ -1,4 +1,4 @@
 library(testthat)
-library(HeatmapPlot)
+library(ModuleViz)
 
-test_check("HeatmapPlot")
+test_check("ModuleViz")

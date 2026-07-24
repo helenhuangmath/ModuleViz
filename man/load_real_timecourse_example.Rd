@@ -5,7 +5,7 @@
 \description{
 List and load public time-course datasets from Bioconductor
 \code{timecoursedata}, returning plain matrices and metadata ready for
-HeatmapPlot workflows.
+ModuleViz workflows.
 }
 \usage{
 available_real_timecourse_datasets()

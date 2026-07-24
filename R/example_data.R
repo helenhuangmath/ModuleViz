@@ -17,7 +17,7 @@ available_real_timecourse_datasets <- function() {
   )
 }
 
-#' Load a real public time-course example in HeatmapPlot format.
+#' Load a real public time-course example in ModuleViz format.
 #'
 #' This helper downloads/loads one dataset from the Bioconductor
 #' `timecoursedata` package and returns a small matrix plus matching metadata

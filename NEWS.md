@@ -1,4 +1,4 @@
-# HeatmapPlot 0.1.0
+# ModuleViz 0.1.0
 
 * Initial package release.
 * Adds temporal module clustering, ordered longitudinal heatmaps, module

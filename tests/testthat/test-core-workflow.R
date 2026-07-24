@@ -1,5 +1,5 @@
 test_that("example data can be clustered and summarized", {
-  data("heatmap_example", package = "HeatmapPlot")
+  data("heatmap_example", package = "ModuleViz")
 
   obj <- longitudinal_cluster(
     heatmap_example$mat,
@@ -21,7 +21,7 @@ test_that("example data can be clustered and summarized", {
 })
 
 test_that("choose_k returns diagnostics and a suggested k", {
-  data("heatmap_example", package = "HeatmapPlot")
+  data("heatmap_example", package = "ModuleViz")
 
   diag <- choose_k(
     zscore_rows(heatmap_example$mat),
@@ -35,7 +35,7 @@ test_that("choose_k returns diagnostics and a suggested k", {
 })
 
 test_that("labels resolve from explicit IDs and top features", {
-  data("heatmap_example", package = "HeatmapPlot")
+  data("heatmap_example", package = "ModuleViz")
 
   obj <- longitudinal_cluster(
     heatmap_example$mat,

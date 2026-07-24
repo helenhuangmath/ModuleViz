@@ -12,7 +12,7 @@ library(dplyr)
 ## Preferred after installing the package:
 ## install.packages("remotes")
 ## remotes::install_github("helenhuangmath/Heatmap_Plot")
-library(HeatmapPlot)
+library(ModuleViz)
 
 ## During local development, you can instead source the R files:
 # source("../R/longitudinal_heatmap.R")

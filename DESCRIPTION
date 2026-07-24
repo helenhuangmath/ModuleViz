@@ -1,4 +1,4 @@
-Package: HeatmapPlot
+Package: ModuleViz
 Title: Longitudinal Omics Heatmaps and Temporal Module Plots
 Version: 0.1.0
 Authors@R:

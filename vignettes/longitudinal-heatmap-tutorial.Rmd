@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-`HeatmapPlot` clusters feature trajectories from longitudinal omics experiments
+`ModuleViz` clusters feature trajectories from longitudinal omics experiments
 and turns them into ordered temporal heatmaps, module trajectory plots, and
 exportable membership tables. The workflow is useful for RNA-seq, ATAC-seq,
 Cut&Run, or other feature-by-sample matrices where columns represent ordered
@@ -28,7 +28,7 @@ runs without network access.
 ## 1. Load The Example Time-Course
 
 ```{r load}
-library(HeatmapPlot)
+library(ModuleViz)
 data("heatmap_example")
 
 mat <- heatmap_example$mat
