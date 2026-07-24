@@ -9,8 +9,11 @@ Maintainer: Helen Huang <helenhuang.math@gmail.com>
 Description: Cluster longitudinal omics features into temporal modules, draw
     ordered ComplexHeatmap heatmaps, summarize module trajectories, and align
     paired omics layers such as RNA and ATAC by gene.
+biocViews: Software, GeneExpression, Transcriptomics, RNASeq, TimeCourse,
+    Clustering, Visualization
 License: MIT + file LICENSE
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends:
@@ -29,5 +32,7 @@ Suggests:
     BiocManager,
     knitr,
     rmarkdown,
+    testthat (>= 3.0.0),
     timecoursedata
 VignetteBuilder: knitr
+Config/testthat/edition: 3

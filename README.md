@@ -46,6 +46,25 @@ install.packages("devtools")
 devtools::load_all(".")
 ```
 
+## Package checks
+
+Before submitting to GitHub, CRAN, or Bioconductor, run:
+
+```bash
+R CMD build .
+env _R_CHECK_FORCE_SUGGESTS_=false R CMD check --no-manual HeatmapPlot_0.1.0.tar.gz
+```
+
+For Bioconductor-style checks:
+
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install("BiocCheck")
+BiocCheck::BiocCheck(".")
+```
+
+`timecoursedata` is optional and only needed for the public real-data examples.
+
 ## Inputs
 
 - **Matrix** — features (rows) × samples (columns). Feature IDs as rownames
@@ -63,6 +82,10 @@ devtools::load_all(".")
 
 ```r
 library(HeatmapPlot)
+
+data("heatmap_example")
+mat <- heatmap_example$mat
+meta <- heatmap_example$meta
 
 # 1. cluster into temporal modules (ordered early-high -> late-high)
 obj <- longitudinal_cluster(
