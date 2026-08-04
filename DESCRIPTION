@@ -2,10 +2,10 @@ Package: ModuleViz
 Title: Longitudinal Omics Heatmaps and Temporal Module Plots
 Version: 0.1.0
 Authors@R:
-    person("Helen", "Huang", email = "helenhuang.math@gmail.com",
+    person("Hua", "Huang", email = "helenhuang.math@gmail.com",
            role = c("aut", "cre"))
-Author: Helen Huang
-Maintainer: Helen Huang <helenhuang.math@gmail.com>
+Author: Hua Huang
+Maintainer: Hua Huang <helenhuang.math@gmail.com>
 Description: Cluster longitudinal omics features into temporal modules, draw
     ordered ComplexHeatmap heatmaps, summarize module trajectories, and align
     paired omics layers such as RNA and ATAC by gene.
@@ -30,6 +30,7 @@ Imports:
     utils
 Suggests:
     BiocManager,
+    BiocStyle,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),

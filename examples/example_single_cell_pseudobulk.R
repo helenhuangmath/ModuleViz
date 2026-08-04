@@ -71,6 +71,10 @@ pseudobulk_meta <- data.frame(
 pseudobulk_meta$Group <- paste(pseudobulk_meta$CellType,
                                pseudobulk_meta$Condition, sep = "_")
 
+## Cell-type x condition groups use the qualitative Paired palette; the
+## Condition bar keeps the same grey/red coding as the other gallery figures.
+COND_COLS <- c(Control = "grey70", Stimulated = "#C1272D")
+
 obj <- longitudinal_cluster(
   pseudobulk_mat,
   pseudobulk_meta,
@@ -84,9 +88,15 @@ obj <- longitudinal_cluster(
   n_resample = 10
 )
 
+## aggregate_replicates = TRUE rebuilds the metadata with only SampleID, Group,
+## and TimeHr, so recover Condition from the group label to get its own bar.
+obj$meta$Condition <- sub("^.*_", "", obj$meta$Group)
+
 longitudinal_heatmap(
   obj,
-  annotation_cols = c("Group", "TimeHr"),
+  annotation_cols = c("Group", "Condition", "TimeHr"),
+  annotation_palette = "paired",
+  annotation_colors = list(Condition = COND_COLS),
   top_n_label = 2,
   label_features = c("Gene001", "Gene016", "Gene031"),
   label_fontsize = 11,
@@ -98,7 +108,9 @@ longitudinal_heatmap(
 )
 longitudinal_heatmap(
   obj,
-  annotation_cols = c("Group", "TimeHr"),
+  annotation_cols = c("Group", "Condition", "TimeHr"),
+  annotation_palette = "paired",
+  annotation_colors = list(Condition = COND_COLS),
   top_n_label = 2,
   label_features = c("Gene001", "Gene016", "Gene031"),
   label_fontsize = 11,
@@ -111,7 +123,7 @@ longitudinal_heatmap(
 
 p_sc <- pattern_lineplot(
   obj,
-  palette = "science",
+  palette = "paired",
   base_size = 12,
   file = file.path(out_dir, "single_cell_pseudobulk_patterns.pdf"),
   width = 9,
