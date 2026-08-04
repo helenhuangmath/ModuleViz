@@ -3,7 +3,7 @@ title: "ModuleViz: CD8 T Cell Exhaustion Published Data"
 author:
 - name: Hua Huang
   email: helenhuang.math@gmail.com
-date: "`r Sys.Date()`"
+date: "2026-05-01"
 package: ModuleViz
 output:
   BiocStyle::html_document:
