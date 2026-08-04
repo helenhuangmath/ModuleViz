@@ -1,8 +1,14 @@
 # ModuleViz: an R package for temporal module discovery and visualization in longitudinal omics data
 
-Hua Huang^1,*
+Hua Huang^1,2,3,4,*
 
-^1 Department of Systems Pharmacology and Translational Therapeutics, University of Pennsylvania, Philadelphia, PA, USA
+^1 Department of Systems Pharmacology and Translational Therapeutics, University of Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104, USA
+
+^2 Institute for Immunology and Immune Health, University of Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104, USA
+
+^3 Epigenetics Institute, University of Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104, USA
+
+^4 Department of Cell and Developmental Biology, University of Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104, USA
 
 * Correspondence: helenhuang.math@gmail.com
 

@@ -90,7 +90,7 @@ write_memberships(
 
 ## ---- 3. side-by-side RNA + ATAC-style heatmap -------------------------------
 ## This simulates a paired ATAC layer with two peaks per gene. In a real project,
-## use your peak-by-sample ATAC/Cut&Run matrix and row names such as
+## use your peak-by-sample ATAC/CUT&RUN matrix and row names such as
 ## "PeakID_GENE".
 set.seed(99)
 genes <- rownames(mat)

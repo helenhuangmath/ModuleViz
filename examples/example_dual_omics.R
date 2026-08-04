@@ -1,8 +1,8 @@
 ## =============================================================================
-## Example: two data sets side by side (RNA + ATAC, or RNA + Cut&Run)
+## Example: two data sets side by side (RNA + ATAC, or RNA + CUT&RUN)
 ##
 ## The primary layer (RNA) drives the clustering and row order; the secondary
-## layer (ATAC / Cut&Run) is aligned per gene and shown alongside so you can see
+## layer (ATAC / CUT&RUN) is aligned per gene and shown alongside so you can see
 ## expression and chromatin signal for the same genes together.  This produces a
 ## SEPARATE new figure, independent of the single-omics heatmaps.
 ## =============================================================================
@@ -26,7 +26,7 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 rna_counts <- fread("path/to/RNA_NormRC_filtered.txt")
 rna <- as.matrix(rna_counts[, -1]); rownames(rna) <- rna_counts[[1]]  # gene symbols
 
-## ATAC / Cut&Run: rows = peaks named "PeakID_SYMBOL", columns = samples.
+## ATAC / CUT&RUN: rows = peaks named "PeakID_SYMBOL", columns = samples.
 atac_counts <- fread("path/to/ATAC_NormRC_filtered.txt")
 atac <- as.matrix(atac_counts[, -1]); rownames(atac) <- atac_counts[[1]]
 

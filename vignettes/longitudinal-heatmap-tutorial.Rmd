@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
 `r Biocpkg("ModuleViz")` clusters feature trajectories from longitudinal omics
 experiments and renders ordered temporal heatmaps.
 
-The workflow is useful for RNA-seq, ATAC-seq, Cut&Run, or other
+The workflow is useful for RNA-seq, ATAC-seq, CUT&RUN, or other
 feature-by-sample matrices where columns represent ordered time points,
 treatment conditions, or both.
 

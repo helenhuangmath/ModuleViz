@@ -1,6 +1,18 @@
-# ModuleViz: Longitudinal Omics Heatmaps and Temporal Module Plots
+# ModuleViz: an R package for temporal module discovery and visualization in longitudinal omics data
 
 #### Hua Huang
+
+Department of Systems Pharmacology and Translational Therapeutics, University
+of Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104, USA
+
+Institute for Immunology and Immune Health, University of Pennsylvania Perelman
+School of Medicine, Philadelphia, PA, 19104, USA
+
+Epigenetics Institute, University of Pennsylvania Perelman School of Medicine,
+Philadelphia, PA, 19104, USA
+
+Department of Cell and Developmental Biology, University of Pennsylvania
+Perelman School of Medicine, Philadelphia, PA, 19104, USA
 
 #### 2026-05-01
 

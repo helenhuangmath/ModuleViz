@@ -2,13 +2,13 @@
 ## longitudinal_heatmap.R
 ##
 ## A small toolkit of functions for longitudinal / time-course omics analysis
-## (RNA-seq, ATAC-seq, Cut&Run, drug-treatment time courses, ...).
+## (RNA-seq, ATAC-seq, CUT&RUN, drug-treatment time courses, ...).
 ##
 ## Given a matrix of features (genes or peaks) measured across an ordered set of
 ## samples (time points / conditions), these functions cluster features into
 ## temporal modules, draw ordered heatmaps, summarize module trajectories,
 ## export module tables, label selected features, and align paired omics layers
-## such as RNA with ATAC or Cut&Run.
+## such as RNA with ATAC or CUT&RUN.
 ##
 ## The functions are deliberately generic: nothing is hard-coded to a particular
 ## project.  Feature selection (which genes/peaks are "interesting") is expected
@@ -980,7 +980,7 @@ write_memberships <- function(obj, file = NULL, prefix = NULL,
 #' Draw two omics layers side by side, linked by gene.
 #'
 #' Puts a primary layer (e.g. RNA, one row per gene) next to a secondary layer
-#' (e.g. ATAC / Cut&Run peaks) in a single figure, sharing a common set of genes
+#' (e.g. ATAC / CUT&RUN peaks) in a single figure, sharing a common set of genes
 #' and row order so gene expression and chromatin signal line up per gene.
 #'
 #' Because one gene can map to several peaks, the secondary layer is collapsed to
