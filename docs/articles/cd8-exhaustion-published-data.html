@@ -4,167 +4,13 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc 3.10.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Hua Huang" />
+  <meta name="dcterms.date" content="2026-08-04" />
   <title>ModuleViz: CD8 T Cell Exhaustion Published Data</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    div.abstract {
-      margin: 2em 2em 2em 2em;
-      text-align: left;
-      font-size: 85%;
-    }
-    div.abstract-title {
-      font-weight: bold;
-      text-align: center;
-      padding: 0;
-      margin-bottom: 0.5em;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: 1.5em;}
     div.column{flex: auto;}
@@ -183,13 +29,79 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <link rel="stylesheet" href="../biocstyle.css" />
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">ModuleViz: CD8 T Cell Exhaustion Published Data</h1>
-<p class="author">true</p>
-<p class="date"><code>r Sys.Date()</code></p>
+<p class="author">Hua Huang</p>
+<p class="date">2026-08-04</p>
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 <p>This vignette demonstrates a reproducible ModuleViz workflow using
@@ -205,53 +117,59 @@ modules by gene.</p>
 class="toc-section-number">1</span> Introduction</a></li>
 <li><a href="#requirements" id="toc-requirements"><span
 class="toc-section-number">2</span> Requirements</a></li>
+<li><a href="#read-the-rna-seq-matrix"
+id="toc-read-the-rna-seq-matrix"><span
+class="toc-section-number">3</span> Read The RNA-seq Matrix</a></li>
 <li><a href="#build-the-sample-metadata"
 id="toc-build-the-sample-metadata"><span
-class="toc-section-number">3</span> Build The Sample Metadata</a></li>
-<li><a
-href="#cluster-on-the-log-scale-z-scoring-raw-counts-lets-a-few-high-count"
-id="toc-cluster-on-the-log-scale-z-scoring-raw-counts-lets-a-few-high-count"><span
-class="toc-section-number">4</span> Cluster on the log scale: z-scoring
-raw counts lets a few high-count</a></li>
-<li><a href="#outliers-dominate-the-distance-metric."
-id="toc-outliers-dominate-the-distance-metric."><span
-class="toc-section-number">5</span> outliers dominate the distance
-metric.</a></li>
+class="toc-section-number">4</span> Build The Sample Metadata</a></li>
+<li><a href="#select-differentially-expressed-genes"
+id="toc-select-differentially-expressed-genes"><span
+class="toc-section-number">5</span> Select Differentially Expressed
+Genes</a></li>
+<li><a href="#choose-the-number-of-modules"
+id="toc-choose-the-number-of-modules"><span
+class="toc-section-number">6</span> Choose The Number Of
+Modules</a></li>
 <li><a href="#cluster-into-temporal-modules"
 id="toc-cluster-into-temporal-modules"><span
-class="toc-section-number">6</span> Cluster Into Temporal
+class="toc-section-number">7</span> Cluster Into Temporal
 Modules</a></li>
 <li><a href="#check-the-modules-against-known-biology"
 id="toc-check-the-modules-against-known-biology"><span
-class="toc-section-number">7</span> Check The Modules Against Known
+class="toc-section-number">8</span> Check The Modules Against Known
 Biology</a></li>
+<li><a href="#draw-the-heatmap" id="toc-draw-the-heatmap"><span
+class="toc-section-number">9</span> Draw The Heatmap</a></li>
 <li><a href="#plot-module-trajectories"
 id="toc-plot-module-trajectories"><span
-class="toc-section-number">8</span> Plot Module Trajectories</a></li>
+class="toc-section-number">10</span> Plot Module Trajectories</a></li>
 <li><a href="#check-module-coherence"
 id="toc-check-module-coherence"><span
-class="toc-section-number">9</span> Check Module Coherence</a></li>
+class="toc-section-number">11</span> Check Module Coherence</a></li>
 <li><a href="#export-the-tables" id="toc-export-the-tables"><span
-class="toc-section-number">10</span> Export The Tables</a></li>
+class="toc-section-number">12</span> Export The Tables</a></li>
 <li><a href="#add-the-cutrun-layer" id="toc-add-the-cutrun-layer"><span
-class="toc-section-number">11</span> Add The CUT&amp;Run Layer</a></li>
+class="toc-section-number">13</span> Add The CUT&amp;Run Layer</a></li>
+<li><a href="#reproducing-everything"
+id="toc-reproducing-everything"><span
+class="toc-section-number">14</span> Reproducing Everything</a></li>
 <li><a href="#adapting-this-to-your-own-data"
 id="toc-adapting-this-to-your-own-data"><span
-class="toc-section-number">12</span> Adapting This To Your Own
+class="toc-section-number">15</span> Adapting This To Your Own
 Data</a></li>
 <li><a href="#citation" id="toc-citation"><span
-class="toc-section-number">13</span> Citation</a></li>
+class="toc-section-number">16</span> Citation</a></li>
 <li><a href="#session-information" id="toc-session-information"><span
-class="toc-section-number">14</span> Session Information</a></li>
+class="toc-section-number">17</span> Session Information</a></li>
 </ul>
 </nav>
-<p><code>{r setup, include=FALSE} knitr::opts_chunk$set(   collapse = TRUE,   comment = "#&gt;",   eval = FALSE )</code></p>
 <h1 data-number="1" id="introduction"><span
 class="header-section-number">1</span> Introduction</h1>
-<p><code>r Biocpkg("ModuleViz")</code> can be used with an ordered
-biological axis even when the axis is not clock time. This vignette
-demonstrates that workflow on published CD8 T cell differentiation
-data.</p>
+<p><a href="https://bioconductor.org/packages/ModuleViz/">ModuleViz</a>
+can be used with an ordered biological axis even when the axis is not
+clock time. This vignette demonstrates that workflow on published CD8 T
+cell differentiation data.</p>
 <p>The other vignette uses the bundled synthetic dataset so it runs
 offline. This one is the opposite: it walks through a complete,
 published, real analysis end to end, on data anyone can download.</p>
@@ -315,49 +233,53 @@ assertions.</p>
 </blockquote>
 <h1 data-number="2" id="requirements"><span
 class="header-section-number">2</span> Requirements</h1>
-<p><code>{r requirements} library(ModuleViz) library(data.table)</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ModuleViz)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span></code></pre></div>
 <p>Only the small processed count matrices are downloaded, about 4.7 MB
 in total. The multi-gigabyte <code>_RAW.tar</code> archives on GEO are
 never touched.</p>
-<p>```{r download} cache_dir &lt;- “geo_cache” dir.create(cache_dir,
-recursive = TRUE, showWarnings = FALSE)</p>
-<p>GEO &lt;- list( rna = list(gse = “GSE285248”, file =
-“GSE285248_NormRC_filter_wanno.txt.gz”), h3k27ac = list(gse =
-“GSE285245”, file = “GSE285245_NormRC_H3K27ac_wID.txt.gz”), h3k27me3 =
-list(gse = “GSE285245”, file = “GSE285245_NormRC_H3K27me3_wID.txt.gz”)
-)</p>
-<p>geo_path &lt;- function(entry) { dest &lt;- file.path(cache_dir,
-entry<span class="math inline">$file)
-  if (!file.exists(dest)) {
-    url &lt;-
-sprintf("https://ftp.ncbi.nlm.nih.gov/geo/series/%snnn/%s/suppl/%s",
-                   substr(entry$</span>gse, 1, 6), entry<span
-class="math inline"><em>g</em><em>s</em><em>e</em>, <em>e</em><em>n</em><em>t</em><em>r</em><em>y</em></span>file)
-utils::download.file(url, dest, mode = “wb”) } dest }</p>
-<p>paths &lt;- lapply(GEO, geo_path)</p>
-<pre><code>
-# Read The RNA-seq Matrix
-
-The RNA table carries six annotation columns (`Chr`, `Start`, `End`, `Geneid`,
-`Gene.Name`, `Strand`) followed by the 16 sample columns. A handful of gene
-symbols appear under more than one Ensembl ID, so we keep the most highly
-expressed copy of each symbol and use symbols as rownames.
-
-```{r read-rna}
-rna_raw  &lt;- fread(paths$rna)
-rna_cols &lt;- grep(&quot;_RNA_&quot;, names(rna_raw), value = TRUE)
-
-rna_raw[, .mean_expr := rowMeans(as.matrix(.SD)), .SDcols = rna_cols]
-setorder(rna_raw, Gene.Name, -.mean_expr)
-rna_uniq &lt;- rna_raw[!duplicated(Gene.Name)]
-
-rna_mat &lt;- as.matrix(rna_uniq[, ..rna_cols])
-rownames(rna_mat) &lt;- rna_uniq$Gene.Name
-
-dim(rna_mat)</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>cache_dir <span class="ot">&lt;-</span> <span class="st">&quot;geo_cache&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(cache_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>GEO <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">rna      =</span> <span class="fu">list</span>(<span class="at">gse =</span> <span class="st">&quot;GSE285248&quot;</span>, <span class="at">file =</span> <span class="st">&quot;GSE285248_NormRC_filter_wanno.txt.gz&quot;</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">h3k27ac  =</span> <span class="fu">list</span>(<span class="at">gse =</span> <span class="st">&quot;GSE285245&quot;</span>, <span class="at">file =</span> <span class="st">&quot;GSE285245_NormRC_H3K27ac_wID.txt.gz&quot;</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">h3k27me3 =</span> <span class="fu">list</span>(<span class="at">gse =</span> <span class="st">&quot;GSE285245&quot;</span>, <span class="at">file =</span> <span class="st">&quot;GSE285245_NormRC_H3K27me3_wID.txt.gz&quot;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>geo_path <span class="ot">&lt;-</span> <span class="cf">function</span>(entry) {</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  dest <span class="ot">&lt;-</span> <span class="fu">file.path</span>(cache_dir, entry<span class="sc">$</span>file)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(dest)) {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    url <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">&quot;https://ftp.ncbi.nlm.nih.gov/geo/series/%snnn/%s/suppl/%s&quot;</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">substr</span>(entry<span class="sc">$</span>gse, <span class="dv">1</span>, <span class="dv">6</span>), entry<span class="sc">$</span>gse, entry<span class="sc">$</span>file)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    utils<span class="sc">::</span><span class="fu">download.file</span>(url, dest, <span class="at">mode =</span> <span class="st">&quot;wb&quot;</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  dest</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>paths <span class="ot">&lt;-</span> <span class="fu">lapply</span>(GEO, geo_path)</span></code></pre></div>
+<h1 data-number="3" id="read-the-rna-seq-matrix"><span
+class="header-section-number">3</span> Read The RNA-seq Matrix</h1>
+<p>The RNA table carries six annotation columns (<code>Chr</code>,
+<code>Start</code>, <code>End</code>, <code>Geneid</code>,
+<code>Gene.Name</code>, <code>Strand</code>) followed by the 16 sample
+columns. A handful of gene symbols appear under more than one Ensembl
+ID, so we keep the most highly expressed copy of each symbol and use
+symbols as rownames.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>rna_raw  <span class="ot">&lt;-</span> <span class="fu">fread</span>(paths<span class="sc">$</span>rna)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>rna_cols <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">&quot;_RNA_&quot;</span>, <span class="fu">names</span>(rna_raw), <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>rna_raw[, .mean_expr <span class="sc">:=</span> <span class="fu">rowMeans</span>(<span class="fu">as.matrix</span>(.SD)), .SDcols <span class="ot">=</span> rna_cols]</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(rna_raw, Gene.Name, <span class="sc">-</span>.mean_expr)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>rna_uniq <span class="ot">&lt;-</span> rna_raw[<span class="sc">!</span><span class="fu">duplicated</span>(Gene.Name)]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>rna_mat <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(rna_uniq[, ..rna_cols])</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(rna_mat) <span class="ot">&lt;-</span> rna_uniq<span class="sc">$</span>Gene.Name</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(rna_mat)</span></code></pre></div>
 <pre><code>#&gt; [1] 16429    16</code></pre>
-<h1 data-number="3" id="build-the-sample-metadata"><span
-class="header-section-number">3</span> Build The Sample Metadata</h1>
+<h1 data-number="4" id="build-the-sample-metadata"><span
+class="header-section-number">4</span> Build The Sample Metadata</h1>
 <p><code>ModuleViz</code> needs one row per sample with a sample ID and
 a <strong>numeric</strong> ordering column. The GEO column names encode
 everything we need in the pattern
@@ -365,113 +287,113 @@ everything we need in the pattern
 so the metadata can be parsed straight out of them. Writing this as a
 function pays off later, because the CUT&amp;Run tables follow exactly
 the same naming scheme.</p>
-<p>```{r metadata} make_meta &lt;- function(cols, assay) { infection
-&lt;- sub(“<em>P14</em>.<em>“,”“, cols) day &lt;-
-as.integer(sub(”.</em>_Day([0-9]+)_.*“,”\1”, cols)) state &lt;- c(Naive
-= “TN”, Arm = “TMEM”, Cl13 = “TEX”)[infection] data.table( SampleID =
-cols, State = factor(state, levels = c(“TN”, “TMEM”, “TEX”)), # the
-ordered differentiation axis handed to time_col StateOrder = unname(c(TN
-= 1, TMEM = 2, TEX = 3)[state]), # naive cells are the pre-infection
-baseline, so they sit at day 0 Day = ifelse(infection == “Naive”, 0L,
-day), Replicate = as.integer(sub(“.<em><em>Rep([0-9]+)</em>.</em>”,
-“\1”, cols)), Assay = assay ) }</p>
-<p>rna_meta &lt;- make_meta(rna_cols, “RNA”) rna_meta[, .N, by =
-.(State, Day)]</p>
-<pre><code></code></pre>
-<p>#&gt; State Day N #&gt; <fctr> <int> <int> #&gt; 1: TN 0 8 #&gt; 2:
-TMEM 30 4 #&gt; 3: TEX 32 4</p>
-<pre><code>
-`StateOrder` is the key column: it is what `time_col` will point at, and it is
-what makes the modules come out ordered naive-high through exhaustion-high.
-
-Note that there are **eight** naive samples, not four. Naive cells were profiled
-twice, once alongside each infection, so they serve as the day-matched baseline
-for both arms. That imbalance is fine — nothing in `ModuleViz` requires equal
-group sizes.
-
-# Select Differentially Expressed Genes
-
-Real analyses do not cluster the whole transcriptome. Clustering 16,429 genes
-would bury the interesting structure under thousands of flat, uninformative
-profiles. We select the genes that actually move across the three states.
-
-A vectorised one-way ANOVA across `TN` / `TMEM` / `TEX` is fast and needs no
-extra packages. If you already have `DESeq2` or `edgeR` results for this
-comparison, substitute them here — all that matters downstream is a set of gene
-IDs and, optionally, a ranking statistic.
-
-```{r deg}
-log_rna &lt;- log2(rna_mat + 1)
-
-deg_anova &lt;- function(x, grp) {
-  grp &lt;- factor(grp)
-  n &lt;- ncol(x); k &lt;- nlevels(grp)
-  grand &lt;- rowMeans(x)
-  ssb &lt;- 0; ssw &lt;- 0
-  for (g in levels(grp)) {
-    cols &lt;- which(grp == g)
-    mg   &lt;- rowMeans(x[, cols, drop = FALSE])
-    ssb  &lt;- ssb + length(cols) * (mg - grand)^2
-    ssw  &lt;- ssw + rowSums((x[, cols, drop = FALSE] - mg)^2)
-  }
-  df1 &lt;- k - 1; df2 &lt;- n - k
-  Fstat &lt;- (ssb / df1) / (ssw / df2)
-  Fstat[!is.finite(Fstat)] &lt;- 0
-  data.table(
-    ID     = rownames(x),
-    Fstat  = Fstat,
-    pvalue = stats::pf(Fstat, df1, df2, lower.tail = FALSE),
-    padj   = stats::p.adjust(stats::pf(Fstat, df1, df2, lower.tail = FALSE),
-                             method = &quot;BH&quot;)
-  )
-}
-
-state_of &lt;- rna_meta$State[match(colnames(log_rna), rna_meta$SampleID)]
-deg &lt;- deg_anova(log_rna, state_of)
-
-mean_by &lt;- function(s) rowMeans(log_rna[, state_of == s, drop = FALSE])
-deg[, `:=`(
-  log2FC_TMEM_vs_TN  = mean_by(&quot;TMEM&quot;) - mean_by(&quot;TN&quot;),
-  log2FC_TEX_vs_TN   = mean_by(&quot;TEX&quot;)  - mean_by(&quot;TN&quot;),
-  log2FC_TEX_vs_TMEM = mean_by(&quot;TEX&quot;)  - mean_by(&quot;TMEM&quot;),
-  baseMean           = rowMeans(rna_mat)
-)]
-deg[, maxAbsLFC := pmax(abs(log2FC_TMEM_vs_TN), abs(log2FC_TEX_vs_TN),
-                        abs(log2FC_TEX_vs_TMEM))]
-
-sig &lt;- deg[padj &lt; 0.01 &amp; maxAbsLFC &gt;= 1 &amp; baseMean &gt;= 10]
-setorder(sig, -Fstat)
-nrow(sig)</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>make_meta <span class="ot">&lt;-</span> <span class="cf">function</span>(cols, assay) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  infection <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">&quot;_P14_.*&quot;</span>, <span class="st">&quot;&quot;</span>, cols)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  day       <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">sub</span>(<span class="st">&quot;.*_Day([0-9]+)_.*&quot;</span>, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">1&quot;</span>, cols))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  state     <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">Naive =</span> <span class="st">&quot;TN&quot;</span>, <span class="at">Arm =</span> <span class="st">&quot;TMEM&quot;</span>, <span class="at">Cl13 =</span> <span class="st">&quot;TEX&quot;</span>)[infection]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">SampleID   =</span> cols,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">State      =</span> <span class="fu">factor</span>(state, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;TN&quot;</span>, <span class="st">&quot;TMEM&quot;</span>, <span class="st">&quot;TEX&quot;</span>)),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># the ordered differentiation axis handed to time_col</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">StateOrder =</span> <span class="fu">unname</span>(<span class="fu">c</span>(<span class="at">TN =</span> <span class="dv">1</span>, <span class="at">TMEM =</span> <span class="dv">2</span>, <span class="at">TEX =</span> <span class="dv">3</span>)[state]),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># naive cells are the pre-infection baseline, so they sit at day 0</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Day        =</span> <span class="fu">ifelse</span>(infection <span class="sc">==</span> <span class="st">&quot;Naive&quot;</span>, <span class="dv">0</span><span class="dt">L</span>, day),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">Replicate  =</span> <span class="fu">as.integer</span>(<span class="fu">sub</span>(<span class="st">&quot;.*_Rep([0-9]+)_.*&quot;</span>, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">1&quot;</span>, cols)),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">Assay      =</span> assay</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>rna_meta <span class="ot">&lt;-</span> <span class="fu">make_meta</span>(rna_cols, <span class="st">&quot;RNA&quot;</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>rna_meta[, .N, by <span class="ot">=</span> .(State, Day)]</span></code></pre></div>
+<pre><code>#&gt;     State   Day     N
+#&gt;    &lt;fctr&gt; &lt;int&gt; &lt;int&gt;
+#&gt; 1:     TN     0     8
+#&gt; 2:   TMEM    30     4
+#&gt; 3:    TEX    32     4</code></pre>
+<p><code>StateOrder</code> is the key column: it is what
+<code>time_col</code> will point at, and it is what makes the modules
+come out ordered naive-high through exhaustion-high.</p>
+<p>Note that there are <strong>eight</strong> naive samples, not four.
+Naive cells were profiled twice, once alongside each infection, so they
+serve as the day-matched baseline for both arms. That imbalance is fine
+— nothing in <code>ModuleViz</code> requires equal group sizes.</p>
+<h1 data-number="5" id="select-differentially-expressed-genes"><span
+class="header-section-number">5</span> Select Differentially Expressed
+Genes</h1>
+<p>Real analyses do not cluster the whole transcriptome. Clustering
+16,429 genes would bury the interesting structure under thousands of
+flat, uninformative profiles. We select the genes that actually move
+across the three states.</p>
+<p>A vectorised one-way ANOVA across <code>TN</code> / <code>TMEM</code>
+/ <code>TEX</code> is fast and needs no extra packages. If you already
+have <code>DESeq2</code> or <code>edgeR</code> results for this
+comparison, substitute them here — all that matters downstream is a set
+of gene IDs and, optionally, a ranking statistic.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>log_rna <span class="ot">&lt;-</span> <span class="fu">log2</span>(rna_mat <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>deg_anova <span class="ot">&lt;-</span> <span class="cf">function</span>(x, grp) {</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  grp <span class="ot">&lt;-</span> <span class="fu">factor</span>(grp)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">ncol</span>(x); k <span class="ot">&lt;-</span> <span class="fu">nlevels</span>(grp)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  grand <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(x)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  ssb <span class="ot">&lt;-</span> <span class="dv">0</span>; ssw <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">levels</span>(grp)) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    cols <span class="ot">&lt;-</span> <span class="fu">which</span>(grp <span class="sc">==</span> g)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    mg   <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(x[, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    ssb  <span class="ot">&lt;-</span> ssb <span class="sc">+</span> <span class="fu">length</span>(cols) <span class="sc">*</span> (mg <span class="sc">-</span> grand)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    ssw  <span class="ot">&lt;-</span> ssw <span class="sc">+</span> <span class="fu">rowSums</span>((x[, cols, <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">-</span> mg)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  df1 <span class="ot">&lt;-</span> k <span class="sc">-</span> <span class="dv">1</span>; df2 <span class="ot">&lt;-</span> n <span class="sc">-</span> k</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  Fstat <span class="ot">&lt;-</span> (ssb <span class="sc">/</span> df1) <span class="sc">/</span> (ssw <span class="sc">/</span> df2)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  Fstat[<span class="sc">!</span><span class="fu">is.finite</span>(Fstat)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>(</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">ID     =</span> <span class="fu">rownames</span>(x),</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">Fstat  =</span> Fstat,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">pvalue =</span> stats<span class="sc">::</span><span class="fu">pf</span>(Fstat, df1, df2, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">padj   =</span> stats<span class="sc">::</span><span class="fu">p.adjust</span>(stats<span class="sc">::</span><span class="fu">pf</span>(Fstat, df1, df2, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                             <span class="at">method =</span> <span class="st">&quot;BH&quot;</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>state_of <span class="ot">&lt;-</span> rna_meta<span class="sc">$</span>State[<span class="fu">match</span>(<span class="fu">colnames</span>(log_rna), rna_meta<span class="sc">$</span>SampleID)]</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>deg <span class="ot">&lt;-</span> <span class="fu">deg_anova</span>(log_rna, state_of)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>mean_by <span class="ot">&lt;-</span> <span class="cf">function</span>(s) <span class="fu">rowMeans</span>(log_rna[, state_of <span class="sc">==</span> s, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>deg[, <span class="st">`</span><span class="at">:=</span><span class="st">`</span>(</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">log2FC_TMEM_vs_TN  =</span> <span class="fu">mean_by</span>(<span class="st">&quot;TMEM&quot;</span>) <span class="sc">-</span> <span class="fu">mean_by</span>(<span class="st">&quot;TN&quot;</span>),</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">log2FC_TEX_vs_TN   =</span> <span class="fu">mean_by</span>(<span class="st">&quot;TEX&quot;</span>)  <span class="sc">-</span> <span class="fu">mean_by</span>(<span class="st">&quot;TN&quot;</span>),</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">log2FC_TEX_vs_TMEM =</span> <span class="fu">mean_by</span>(<span class="st">&quot;TEX&quot;</span>)  <span class="sc">-</span> <span class="fu">mean_by</span>(<span class="st">&quot;TMEM&quot;</span>),</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">baseMean           =</span> <span class="fu">rowMeans</span>(rna_mat)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>)]</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>deg[, maxAbsLFC <span class="sc">:=</span> <span class="fu">pmax</span>(<span class="fu">abs</span>(log2FC_TMEM_vs_TN), <span class="fu">abs</span>(log2FC_TEX_vs_TN),</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">abs</span>(log2FC_TEX_vs_TMEM))]</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>sig <span class="ot">&lt;-</span> deg[padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> maxAbsLFC <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> baseMean <span class="sc">&gt;=</span> <span class="dv">10</span>]</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a><span class="fu">setorder</span>(sig, <span class="sc">-</span>Fstat)</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(sig)</span></code></pre></div>
 <pre><code>#&gt; [1] 4176</code></pre>
 <p>4,176 genes pass. We keep the top 3,000 by ANOVA <em>F</em> so the
 vignette runs quickly; raise or drop the cap freely.</p>
-<p>```{r deg-matrix} sig &lt;- sig[seq_len(min(3000, nrow(sig)))]</p>
-<h1 data-number="4"
-id="cluster-on-the-log-scale-z-scoring-raw-counts-lets-a-few-high-count"><span
-class="header-section-number">4</span> Cluster on the log scale:
-z-scoring raw counts lets a few high-count</h1>
-<h1 data-number="5" id="outliers-dominate-the-distance-metric."><span
-class="header-section-number">5</span> outliers dominate the distance
-metric.</h1>
-<p>deg_mat &lt;- log2(rna_mat[sig$ID, , drop = FALSE] + 1)</p>
-<p>head(sig$ID, 12)</p>
-<pre><code></code></pre>
-<p>#&gt; [1] “Pik3ap1” “Myo1f” “Chsy1” “Gnptab” “Ccr9” “Satb1” #&gt; [7]
-“Rapgef6” “Il6ra” “Sytl2” “Ccr5” “Tox” “Fam169b”</p>
-<pre><code>
-`Tox`, the master transcription factor of CD8 T cell exhaustion, is already in
-the top 12 — a good sign that the selection is picking up real biology.
-
-# Choose The Number Of Modules
-
-```{r choose-k}
-z &lt;- zscore_rows(deg_mat)
-
-K &lt;- 6   # see the note below
-diag &lt;- choose_k(z, k_range = 2:12, method = &quot;kmeans&quot;,
-                 file = &quot;choose_k_elbow.pdf&quot;)
-diag
-attr(diag, &quot;suggested_k&quot;)</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sig <span class="ot">&lt;-</span> sig[<span class="fu">seq_len</span>(<span class="fu">min</span>(<span class="dv">3000</span>, <span class="fu">nrow</span>(sig)))]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Cluster on the log scale: z-scoring raw counts lets a few high-count</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># outliers dominate the distance metric.</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>deg_mat <span class="ot">&lt;-</span> <span class="fu">log2</span>(rna_mat[sig<span class="sc">$</span>ID, , <span class="at">drop =</span> <span class="cn">FALSE</span>] <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sig<span class="sc">$</span>ID, <span class="dv">12</span>)</span></code></pre></div>
+<pre><code>#&gt;  [1] &quot;Pik3ap1&quot; &quot;Myo1f&quot;   &quot;Chsy1&quot;   &quot;Gnptab&quot;  &quot;Ccr9&quot;    &quot;Satb1&quot;
+#&gt;  [7] &quot;Rapgef6&quot; &quot;Il6ra&quot;   &quot;Sytl2&quot;   &quot;Ccr5&quot;    &quot;Tox&quot;     &quot;Fam169b&quot;</code></pre>
+<p><code>Tox</code>, the master transcription factor of CD8 T cell
+exhaustion, is already in the top 12 — a good sign that the selection is
+picking up real biology.</p>
+<h1 data-number="6" id="choose-the-number-of-modules"><span
+class="header-section-number">6</span> Choose The Number Of Modules</h1>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">zscore_rows</span>(deg_mat)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">6</span>   <span class="co"># see the note below</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>diag <span class="ot">&lt;-</span> <span class="fu">choose_k</span>(z, <span class="at">k_range =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">file =</span> <span class="st">&quot;choose_k_elbow.pdf&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>diag</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(diag, <span class="st">&quot;suggested_k&quot;</span>)</span></code></pre></div>
 <pre><code>#&gt;         k tot_withinss mean_silhouette elbow_k
 #&gt;  1:     2    10243.402       0.6761535       5
 #&gt;  2:     3     7723.609       0.5215970       5
@@ -496,33 +418,41 @@ the figure itself to record the k you settled on,
 <code>choose_k(..., chosen_k = K)</code> draws it as a solid line beside
 the dashed elbow, and <code>annotate_k = FALSE</code> strips both
 markers for a bare curve.</p>
-<h1 data-number="6" id="cluster-into-temporal-modules"><span
-class="header-section-number">6</span> Cluster Into Temporal
+<h1 data-number="7" id="cluster-into-temporal-modules"><span
+class="header-section-number">7</span> Cluster Into Temporal
 Modules</h1>
-<p>```{r cluster} obj &lt;- longitudinal_cluster( deg_mat, rna_meta,
-sample_col = “SampleID”, time_col = “StateOrder”, # the ordered
-differentiation axis k = K, method = “kmeans”, stability = TRUE,
-n_resample = 20, seed = 1 )</p>
-<p>obj obj$stability</p>
-<pre><code></code></pre>
-<p>#&gt; <longi> 3000 features x 16 samples, 6 modules (kmeans) #&gt;
-stability (mean Jaccard): 0.90 - 0.97 #&gt; Cluster MeanJaccard N #&gt;
-1: Cluster1 0.958 388 #&gt; 2: Cluster2 0.975 776 #&gt; 3: Cluster3
-0.972 158 #&gt; 4: Cluster4 0.901 243 #&gt; 5: Cluster5 0.958 1019 #&gt;
-6: Cluster6 0.968 416</p>
-<pre><code>
-Every module has a mean Jaccard above 0.9 under resampling, so all six are
-reproducible. Values below roughly 0.6 would mean a module is an artefact of one
-particular clustering run and should not be interpreted.
-
-Modules are automatically renumbered so that `Cluster1` peaks earliest and
-`Cluster6` peaks latest:
-
-```{r centroids}
-cent &lt;- as.matrix(obj$centroids[, -1])
-rownames(cent) &lt;- obj$centroids$Cluster
-colnames(cent) &lt;- c(&quot;TN&quot;, &quot;TMEM&quot;, &quot;TEX&quot;)
-round(cent, 2)</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  deg_mat, rna_meta,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_col   =</span> <span class="st">&quot;StateOrder&quot;</span>,   <span class="co"># the ordered differentiation axis</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">k          =</span> K,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">method     =</span> <span class="st">&quot;kmeans&quot;</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">stability  =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_resample =</span> <span class="dv">20</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed       =</span> <span class="dv">1</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>obj</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>obj<span class="sc">$</span>stability</span></code></pre></div>
+<pre><code>#&gt; &lt;longi&gt;  3000 features x 16 samples,  6 modules (kmeans)
+#&gt;   stability (mean Jaccard): 0.90 - 0.97
+#&gt;     Cluster MeanJaccard     N
+#&gt; 1: Cluster1       0.958   388
+#&gt; 2: Cluster2       0.975   776
+#&gt; 3: Cluster3       0.972   158
+#&gt; 4: Cluster4       0.901   243
+#&gt; 5: Cluster5       0.958  1019
+#&gt; 6: Cluster6       0.968   416</code></pre>
+<p>Every module has a mean Jaccard above 0.9 under resampling, so all
+six are reproducible. Values below roughly 0.6 would mean a module is an
+artefact of one particular clustering run and should not be
+interpreted.</p>
+<p>Modules are automatically renumbered so that <code>Cluster1</code>
+peaks earliest and <code>Cluster6</code> peaks latest:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cent <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(obj<span class="sc">$</span>centroids[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(cent) <span class="ot">&lt;-</span> obj<span class="sc">$</span>centroids<span class="sc">$</span>Cluster</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(cent) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;TN&quot;</span>, <span class="st">&quot;TMEM&quot;</span>, <span class="st">&quot;TEX&quot;</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(cent, <span class="dv">2</span>)</span></code></pre></div>
 <pre><code>#&gt;            TN  TMEM   TEX
 #&gt; Cluster1  0.74 -0.01 -1.48   &lt;- naive-high, lost on activation
 #&gt; Cluster2  0.92 -0.87 -0.98   &lt;- naive-specific
@@ -530,69 +460,73 @@ round(cent, 2)</code></pre>
 #&gt; Cluster4 -0.83  1.31  0.34   &lt;- memory-specific
 #&gt; Cluster5 -0.92  0.69  1.15   &lt;- shared effector, highest in exhaustion
 #&gt; Cluster6 -0.65 -0.26  1.55   &lt;- exhaustion-specific</code></pre>
-<h1 data-number="7" id="check-the-modules-against-known-biology"><span
-class="header-section-number">7</span> Check The Modules Against Known
+<h1 data-number="8" id="check-the-modules-against-known-biology"><span
+class="header-section-number">8</span> Check The Modules Against Known
 Biology</h1>
 <p>This is the step worth doing before any figure goes into a paper.
 Canonical markers should land where the biology says they should.</p>
-<p>```{r biology} module_of &lt;- setNames(as.character(obj<span
-class="math inline"><em>c</em><em>l</em><em>u</em><em>s</em><em>t</em><em>e</em><em>r</em>), <em>r</em><em>o</em><em>w</em><em>n</em><em>a</em><em>m</em><em>e</em><em>s</em>(<em>o</em><em>b</em><em>j</em></span>z))</p>
-<p>TEX_MARKERS &lt;- c(“Pdcd1”, “Tox”, “Havcr2”, “Lag3”, “Entpd1”,
-“Cd101”, “Cd160”) TN_MARKERS &lt;- c(“Sell”, “Ccr7”, “Lef1”, “Tcf7”)</p>
-<p>data.table(Gene = TEX_MARKERS, Module = module_of[TEX_MARKERS])
-data.table(Gene = TN_MARKERS, Module = module_of[TN_MARKERS])</p>
-<pre><code></code></pre>
-<p>#&gt; Gene Module #&gt; Gene Module #&gt; 1: Pdcd1 Cluster6 #&gt; 1:
-Sell Cluster2 #&gt; 2: Tox Cluster6 #&gt; 2: Ccr7 Cluster2 #&gt; 3:
-Havcr2 Cluster5 #&gt; 3: Lef1 Cluster1 #&gt; 4: Lag3 Cluster6 #&gt; 4:
-Tcf7 Cluster1 #&gt; 5: Entpd1 Cluster5 #&gt; 6: Cd101 Cluster6 #&gt; 7:
-Cd160 Cluster5</p>
-<pre><code>
-Every inhibitory-receptor and exhaustion gene falls in Cluster5 or Cluster6, the
-two exhaustion-peaking modules. Every naive/stemness gene falls in Cluster1 or
-Cluster2, the naive-peaking modules. The clustering recovered the expected
-programme without being told anything about it.
-
-# Draw The Heatmap
-
-Three palettes are in play, and each is chosen for its job:
-
-- `cluster_palette` — a **qualitative** palette for module identity (`&quot;paired&quot;`,
-  `&quot;set2&quot;`, `&quot;set3&quot;`, `&quot;okabe_ito&quot;`, ...).
-- `annotation_palette` — a qualitative palette for categorical metadata bars.
-  `&quot;set2&quot;` is the default; use `&quot;set3&quot;` beyond eight levels.
-- `zscore_palette` — a **continuous** scale for the matrix body: `&quot;viridis&quot;`
-  (perceptually uniform and colour-blind safe) or `&quot;rdbu&quot;` (diverging). This
-  walkthrough uses one scheme throughout; change the single argument to swap it.
-
-```{r heatmap}
-rank_tab &lt;- sig[, .(ID, value = -log10(pmax(padj, .Machine$double.xmin)))]
-
-longitudinal_heatmap(
-  obj,
-  annotation_cols    = c(&quot;State&quot;, &quot;Day&quot;),
-  rank_table         = rank_tab,   # label the most significant genes per module
-  id_field           = &quot;ID&quot;,
-  value_field        = &quot;value&quot;,
-  top_n_label        = 3,
-  zscore_palette     = &quot;viridis&quot;,  # &lt;- &quot;rdbu&quot; for the diverging alternative
-  cluster_palette    = &quot;paired&quot;,
-  annotation_palette = &quot;set2&quot;,
-  # the GEO sample IDs are long and the State bar already says what each
-  # column is, so suppress them and scale the remaining text up for print
-  show_column_names        = FALSE,
-  label_fontsize           = 13,
-  row_title_fontsize       = 13,
-  annotation_name_fontsize = 13,
-  legend_fontsize          = 12,
-  title_fontsize           = 16,
-  title  = &quot;CD8 T cell differentiation: DEG modules (GSE285248)&quot;,
-  file   = &quot;cd8_module_heatmap.png&quot;,
-  width  = 10,
-  height = 12
-)</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>module_of <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">as.character</span>(obj<span class="sc">$</span>cluster), <span class="fu">rownames</span>(obj<span class="sc">$</span>z))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>TEX_MARKERS <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Pdcd1&quot;</span>, <span class="st">&quot;Tox&quot;</span>, <span class="st">&quot;Havcr2&quot;</span>, <span class="st">&quot;Lag3&quot;</span>, <span class="st">&quot;Entpd1&quot;</span>, <span class="st">&quot;Cd101&quot;</span>, <span class="st">&quot;Cd160&quot;</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>TN_MARKERS  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Sell&quot;</span>, <span class="st">&quot;Ccr7&quot;</span>, <span class="st">&quot;Lef1&quot;</span>, <span class="st">&quot;Tcf7&quot;</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data.table</span>(<span class="at">Gene =</span> TEX_MARKERS, <span class="at">Module =</span> module_of[TEX_MARKERS])</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data.table</span>(<span class="at">Gene =</span> TN_MARKERS,  <span class="at">Module =</span> module_of[TN_MARKERS])</span></code></pre></div>
+<pre><code>#&gt;      Gene   Module          #&gt;      Gene   Module
+#&gt; 1:  Pdcd1 Cluster6          #&gt; 1:   Sell Cluster2
+#&gt; 2:    Tox Cluster6          #&gt; 2:   Ccr7 Cluster2
+#&gt; 3: Havcr2 Cluster5          #&gt; 3:   Lef1 Cluster1
+#&gt; 4:   Lag3 Cluster6          #&gt; 4:   Tcf7 Cluster1
+#&gt; 5: Entpd1 Cluster5
+#&gt; 6:  Cd101 Cluster6
+#&gt; 7:  Cd160 Cluster5</code></pre>
+<p>Every inhibitory-receptor and exhaustion gene falls in Cluster5 or
+Cluster6, the two exhaustion-peaking modules. Every naive/stemness gene
+falls in Cluster1 or Cluster2, the naive-peaking modules. The clustering
+recovered the expected programme without being told anything about
+it.</p>
+<h1 data-number="9" id="draw-the-heatmap"><span
+class="header-section-number">9</span> Draw The Heatmap</h1>
+<p>Three palettes are in play, and each is chosen for its job:</p>
+<ul>
+<li><code>cluster_palette</code> — a <strong>qualitative</strong>
+palette for module identity (<code>"paired"</code>, <code>"set2"</code>,
+<code>"set3"</code>, <code>"okabe_ito"</code>, …).</li>
+<li><code>annotation_palette</code> — a qualitative palette for
+categorical metadata bars. <code>"set2"</code> is the default; use
+<code>"set3"</code> beyond eight levels.</li>
+<li><code>zscore_palette</code> — a <strong>continuous</strong> scale
+for the matrix body: <code>"viridis"</code> (perceptually uniform and
+colour-blind safe) or <code>"rdbu"</code> (diverging). This walkthrough
+uses one scheme throughout; change the single argument to swap it.</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rank_tab <span class="ot">&lt;-</span> sig[, .(ID, <span class="at">value =</span> <span class="sc">-</span><span class="fu">log10</span>(<span class="fu">pmax</span>(padj, .Machine<span class="sc">$</span>double.xmin)))]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  obj,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_cols    =</span> <span class="fu">c</span>(<span class="st">&quot;State&quot;</span>, <span class="st">&quot;Day&quot;</span>),</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">rank_table         =</span> rank_tab,   <span class="co"># label the most significant genes per module</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">id_field           =</span> <span class="st">&quot;ID&quot;</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">value_field        =</span> <span class="st">&quot;value&quot;</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_label        =</span> <span class="dv">3</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">zscore_palette     =</span> <span class="st">&quot;viridis&quot;</span>,  <span class="co"># &lt;- &quot;rdbu&quot; for the diverging alternative</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette    =</span> <span class="st">&quot;paired&quot;</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_palette =</span> <span class="st">&quot;set2&quot;</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># the GEO sample IDs are long and the State bar already says what each</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># column is, so suppress them and scale the remaining text up for print</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_column_names        =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize           =</span> <span class="dv">13</span>,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">row_title_fontsize       =</span> <span class="dv">13</span>,</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_name_fontsize =</span> <span class="dv">13</span>,</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend_fontsize          =</span> <span class="dv">12</span>,</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">title_fontsize           =</span> <span class="dv">16</span>,</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">title  =</span> <span class="st">&quot;CD8 T cell differentiation: DEG modules (GSE285248)&quot;</span>,</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">file   =</span> <span class="st">&quot;cd8_module_heatmap.png&quot;</span>,</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">width  =</span> <span class="dv">10</span>,</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">12</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
-<img src="figures/cd8_01_module_heatmap.png"
+<img src="../assets/figures/cd8_01_module_heatmap.png"
 alt="CD8 T cell DEG modules" />
 <figcaption aria-hidden="true">CD8 T cell DEG modules</figcaption>
 </figure>
@@ -605,22 +539,31 @@ module size and stability.</p>
 statistic you supply, which is usually what you want for a figure;
 <code>label_features</code> labels an explicit list of genes. The two
 can be combined.</p>
-<h1 data-number="8" id="plot-module-trajectories"><span
-class="header-section-number">8</span> Plot Module Trajectories</h1>
-<p><code>{r lineplot} pattern_lineplot(   obj, cluster_palette = "paired", base_size = 15,   title_fontsize = 14,   # the ordering column is an integer rank, so relabel the axis with the   # state names it stands for   xlab        = "Differentiation state",   time_labels = c("1" = "TN", "2" = "TMEM", "3" = "TEX"),   x_angle     = 0,   file = "cd8_module_patterns.pdf" )</code></p>
+<h1 data-number="10" id="plot-module-trajectories"><span
+class="header-section-number">10</span> Plot Module Trajectories</h1>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  obj, <span class="at">cluster_palette =</span> <span class="st">&quot;paired&quot;</span>, <span class="at">base_size =</span> <span class="dv">15</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">title_fontsize =</span> <span class="dv">14</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># the ordering column is an integer rank, so relabel the axis with the</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># state names it stands for</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab        =</span> <span class="st">&quot;Differentiation state&quot;</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_labels =</span> <span class="fu">c</span>(<span class="st">&quot;1&quot;</span> <span class="ot">=</span> <span class="st">&quot;TN&quot;</span>, <span class="st">&quot;2&quot;</span> <span class="ot">=</span> <span class="st">&quot;TMEM&quot;</span>, <span class="st">&quot;3&quot;</span> <span class="ot">=</span> <span class="st">&quot;TEX&quot;</span>),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_angle     =</span> <span class="dv">0</span>,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;cd8_module_patterns.pdf&quot;</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
-<img src="figures/cd8_03_module_patterns.png"
+<img src="../assets/figures/cd8_03_module_patterns.png"
 alt="Mean z-score trajectory per module" />
 <figcaption aria-hidden="true">Mean z-score trajectory per
 module</figcaption>
 </figure>
-<h1 data-number="9" id="check-module-coherence"><span
-class="header-section-number">9</span> Check Module Coherence</h1>
+<h1 data-number="11" id="check-module-coherence"><span
+class="header-section-number">11</span> Check Module Coherence</h1>
 <p>Clustering guarantees that a module’s genes are closer to each other
 than to other modules. It does not guarantee they actually agree.
 Correlating every gene in a module against every other one shows whether
 the module is one programme or several averaging together.</p>
-<p><code>{r coherence} module_correlation_summary(obj)</code></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_summary</span>(obj)</span></code></pre></div>
 <pre><code>#&gt;     Cluster     N NShown MeanCor
 #&gt; 1: Cluster1   388    388   0.876
 #&gt; 2: Cluster2   776    776   0.916
@@ -632,25 +575,36 @@ the module is one programme or several averaging together.</p>
 coherent. A value below roughly 0.3, or visible sub-blocks in the
 heatmap below, would mean the module should be split by raising
 <code>k</code>.</p>
-<p><code>{r coherence-heatmap} module_correlation_heatmap(   obj,   clusters        = "Cluster6",   # the exhaustion-specific module   # every gene in the module is used by default; printing 416 row names would   # be unreadable, so only the 30 strongest-signal genes get labelled   label_top_n     = 30,   corr_palette    = "rdbu",   # correlations diverge around 0   label_fontsize  = 9,   legend_fontsize = 12,   title_fontsize  = 11,   file = "cd8_correlation.png", width = 7.5, height = 7 )</code></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_heatmap</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">clusters        =</span> <span class="st">&quot;Cluster6&quot;</span>,   <span class="co"># the exhaustion-specific module</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># every gene in the module is used by default; printing 416 row names would</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># be unreadable, so only the 30 strongest-signal genes get labelled</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_top_n     =</span> <span class="dv">30</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">corr_palette    =</span> <span class="st">&quot;rdbu&quot;</span>,   <span class="co"># correlations diverge around 0</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize  =</span> <span class="dv">9</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend_fontsize =</span> <span class="dv">12</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">title_fontsize  =</span> <span class="dv">11</span>,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;cd8_correlation.png&quot;</span>, <span class="at">width =</span> <span class="fl">7.5</span>, <span class="at">height =</span> <span class="dv">7</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
-<img src="figures/cd8_05_module_correlation.png"
+<img src="../assets/figures/cd8_05_module_correlation.png"
 alt="Gene-gene correlation inside the exhaustion module" />
 <figcaption aria-hidden="true">Gene-gene correlation inside the
 exhaustion module</figcaption>
 </figure>
 <p>A <code>.pdf</code> destination writes one page per module
 instead:</p>
-<p><code>{r coherence-pdf} module_correlation_heatmap(obj, file = "cd8_module_correlations.pdf")</code></p>
-<h1 data-number="10" id="export-the-tables"><span
-class="header-section-number">10</span> Export The Tables</h1>
-<p><code>{r export} write_memberships(obj, prefix = "cd8_modules")</code></p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_heatmap</span>(obj, <span class="at">file =</span> <span class="st">&quot;cd8_module_correlations.pdf&quot;</span>)</span></code></pre></div>
+<h1 data-number="12" id="export-the-tables"><span
+class="header-section-number">12</span> Export The Tables</h1>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_memberships</span>(obj, <span class="at">prefix =</span> <span class="st">&quot;cd8_modules&quot;</span>)</span></code></pre></div>
 <p>Writes <code>cd8_modules_memberships.txt</code> (gene to module),
 <code>_centroids.txt</code> (mean trajectory per module), and
 <code>_stability.txt</code>. The membership table is what you would feed
 into GO or GSEA enrichment, one module at a time.</p>
-<h1 data-number="11" id="add-the-cutrun-layer"><span
-class="header-section-number">11</span> Add The CUT&amp;Run Layer</h1>
+<h1 data-number="13" id="add-the-cutrun-layer"><span
+class="header-section-number">13</span> Add The CUT&amp;Run Layer</h1>
 <p>Now the paired-omics question: does chromatin state track these
 expression modules?</p>
 <p>The CUT&amp;Run tables give peak coordinates but <strong>no gene
@@ -658,111 +612,123 @@ symbol</strong>, so peaks have to be assigned to genes first. We map
 each peak to its nearest gene transcription start site, using the
 coordinates already present in the RNA annotation, and keep peaks within
 25 kb.</p>
-<p>```{r peak-mapping} gene_tss &lt;- unique(rna_uniq[, .(Chr, TSS =
-ifelse(Strand == “+”, Start, End), Gene = Gene.Name)])</p>
-<p>map_peaks_to_nearest_gene &lt;- function(peaks, genes, max_dist =
-25000) { out &lt;- list() for (ch in intersect(unique(peaks<span
-class="math inline"><em>C</em><em>h</em><em>r</em>), <em>u</em><em>n</em><em>i</em><em>q</em><em>u</em><em>e</em>(<em>g</em><em>e</em><em>n</em><em>e</em><em>s</em></span>Chr)))
-{ gg &lt;- genes[Chr == ch][order(TSS)] pp &lt;- peaks[Chr == ch] if
-(!nrow(gg) || !nrow(pp)) next i &lt;- findInterval(pp<span
-class="math inline"><em>M</em><em>i</em><em>d</em>, <em>g</em><em>g</em></span>TSS)
-lo &lt;- pmax(i, 1L); hi &lt;- pmin(i + 1L, nrow(gg)) dlo &lt;-
-abs(pp<span
-class="math inline"><em>M</em><em>i</em><em>d</em> − <em>g</em><em>g</em></span>TSS[lo]);
-dhi &lt;- abs(pp<span
-class="math inline"><em>M</em><em>i</em><em>d</em> − <em>g</em><em>g</em></span>TSS[hi])
-pick &lt;- ifelse(dlo &lt;= dhi, lo, hi) out[[length(out) + 1L]] &lt;-
-data.table(peakN = pp<span
-class="math inline"><em>p</em><em>e</em><em>a</em><em>k</em><em>N</em>, <em>G</em><em>e</em><em>n</em><em>e</em> = <em>g</em><em>g</em></span>Gene[pick],
-dist = pmin(dlo, dhi)) } rbindlist(out)[dist &lt;= max_dist] }</p>
-<pre><code>
-`dual_omics_heatmap()` recovers the gene from a secondary row ID using
-`gene_of_secondary`, whose default is `sub(&quot;^.*_&quot;, &quot;&quot;, id)` — everything after
-the last underscore. So we name the rows `peak1243_Pdcd1` and the default just
-works.
-
-```{r load-cutrun}
-load_cutrun &lt;- function(path, mark) {
-  tab   &lt;- fread(path)
-  scols &lt;- grep(paste0(&quot;_&quot;, mark, &quot;_Rep&quot;), names(tab), value = TRUE)
-  pk    &lt;- tab[, .(peakN, Chr, Mid = as.integer((Start + End) / 2))]
-  ann   &lt;- map_peaks_to_nearest_gene(pk, gene_tss)
-  tab   &lt;- tab[peakN %in% ann$peakN]
-  ann   &lt;- ann[match(tab$peakN, peakN)]
-  m     &lt;- as.matrix(tab[, ..scols])
-  rownames(m) &lt;- paste0(ann$peakN, &quot;_&quot;, ann$Gene)   # PeakID_SYMBOL
-  list(mat = log2(m + 1), meta = make_meta(scols, mark), ann = ann)
-}
-
-ac &lt;- load_cutrun(paths$h3k27ac, &quot;H3K27ac&quot;)
-dim(ac$mat)</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>gene_tss <span class="ot">&lt;-</span> <span class="fu">unique</span>(rna_uniq[, .(Chr,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">TSS  =</span> <span class="fu">ifelse</span>(Strand <span class="sc">==</span> <span class="st">&quot;+&quot;</span>, Start, End),</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">Gene =</span> Gene.Name)])</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>map_peaks_to_nearest_gene <span class="ot">&lt;-</span> <span class="cf">function</span>(peaks, genes, <span class="at">max_dist =</span> <span class="dv">25000</span>) {</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (ch <span class="cf">in</span> <span class="fu">intersect</span>(<span class="fu">unique</span>(peaks<span class="sc">$</span>Chr), <span class="fu">unique</span>(genes<span class="sc">$</span>Chr))) {</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    gg <span class="ot">&lt;-</span> genes[Chr <span class="sc">==</span> ch][<span class="fu">order</span>(TSS)]</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    pp <span class="ot">&lt;-</span> peaks[Chr <span class="sc">==</span> ch]</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">nrow</span>(gg) <span class="sc">||</span> <span class="sc">!</span><span class="fu">nrow</span>(pp)) <span class="cf">next</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    i  <span class="ot">&lt;-</span> <span class="fu">findInterval</span>(pp<span class="sc">$</span>Mid, gg<span class="sc">$</span>TSS)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    lo <span class="ot">&lt;-</span> <span class="fu">pmax</span>(i, <span class="dv">1</span><span class="dt">L</span>); hi <span class="ot">&lt;-</span> <span class="fu">pmin</span>(i <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>, <span class="fu">nrow</span>(gg))</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    dlo <span class="ot">&lt;-</span> <span class="fu">abs</span>(pp<span class="sc">$</span>Mid <span class="sc">-</span> gg<span class="sc">$</span>TSS[lo]); dhi <span class="ot">&lt;-</span> <span class="fu">abs</span>(pp<span class="sc">$</span>Mid <span class="sc">-</span> gg<span class="sc">$</span>TSS[hi])</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    pick <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(dlo <span class="sc">&lt;=</span> dhi, lo, hi)</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    out[[<span class="fu">length</span>(out) <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>]] <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="at">peakN =</span> pp<span class="sc">$</span>peakN,</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">Gene  =</span> gg<span class="sc">$</span>Gene[pick],</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">dist  =</span> <span class="fu">pmin</span>(dlo, dhi))</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbindlist</span>(out)[dist <span class="sc">&lt;=</span> max_dist]</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><code>dual_omics_heatmap()</code> recovers the gene from a secondary
+row ID using <code>gene_of_secondary</code>, whose default is
+<code>sub("^.*_", "", id)</code> — everything after the last underscore.
+So we name the rows <code>peak1243_Pdcd1</code> and the default just
+works.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>load_cutrun <span class="ot">&lt;-</span> <span class="cf">function</span>(path, mark) {</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  tab   <span class="ot">&lt;-</span> <span class="fu">fread</span>(path)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  scols <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="fu">paste0</span>(<span class="st">&quot;_&quot;</span>, mark, <span class="st">&quot;_Rep&quot;</span>), <span class="fu">names</span>(tab), <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  pk    <span class="ot">&lt;-</span> tab[, .(peakN, Chr, <span class="at">Mid =</span> <span class="fu">as.integer</span>((Start <span class="sc">+</span> End) <span class="sc">/</span> <span class="dv">2</span>))]</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  ann   <span class="ot">&lt;-</span> <span class="fu">map_peaks_to_nearest_gene</span>(pk, gene_tss)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  tab   <span class="ot">&lt;-</span> tab[peakN <span class="sc">%in%</span> ann<span class="sc">$</span>peakN]</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  ann   <span class="ot">&lt;-</span> ann[<span class="fu">match</span>(tab<span class="sc">$</span>peakN, peakN)]</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  m     <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(tab[, ..scols])</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames</span>(m) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(ann<span class="sc">$</span>peakN, <span class="st">&quot;_&quot;</span>, ann<span class="sc">$</span>Gene)   <span class="co"># PeakID_SYMBOL</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">mat =</span> <span class="fu">log2</span>(m <span class="sc">+</span> <span class="dv">1</span>), <span class="at">meta =</span> <span class="fu">make_meta</span>(scols, mark), <span class="at">ann =</span> ann)</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>ac <span class="ot">&lt;-</span> <span class="fu">load_cutrun</span>(paths<span class="sc">$</span>h3k27ac, <span class="st">&quot;H3K27ac&quot;</span>)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(ac<span class="sc">$</span>mat)</span></code></pre></div>
 <pre><code>#&gt; [1] 20879    16</code></pre>
 <p>A gene can carry several peaks; <code>aggregate = "mean"</code>
 averages a gene’s peaks, <code>aggregate = "top"</code> takes the single
 strongest one.</p>
-<p>```{r dual-omics} ac_obj &lt;- longitudinal_cluster(ac<span
-class="math inline"><em>m</em><em>a</em><em>t</em>, <em>a</em><em>c</em></span>meta,
-sample_col = “SampleID”, time_col = “StateOrder”, k = 4, stability =
-FALSE)</p>
-<p>d_ac &lt;- dual_omics_heatmap( primary = obj, # RNA drives the module
-structure and row order secondary = ac_obj, # chromatin is shown in that
-same order primary_name = “RNA”, secondary_name = “H3K27ac”, aggregate =
-“mean”, label_features = c(TEX_MARKERS, TN_MARKERS), zscore_palette =
-“viridis”, cluster_palette = “paired”, show_column_names = FALSE,
-label_fontsize = 13, row_title_fontsize = 13, legend_fontsize = 12,
-title_fontsize = 16, file = “cd8_rna_vs_h3k27ac.png”, width = 15, height
-= 12 )</p>
-<pre><code>
-![RNA modules with matched H3K27ac signal](figures/cd8_04_rna_vs_h3k27ac.png)
-
-The chromatin panel mirrors the expression panel block for block. The
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>ac_obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(ac<span class="sc">$</span>mat, ac<span class="sc">$</span>meta,</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                               <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">time_col   =</span> <span class="st">&quot;StateOrder&quot;</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">k =</span> <span class="dv">4</span>, <span class="at">stability =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>d_ac <span class="ot">&lt;-</span> <span class="fu">dual_omics_heatmap</span>(</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary        =</span> obj,        <span class="co"># RNA drives the module structure and row order</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary      =</span> ac_obj,     <span class="co"># chromatin is shown in that same order</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary_name   =</span> <span class="st">&quot;RNA&quot;</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary_name =</span> <span class="st">&quot;H3K27ac&quot;</span>,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate      =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_features =</span> <span class="fu">c</span>(TEX_MARKERS, TN_MARKERS),</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">zscore_palette  =</span> <span class="st">&quot;viridis&quot;</span>,</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;paired&quot;</span>,</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_column_names  =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize     =</span> <span class="dv">13</span>,</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">row_title_fontsize =</span> <span class="dv">13</span>,</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">legend_fontsize    =</span> <span class="dv">12</span>,</span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">title_fontsize     =</span> <span class="dv">16</span>,</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;cd8_rna_vs_h3k27ac.png&quot;</span>, <span class="at">width =</span> <span class="dv">15</span>, <span class="at">height =</span> <span class="dv">12</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<figure>
+<img src="../assets/figures/cd8_04_rna_vs_h3k27ac.png"
+alt="RNA modules with matched H3K27ac signal" />
+<figcaption aria-hidden="true">RNA modules with matched H3K27ac
+signal</figcaption>
+</figure>
+<p>The chromatin panel mirrors the expression panel block for block. The
 naive-high modules carry naive-high H3K27ac; the exhaustion-high module
-containing *Pdcd1*, *Tox*, and *Lag3* carries exhaustion-high H3K27ac. The
-activating mark is deposited where the genes are expressed.
-
-The repressive mark behaves differently, which is the point of the comparison:
-
-```{r repressive}
-me3 &lt;- load_cutrun(paths$h3k27me3, &quot;H3K27me3&quot;)
-
-d_me3 &lt;- dual_omics_heatmap(
-  primary = obj, secondary = me3$mat,     # a raw matrix also works
-  primary_name = &quot;RNA&quot;, secondary_name = &quot;H3K27me3&quot;,
-  label_features = TEX_MARKERS,
-  file = &quot;cd8_rna_vs_h3k27me3.png&quot;, width = 15, height = 12
-)</code></pre>
+containing <em>Pdcd1</em>, <em>Tox</em>, and <em>Lag3</em> carries
+exhaustion-high H3K27ac. The activating mark is deposited where the
+genes are expressed.</p>
+<p>The repressive mark behaves differently, which is the point of the
+comparison:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>me3 <span class="ot">&lt;-</span> <span class="fu">load_cutrun</span>(paths<span class="sc">$</span>h3k27me3, <span class="st">&quot;H3K27me3&quot;</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>d_me3 <span class="ot">&lt;-</span> <span class="fu">dual_omics_heatmap</span>(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary =</span> obj, <span class="at">secondary =</span> me3<span class="sc">$</span>mat,     <span class="co"># a raw matrix also works</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary_name =</span> <span class="st">&quot;RNA&quot;</span>, <span class="at">secondary_name =</span> <span class="st">&quot;H3K27me3&quot;</span>,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_features =</span> TEX_MARKERS,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;cd8_rna_vs_h3k27me3.png&quot;</span>, <span class="at">width =</span> <span class="dv">15</span>, <span class="at">height =</span> <span class="dv">12</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>Quantifying the contrast over the exhaustion-induced genes:</p>
-<p>```{r concordance} peak_state &lt;-
-setNames(colnames(cent)[apply(cent, 1, which.max)], rownames(cent))
-tex_genes &lt;- names(module_of)[peak_state[module_of] == “TEX”]</p>
-<p>delta_in &lt;- function(res, meta_tab, genes) { zs &lt;- res<span
-class="math inline"><em>z</em><sub><em>s</em></sub><em>e</em><em>c</em><em>o</em><em>n</em><em>d</em><em>a</em><em>r</em><em>y</em><em>k</em><em>e</em><em>e</em><em>p</em> &lt; −<em>i</em><em>n</em><em>t</em><em>e</em><em>r</em><em>s</em><em>e</em><em>c</em><em>t</em>(<em>g</em><em>e</em><em>n</em><em>e</em><em>s</em>, <em>r</em><em>o</em><em>w</em><em>n</em><em>a</em><em>m</em><em>e</em><em>s</em>(<em>z</em><em>s</em>))<em>s</em><em>t</em> &lt; −<em>m</em><em>e</em><em>t</em><em>a</em><sub><em>t</em></sub><em>a</em><em>b</em></span>State[match(colnames(zs),
-meta_tab$SampleID)] mean(zs[keep, st == “TEX”], na.rm = TRUE) -
-mean(zs[keep, st == “TN”], na.rm = TRUE) }</p>
-<p>round(c(H3K27ac = delta_in(d_ac, ac<span
-class="math inline"><em>m</em><em>e</em><em>t</em><em>a</em>, <em>t</em><em>e</em><em>x</em><sub><em>g</em></sub><em>e</em><em>n</em><em>e</em><em>s</em>), <em>H</em>3<em>K</em>27<em>m</em><em>e</em>3 = <em>d</em><em>e</em><em>l</em><em>t</em><em>a</em><sub><em>i</em></sub><em>n</em>(<em>d</em><sub><em>m</em></sub><em>e</em>3, <em>m</em><em>e</em>3</span>meta,
-tex_genes)), 3)</p>
-<pre><code></code></pre>
-<p>#&gt; H3K27ac H3K27me3 #&gt; 1.350 -0.032</p>
-<pre><code>
-The activating mark is gained at exhaustion-induced genes; the repressive mark
-is flat to slightly lost. Chromatin accessibility tracks the expression
-modules, which is exactly the claim the original study makes.
-
-# Reproducing Everything
-
-The complete script, with 114 assertions covering data integrity, clustering
-correctness, palette behaviour, marker-gene placement, and cross-omics
-concordance, ships with the package:
-
-```{r reproduce, eval=FALSE}
-# from the package root
-system(&quot;Rscript examples/validate_real_data.R&quot;)</code></pre>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>peak_state <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">colnames</span>(cent)[<span class="fu">apply</span>(cent, <span class="dv">1</span>, which.max)], <span class="fu">rownames</span>(cent))</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>tex_genes  <span class="ot">&lt;-</span> <span class="fu">names</span>(module_of)[peak_state[module_of] <span class="sc">==</span> <span class="st">&quot;TEX&quot;</span>]</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>delta_in <span class="ot">&lt;-</span> <span class="cf">function</span>(res, meta_tab, genes) {</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  zs   <span class="ot">&lt;-</span> res<span class="sc">$</span>z_secondary</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  keep <span class="ot">&lt;-</span> <span class="fu">intersect</span>(genes, <span class="fu">rownames</span>(zs))</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  st   <span class="ot">&lt;-</span> meta_tab<span class="sc">$</span>State[<span class="fu">match</span>(<span class="fu">colnames</span>(zs), meta_tab<span class="sc">$</span>SampleID)]</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(zs[keep, st <span class="sc">==</span> <span class="st">&quot;TEX&quot;</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">-</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(zs[keep, st <span class="sc">==</span> <span class="st">&quot;TN&quot;</span>],  <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">c</span>(<span class="at">H3K27ac  =</span> <span class="fu">delta_in</span>(d_ac,  ac<span class="sc">$</span>meta,  tex_genes),</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">H3K27me3 =</span> <span class="fu">delta_in</span>(d_me3, me3<span class="sc">$</span>meta, tex_genes)), <span class="dv">3</span>)</span></code></pre></div>
+<pre><code>#&gt;  H3K27ac H3K27me3
+#&gt;    1.350   -0.032</code></pre>
+<p>The activating mark is gained at exhaustion-induced genes; the
+repressive mark is flat to slightly lost. Chromatin accessibility tracks
+the expression modules, which is exactly the claim the original study
+makes.</p>
+<h1 data-number="14" id="reproducing-everything"><span
+class="header-section-number">14</span> Reproducing Everything</h1>
+<p>The complete script, with 114 assertions covering data integrity,
+clustering correctness, palette behaviour, marker-gene placement, and
+cross-omics concordance, ships with the package:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># from the package root</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">system</span>(<span class="st">&quot;Rscript examples/validate_real_data.R&quot;</span>)</span></code></pre></div>
 <p>It caches the downloads under
 <code>examples/outputs/geo_cache/</code>, so re-runs are offline and
 fast.</p>
-<h1 data-number="12" id="adapting-this-to-your-own-data"><span
-class="header-section-number">12</span> Adapting This To Your Own
+<h1 data-number="15" id="adapting-this-to-your-own-data"><span
+class="header-section-number">15</span> Adapting This To Your Own
 Data</h1>
 <p>The only project-specific parts are steps 2 to 4. Everything from
 step 5 onward is generic. To reuse the workflow you need:</p>
@@ -779,11 +745,11 @@ the line plot.</li>
 <code>_&lt;GeneSymbol&gt;</code>, or a custom
 <code>gene_of_secondary</code> function.</li>
 </ol>
-<h1 data-number="13" id="citation"><span
-class="header-section-number">13</span> Citation</h1>
+<h1 data-number="16" id="citation"><span
+class="header-section-number">16</span> Citation</h1>
 <p>Cite the original study and the GEO accessions alongside
 <code>ModuleViz</code>:</p>
-<p><code>{r citation} citation("ModuleViz")</code></p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;ModuleViz&quot;</span>)</span></code></pre></div>
 <ul>
 <li>GSE285248 — RNA-seq, memory and exhausted CD8 T cells.</li>
 <li>GSE285245 — CUT&amp;Run, histone modifications in the same
@@ -791,8 +757,25 @@ cells.</li>
 <li>PubMed <a
 href="https://pubmed.ncbi.nlm.nih.gov/40389726/">40389726</a>.</li>
 </ul>
-<h1 data-number="14" id="session-information"><span
-class="header-section-number">14</span> Session Information</h1>
-<p><code>{r session-info, eval=TRUE} sessionInfo()</code></p>
+<h1 data-number="17" id="session-information"><span
+class="header-section-number">17</span> Session Information</h1>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; R version 4.1.3 (2022-03-10)</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-apple-darwin13.4.0 (64-bit)</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Running under: macOS 26.6</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; BLAS/LAPACK: /Users/hhua/miniconda3/lib/libmkl_rt.dylib</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1] compiler_4.1.3  fastmap_1.1.1   cli_3.6.2       htmltools_0.5.7</span></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [5] tools_4.1.3     yaml_2.3.8      rmarkdown_2.30  knitr_1.45     </span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [9] digest_0.6.34   xfun_0.42       rlang_1.1.3     evaluate_1.0.5</span></span></code></pre></div>
 </body>
 </html>
