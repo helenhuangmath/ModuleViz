@@ -9,151 +9,6 @@
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: 1.5em;}
     div.column{flex: auto;}
@@ -238,6 +93,7 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <link rel="stylesheet" href="biocstyle.css" />
 </head>
 <body>
 <nav id="TOC" role="doc-toc">
@@ -534,7 +390,7 @@ class="header-section-number">1.4.5</span> Draw The Module Heatmap</h3>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="dv">12</span></span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
-<img src="inst/extdata/results/01_longitudinal_clustered_heatmap.png"
+<img src="assets/results/01_longitudinal_clustered_heatmap.png"
 alt="Longitudinal clustered heatmap" />
 <figcaption aria-hidden="true">Longitudinal clustered
 heatmap</figcaption>
@@ -551,7 +407,7 @@ class="header-section-number">1.4.6</span> Plot Module Trajectories</h3>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;moduleviz_patterns.pdf&quot;</span></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
-<img src="inst/extdata/results/02_module_line_patterns.png"
+<img src="assets/results/02_module_line_patterns.png"
 alt="Module line patterns" />
 <figcaption aria-hidden="true">Module line patterns</figcaption>
 </figure>
@@ -825,7 +681,7 @@ shown beside the primary layer.</p>
 <span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;rna_atac_heatmap.pdf&quot;</span></span>
 <span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
-<img src="inst/extdata/results/03_rna_atac_side_by_side_heatmap.png"
+<img src="assets/results/03_rna_atac_side_by_side_heatmap.png"
 alt="RNA ATAC side-by-side heatmap" />
 <figcaption aria-hidden="true">RNA ATAC side-by-side
 heatmap</figcaption>
@@ -848,7 +704,7 @@ within each module.</p>
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;module_correlation.pdf&quot;</span></span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
-<img src="vignettes/figures/cd8_05_module_correlation.png"
+<img src="assets/figures/cd8_05_module_correlation.png"
 alt="CD8 module correlation heatmap" />
 <figcaption aria-hidden="true">CD8 module correlation
 heatmap</figcaption>
@@ -863,17 +719,17 @@ demonstrates a published-data workflow using RNA-seq and CUT&amp;Run
 data from memory and exhausted CD8 T cells. RNA-seq defines the modules
 and H3K27ac signal is aligned to those modules by gene.</p>
 <figure>
-<img src="vignettes/figures/cd8_01_module_heatmap.png"
+<img src="assets/figures/cd8_01_module_heatmap.png"
 alt="CD8 module heatmap" />
 <figcaption aria-hidden="true">CD8 module heatmap</figcaption>
 </figure>
 <figure>
-<img src="vignettes/figures/cd8_03_module_patterns.png"
+<img src="assets/figures/cd8_03_module_patterns.png"
 alt="CD8 module patterns" />
 <figcaption aria-hidden="true">CD8 module patterns</figcaption>
 </figure>
 <figure>
-<img src="vignettes/figures/cd8_04_rna_vs_h3k27ac.png"
+<img src="assets/figures/cd8_04_rna_vs_h3k27ac.png"
 alt="CD8 RNA versus H3K27ac heatmap" />
 <figcaption aria-hidden="true">CD8 RNA versus H3K27ac
 heatmap</figcaption>
@@ -887,13 +743,13 @@ matrix can be analyzed with the same <code>ModuleViz</code>
 functions.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;examples/example_single_cell_pseudobulk.R&quot;</span>)</span></code></pre></div>
 <figure>
-<img src="inst/extdata/results/04_single_cell_pseudobulk_heatmap.png"
+<img src="assets/results/04_single_cell_pseudobulk_heatmap.png"
 alt="Single-cell pseudobulk heatmap" />
 <figcaption aria-hidden="true">Single-cell pseudobulk
 heatmap</figcaption>
 </figure>
 <figure>
-<img src="inst/extdata/results/05_single_cell_pseudobulk_patterns.png"
+<img src="assets/results/05_single_cell_pseudobulk_patterns.png"
 alt="Single-cell pseudobulk line patterns" />
 <figcaption aria-hidden="true">Single-cell pseudobulk line
 patterns</figcaption>

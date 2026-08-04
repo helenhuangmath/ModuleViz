@@ -6,10 +6,10 @@ citEntry(
   author = personList(as.person("Hua Huang")),
   year = "2026",
   note = "R package version 0.1.0",
-  url = "https://github.com/helenhuangmath/Heatmap_Plot",
+  url = "https://github.com/helenhuangmath/ModuleViz",
   textVersion = paste(
     "Huang H (2026). ModuleViz: Longitudinal Omics Heatmaps and Temporal",
     "Module Plots. R package version 0.1.0.",
-    "https://github.com/helenhuangmath/Heatmap_Plot"
+    "https://github.com/helenhuangmath/ModuleViz"
   )
 )

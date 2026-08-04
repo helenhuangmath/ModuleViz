@@ -11,7 +11,7 @@ library(data.table)
 
 ## Preferred after installing the package:
 ## install.packages("remotes")
-## remotes::install_github("helenhuangmath/Heatmap_Plot")
+## remotes::install_github("helenhuangmath/ModuleViz")
 library(ModuleViz)
 
 ## During local development, you can instead source the R files:

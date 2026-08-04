@@ -1,8 +1,22 @@
 ---
-title: "Longitudinal Heatmap Tutorial"
-output: rmarkdown::html_vignette
+title: "ModuleViz: Longitudinal Heatmap Tutorial"
+author:
+- name: Hua Huang
+  email: helenhuang.math@gmail.com
+date: "`r Sys.Date()`"
+package: ModuleViz
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+abstract: |
+  This tutorial introduces the main ModuleViz workflow with the bundled
+  heatmap_example dataset. It covers module-number diagnostics, longitudinal
+  clustering, heatmap rendering, module trajectory plots, paired omics
+  visualization, pseudobulk summaries, and exportable result tables.
 vignette: >
-  %\VignetteIndexEntry{Longitudinal Heatmap Tutorial}
+  %\VignetteIndexEntry{ModuleViz: Longitudinal Heatmap Tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,18 +28,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Introduction
+# Introduction
 
-`ModuleViz` clusters feature trajectories from longitudinal omics experiments
-and turns them into ordered temporal heatmaps, module trajectory plots, and
-exportable membership tables. The workflow is useful for RNA-seq, ATAC-seq,
-Cut&Run, or other feature-by-sample matrices where columns represent ordered
-time points, treatment conditions, or both.
+`r Biocpkg("ModuleViz")` clusters feature trajectories from longitudinal omics
+experiments and renders ordered temporal heatmaps.
+
+The workflow is useful for RNA-seq, ATAC-seq, Cut&Run, or other
+feature-by-sample matrices where columns represent ordered time points,
+treatment conditions, or both.
 
 This vignette uses the small bundled `heatmap_example` dataset so the tutorial
 runs without network access.
 
-## 1. Load The Example Time-Course
+# Load The Example Time-Course
 
 ```{r load}
 library(ModuleViz)
@@ -43,7 +58,7 @@ The returned object is plain R data:
 - `mat`: numeric feature-by-sample matrix.
 - `meta`: one row per sample, with sample ID, condition, time, and replicate.
 
-## 2. Choose The Number Of Modules
+# Choose The Number Of Modules
 
 `choose_k()` calculates a simple within-cluster-sum-of-squares elbow diagnostic.
 Use it as a first pass, then choose a biologically interpretable value.
@@ -59,7 +74,7 @@ diag
 attr(diag, "suggested_k")
 ```
 
-## 3. Cluster Temporal Patterns
+# Cluster Temporal Patterns
 
 ```{r cluster}
 obj <- longitudinal_cluster(
@@ -81,7 +96,7 @@ obj
 Clusters are reordered by their temporal peak, so early-high modules appear
 before late-high modules.
 
-## 4. Draw The Heatmap
+# Draw The Heatmap
 
 ```{r heatmap, fig.width=8, fig.height=8}
 longitudinal_heatmap(
@@ -107,13 +122,13 @@ longitudinal_heatmap(
 )
 ```
 
-## 5. Plot Module Trajectories
+# Plot Module Trajectories
 
 ```{r lineplot, fig.width=7, fig.height=7}
 pattern_lineplot(obj, palette = "nature", base_size = 12)
 ```
 
-## 6. Draw Side-By-Side RNA + ATAC Patterns
+# Draw Side-By-Side RNA And ATAC Patterns
 
 The primary matrix drives clustering and row order. The secondary matrix is
 aligned by gene and displayed next to it. This example simulates two ATAC peaks
@@ -145,7 +160,7 @@ dual_omics_heatmap(
 )
 ```
 
-## 7. Single-Cell Pseudobulk Example
+# Single-Cell Pseudobulk Example
 
 Single-cell data can be summarized into pseudobulk profiles by cell type,
 condition, time point, and replicate. The resulting feature-by-pseudobulk matrix
@@ -215,7 +230,7 @@ sc_obj <- longitudinal_cluster(
 pattern_lineplot(sc_obj, palette = "science", base_size = 11)
 ```
 
-## 8. Export Tables
+# Export Tables
 
 ```{r write}
 out_dir <- tempdir()
@@ -228,7 +243,7 @@ This writes:
 - `heatmap_example_centroids.txt`
 - `heatmap_example_stability.txt`
 
-## Real Public Data
+# Real Public Data
 
 The package also includes a helper for public datasets in Bioconductor
 `timecoursedata`. These examples are optional because they require installing
@@ -266,7 +281,7 @@ flu <- load_real_timecourse_example(
 )
 ```
 
-## Session Information
+# Session Information
 
 ```{r session-info}
 sessionInfo()

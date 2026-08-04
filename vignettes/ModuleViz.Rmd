@@ -1,8 +1,9 @@
 ---
-title: "ModuleViz: temporal modules from longitudinal omics"
+title: "ModuleViz: Temporal Modules from Longitudinal Omics"
 author:
-- name: Helen Huang
+- name: Hua Huang
   email: helenhuang.math@gmail.com
+date: "`r Sys.Date()`"
 package: ModuleViz
 output:
   BiocStyle::html_document:
@@ -18,7 +19,7 @@ abstract: |
   correlation maps. Paired omics layers such as RNA and CUT&Run can be aligned
   by gene and shown side by side. This vignette is the complete user guide.
 vignette: >
-  %\VignetteIndexEntry{ModuleViz: temporal modules from longitudinal omics}
+  %\VignetteIndexEntry{ModuleViz: Temporal Modules from Longitudinal Omics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -36,7 +37,10 @@ set.seed(1)
 
 # Introduction
 
-## What problem does this solve?
+`r Biocpkg("ModuleViz")` clusters feature trajectories from longitudinal omics
+experiments and visualizes the resulting temporal modules.
+
+## What Problem Does This Solve?
 
 A longitudinal omics experiment produces a matrix of features (genes, peaks,
 proteins) measured across samples that have a meaningful **order**: time points,
@@ -55,7 +59,7 @@ and fall, which come up late and stay up, which respond only in the treated arm.
    gene-gene correlation maps;
 6. optionally **align a second omics layer** by gene.
 
-## When to use it
+## When To Use It
 
 `ModuleViz` fits any experiment where the columns have an order and the rows are
 features:
@@ -70,7 +74,7 @@ which features are interesting upstream — with `r Biocpkg("DESeq2")`,
 `r Biocpkg("edgeR")`, `r Biocpkg("limma")`, or a variance filter — and pass in
 the matrix you want to see.
 
-## The two vignettes
+## Package Vignettes
 
 | Vignette | Data | Purpose |
 |---|---|---|
@@ -92,7 +96,7 @@ BiocManager::install("ComplexHeatmap")
 library(ModuleViz)
 ```
 
-# Quick start
+# Quick Example
 
 Five lines from data to figure. Everything after this section explains what
 these calls are doing and how to control them.
@@ -109,9 +113,9 @@ obj <- longitudinal_cluster(
 longitudinal_heatmap(obj, top_n_label = 3, title = "Quick start")
 ```
 
-# Input data
+# Input Data
 
-## The two objects you supply
+## The Two Objects You Supply
 
 `ModuleViz` needs exactly two things.
 
@@ -157,7 +161,7 @@ meta$StageOrder <- c(naive = 1, memory = 2, exhausted = 3)[meta$Stage]
 Samples present in the metadata but missing from the matrix (or vice versa) are
 silently dropped, so the two only need to overlap.
 
-## Feature-level preprocessing
+## Feature-Level Preprocessing
 
 Cluster on a **log or variance-stabilised scale** for count data. Z-scoring raw
 counts lets a handful of very high-count features dominate the distance metric:
@@ -167,7 +171,7 @@ mat <- log2(counts + 1)                       # or DESeq2::vst(dds)
 mat <- mat[rowMeans(counts) >= 10, ]          # drop low-expressed features
 ```
 
-# The core workflow
+# Core Workflow
 
 ## Z-scoring
 
@@ -185,7 +189,7 @@ round(apply(z, 1, sd)[1:3], 12) # scaled
 `longitudinal_cluster()` calls this internally. Pass `is_zscore = TRUE` if your
 matrix is already z-scored.
 
-## Choosing the number of modules
+## Choosing The Number Of Modules
 
 `choose_k()` scans a range of `k` and reports two diagnostics: the total
 within-cluster sum of squares (an elbow curve) and the mean silhouette width.
@@ -269,7 +273,7 @@ table(obj_corr$cluster)
 a much narrower heatmap, at the cost of no longer seeing replicate variability.
 Keep it `FALSE` when you want to inspect reproducibility across replicates.
 
-## What you get back
+## What You Get Back
 
 The result is a `longi` object — a plain list, so everything is inspectable:
 
@@ -297,7 +301,7 @@ knitr::kable(data.frame(
 head(obj$membership, 4)
 ```
 
-## How modules get ordered {#ordering}
+## How Modules Get Ordered {#ordering}
 
 This is the feature that makes the heatmap readable, so it is worth stating
 explicitly. After clustering, each module's centroid is computed across the
@@ -340,7 +344,7 @@ knitr::kable(data.frame(
 Stability is shown twice in the heatmap: as a grey `Stability` bar down the left
 edge, and as `J=` in each row title.
 
-# Visualisation
+# Visualization
 
 ## The heatmap
 
@@ -358,7 +362,7 @@ heatmap itself (`cluster_rows = FALSE`), because the ordering from Section
 \@ref(ordering) is the point. Columns are split by `group_col` and ordered by
 time. Metadata columns become annotation bars along the top.
 
-### Labelling features
+### Labeling Features
 
 Three ways to choose which features get labelled, combinable:
 
@@ -445,7 +449,7 @@ longitudinal_heatmap(
 `zscore_limits` controls where the scale saturates; widen it if `±2` clips too
 much of your data.
 
-## Module trajectories
+## Module Trajectories
 
 The heatmap shows every feature; the line plot shows each module's average
 shape, which is what you actually describe in the text.
@@ -493,7 +497,7 @@ module_correlation_heatmap(obj, file = "module_correlations.pdf",
                            max_genes = 60)
 ```
 
-# Paired omics
+# Paired Omics
 
 `dual_omics_heatmap()` puts two layers side by side, linked by gene: RNA next to
 ATAC, or RNA next to CUT&Run. The **primary** layer drives the clustering and
@@ -537,7 +541,7 @@ That makes it straightforward to ask whether the second layer tracks the first �
 for example, comparing mean secondary signal at late versus early time points
 for the late-peaking module.
 
-# Exporting results
+# Exporting Results
 
 ```{r export}
 demo_prefix <- file.path(tempdir(), "demo")
@@ -549,7 +553,7 @@ list.files(tempdir(), pattern = "^demo_")
 at a time. `_centroids.txt` holds the mean trajectories, and `_stability.txt`
 the Jaccard scores.
 
-# The one-call wrapper
+# One-Call Wrapper
 
 `run_longitudinal()` runs cluster → heatmap → line plot → export in a single
 call, for when you have settled on parameters and just want the outputs:
@@ -563,7 +567,7 @@ run_longitudinal(
 )
 ```
 
-# Working with published data
+# Working With Published Data
 
 `vignette("cd8-exhaustion-published-data", package = "ModuleViz")` applies this
 workflow end to end to two public GEO series — RNA-seq (GSE285248) and paired
@@ -581,7 +585,7 @@ For a small set of bundled public time courses:
 available_real_timecourse_datasets()
 ```
 
-# Frequently asked questions
+# Frequently Asked Questions
 
 **`Error: mat has no rownames`** — feature IDs must be `rownames(mat)`, or
 passed via `id_col` if they live in a column of a `data.frame`.
@@ -608,7 +612,7 @@ categories as integer ranks; the spacing does not need to be even.
 colour vectors, and `col_fun` takes any `circlize::colorRamp2()` function,
 overriding `zscore_palette`.
 
-# Session info
+# Session Information
 
 ```{r session-info}
 sessionInfo()

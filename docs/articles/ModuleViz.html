@@ -4,167 +4,13 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc 3.10.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Hua Huang" />
+  <meta name="dcterms.date" content="2026-08-04" />
   <title>ModuleViz: Temporal Modules from Longitudinal Omics</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    div.abstract {
-      margin: 2em 2em 2em 2em;
-      text-align: left;
-      font-size: 85%;
-    }
-    div.abstract-title {
-      font-weight: bold;
-      text-align: center;
-      padding: 0;
-      margin-bottom: 0.5em;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: 1.5em;}
     div.column{flex: auto;}
@@ -183,14 +29,80 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <link rel="stylesheet" href="../biocstyle.css" />
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">ModuleViz: Temporal Modules from Longitudinal
 Omics</h1>
-<p class="author">true</p>
-<p class="date"><code>r Sys.Date()</code></p>
+<p class="author">Hua Huang</p>
+<p class="date">2026-08-04</p>
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 <p>ModuleViz turns a feature-by-sample matrix with an ordered sample
@@ -219,97 +131,85 @@ class="toc-section-number">1.3</span> Package Vignettes</a></li>
 </ul></li>
 <li><a href="#installation" id="toc-installation"><span
 class="toc-section-number">2</span> Installation</a></li>
-<li><a href="#then-install-moduleviz-itself-e.g."
-id="toc-then-install-moduleviz-itself-e.g."><span
-class="toc-section-number">3</span> then install ModuleViz itself,
-e.g.</a></li>
-<li><a href="#remotesinstall_githubhelenhuangmathmoduleviz"
-id="toc-remotesinstall_githubhelenhuangmathmoduleviz"><span
-class="toc-section-number">4</span>
-remotes::install_github(“helenhuangmath/ModuleViz”)</a></li>
 <li><a href="#quick-example" id="toc-quick-example"><span
-class="toc-section-number">5</span> Quick Example</a>
+class="toc-section-number">3</span> Quick Example</a></li>
+<li><a href="#input-data" id="toc-input-data"><span
+class="toc-section-number">4</span> Input Data</a>
 <ul>
+<li><a href="#the-two-objects-you-supply"
+id="toc-the-two-objects-you-supply"><span
+class="toc-section-number">4.1</span> The Two Objects You
+Supply</a></li>
 <li><a href="#feature-level-preprocessing"
 id="toc-feature-level-preprocessing"><span
-class="toc-section-number">5.1</span> Feature-Level
+class="toc-section-number">4.2</span> Feature-Level
 Preprocessing</a></li>
 </ul></li>
 <li><a href="#core-workflow" id="toc-core-workflow"><span
-class="toc-section-number">6</span> Core Workflow</a>
+class="toc-section-number">5</span> Core Workflow</a>
 <ul>
 <li><a href="#z-scoring" id="toc-z-scoring"><span
-class="toc-section-number">6.1</span> Z-scoring</a></li>
+class="toc-section-number">5.1</span> Z-scoring</a></li>
 <li><a href="#choosing-the-number-of-modules"
 id="toc-choosing-the-number-of-modules"><span
-class="toc-section-number">6.2</span> Choosing The Number Of
+class="toc-section-number">5.2</span> Choosing The Number Of
 Modules</a></li>
 <li><a href="#clustering" id="toc-clustering"><span
-class="toc-section-number">6.3</span> Clustering</a>
+class="toc-section-number">5.3</span> Clustering</a>
 <ul>
 <li><a href="#clustering-methods" id="toc-clustering-methods"><span
-class="toc-section-number">6.3.1</span> Clustering methods</a></li>
+class="toc-section-number">5.3.1</span> Clustering methods</a></li>
 <li><a href="#replicate-aggregation"
 id="toc-replicate-aggregation"><span
-class="toc-section-number">6.3.2</span> Replicate aggregation</a></li>
+class="toc-section-number">5.3.2</span> Replicate aggregation</a></li>
 </ul></li>
 <li><a href="#what-you-get-back" id="toc-what-you-get-back"><span
-class="toc-section-number">6.4</span> What You Get Back</a></li>
+class="toc-section-number">5.4</span> What You Get Back</a></li>
 <li><a href="#ordering" id="toc-ordering"><span
-class="toc-section-number">6.5</span> How Modules Get Ordered</a></li>
+class="toc-section-number">5.5</span> How Modules Get Ordered</a></li>
 <li><a href="#cluster-stability" id="toc-cluster-stability"><span
-class="toc-section-number">6.6</span> Cluster stability</a></li>
+class="toc-section-number">5.6</span> Cluster stability</a></li>
 </ul></li>
 <li><a href="#visualization" id="toc-visualization"><span
-class="toc-section-number">7</span> Visualization</a>
+class="toc-section-number">6</span> Visualization</a>
 <ul>
 <li><a href="#the-heatmap" id="toc-the-heatmap"><span
-class="toc-section-number">7.1</span> The heatmap</a>
+class="toc-section-number">6.1</span> The heatmap</a>
 <ul>
 <li><a href="#labeling-features" id="toc-labeling-features"><span
-class="toc-section-number">7.1.1</span> Labeling Features</a></li>
+class="toc-section-number">6.1.1</span> Labeling Features</a></li>
+<li><a href="#saving" id="toc-saving"><span
+class="toc-section-number">6.1.2</span> Saving</a></li>
 </ul></li>
-</ul></li>
-<li><a href="#top-n-per-module-by-signal-strength"
-id="toc-top-n-per-module-by-signal-strength"><span
-class="toc-section-number">8</span> 2. top N per module by signal
-strength</a></li>
-<li><a
-href="#top-n-per-module-by-your-statistic-e.g.--log10-padj-from-deseq2"
-id="toc-top-n-per-module-by-your-statistic-e.g.--log10-padj-from-deseq2"><span
-class="toc-section-number">9</span> 3. top N per module by YOUR
-statistic (e.g. -log10 padj from DESeq2)</a>
-<ul>
 <li><a href="#palettes" id="toc-palettes"><span
-class="toc-section-number">9.1</span> Palettes</a></li>
+class="toc-section-number">6.2</span> Palettes</a></li>
 <li><a href="#module-trajectories" id="toc-module-trajectories"><span
-class="toc-section-number">9.2</span> Module Trajectories</a></li>
+class="toc-section-number">6.3</span> Module Trajectories</a></li>
 <li><a href="#module-coherence" id="toc-module-coherence"><span
-class="toc-section-number">9.3</span> Module coherence</a></li>
+class="toc-section-number">6.4</span> Module coherence</a></li>
 </ul></li>
 <li><a href="#paired-omics" id="toc-paired-omics"><span
-class="toc-section-number">10</span> Paired Omics</a></li>
+class="toc-section-number">7</span> Paired Omics</a></li>
 <li><a href="#exporting-results" id="toc-exporting-results"><span
-class="toc-section-number">11</span> Exporting Results</a></li>
+class="toc-section-number">8</span> Exporting Results</a></li>
 <li><a href="#one-call-wrapper" id="toc-one-call-wrapper"><span
-class="toc-section-number">12</span> One-Call Wrapper</a></li>
+class="toc-section-number">9</span> One-Call Wrapper</a></li>
 <li><a href="#working-with-published-data"
 id="toc-working-with-published-data"><span
-class="toc-section-number">13</span> Working With Published
+class="toc-section-number">10</span> Working With Published
 Data</a></li>
 <li><a href="#frequently-asked-questions"
 id="toc-frequently-asked-questions"><span
-class="toc-section-number">14</span> Frequently Asked Questions</a></li>
+class="toc-section-number">11</span> Frequently Asked Questions</a></li>
 <li><a href="#session-information" id="toc-session-information"><span
-class="toc-section-number">15</span> Session Information</a></li>
+class="toc-section-number">12</span> Session Information</a></li>
 </ul>
 </nav>
-<p><code>{r setup, include = FALSE} knitr::opts_chunk$set(   collapse = TRUE,   comment = "#&gt;",   dev = "png",   dpi = 110,   fig.align = "center" ) set.seed(1)</code></p>
 <h1 data-number="1" id="introduction"><span
 class="header-section-number">1</span> Introduction</h1>
-<p><code>r Biocpkg("ModuleViz")</code> clusters feature trajectories
-from longitudinal omics experiments and visualizes the resulting
-temporal modules.</p>
+<p><a href="https://bioconductor.org/packages/ModuleViz/">ModuleViz</a>
+clusters feature trajectories from longitudinal omics experiments and
+visualizes the resulting temporal modules.</p>
 <h2 data-number="1.1" id="what-problem-does-this-solve"><span
 class="header-section-number">1.1</span> What Problem Does This
 Solve?</h2>
@@ -349,9 +249,10 @@ time);</li>
 </ul>
 <p>It deliberately does <em>not</em> do feature selection or
 differential testing. Choose which features are interesting upstream —
-with <code>r Biocpkg("DESeq2")</code>, <code>r Biocpkg("edgeR")</code>,
-<code>r Biocpkg("limma")</code>, or a variance filter — and pass in the
-matrix you want to see.</p>
+with <a href="https://bioconductor.org/packages/DESeq2/">DESeq2</a>, <a
+href="https://bioconductor.org/packages/edgeR/">edgeR</a>, <a
+href="https://bioconductor.org/packages/limma/">limma</a>, or a variance
+filter — and pass in the matrix you want to see.</p>
 <h2 data-number="1.3" id="package-vignettes"><span
 class="header-section-number">1.3</span> Package Vignettes</h2>
 <table>
@@ -382,91 +283,87 @@ class="header-section-number">1.3</span> Package Vignettes</h2>
 </table>
 <h1 data-number="2" id="installation"><span
 class="header-section-number">2</span> Installation</h1>
-<p>```{r install, eval = FALSE} if (!requireNamespace(“BiocManager”,
-quietly = TRUE)) install.packages(“BiocManager”)
-BiocManager::install(“ComplexHeatmap”)</p>
-<h1 data-number="3" id="then-install-moduleviz-itself-e.g."><span
-class="header-section-number">3</span> then install ModuleViz itself,
-e.g.</h1>
-<h1 data-number="4"
-id="remotesinstall_githubhelenhuangmathmoduleviz"><span
-class="header-section-number">4</span>
-remotes::install_github(“helenhuangmath/ModuleViz”)</h1>
-<pre><code>
-```{r load-pkg, message = FALSE}
-library(ModuleViz)</code></pre>
-<h1 data-number="5" id="quick-example"><span
-class="header-section-number">5</span> Quick Example</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;ComplexHeatmap&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># then install ModuleViz itself, e.g.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># remotes::install_github(&quot;helenhuangmath/ModuleViz&quot;)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ModuleViz)</span></code></pre></div>
+<h1 data-number="3" id="quick-example"><span
+class="header-section-number">3</span> Quick Example</h1>
 <p>Five lines from data to figure. Everything after this section
 explains what these calls are doing and how to control them.</p>
-<p>```{r quickstart, fig.width = 8, fig.height = 7, fig.cap =
-“Quick-start heatmap. Rows are split into four temporal modules ordered
-early-peaking to late-peaking; columns are split by condition and
-ordered by time.”} data(“heatmap_example”)</p>
-<p>obj &lt;- longitudinal_cluster( heatmap_example<span
-class="math inline"><em>m</em><em>a</em><em>t</em>, <em>h</em><em>e</em><em>a</em><em>t</em><em>m</em><em>a</em><em>p</em><sub><em>e</em></sub><em>x</em><em>a</em><em>m</em><em>p</em><em>l</em><em>e</em></span>meta,
-sample_col = “SampleID”, time_col = “TimeHr”, group_col = “Condition”, k
-= 4, aggregate_replicates = TRUE )</p>
-<p>longitudinal_heatmap(obj, top_n_label = 3, title = “Quick start”)</p>
-<pre><code>
-# Input Data
-
-## The Two Objects You Supply
-
-`ModuleViz` needs exactly two things.
-
-**A numeric matrix**, features in rows, samples in columns, with feature IDs as
-`rownames()`:
-
-```{r input-mat}
-mat &lt;- heatmap_example$mat
-dim(mat)
-mat[1:4, 1:4]</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;heatmap_example&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    heatmap_example<span class="sc">$</span>mat, heatmap_example<span class="sc">$</span>meta,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>, <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">4</span>, <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(obj, <span class="at">top_n_label =</span> <span class="dv">3</span>, <span class="at">title =</span> <span class="st">&quot;Quick start&quot;</span>)</span></code></pre></div>
+<h1 data-number="4" id="input-data"><span
+class="header-section-number">4</span> Input Data</h1>
+<h2 data-number="4.1" id="the-two-objects-you-supply"><span
+class="header-section-number">4.1</span> The Two Objects You Supply</h2>
+<p><code>ModuleViz</code> needs exactly two things.</p>
+<p><strong>A numeric matrix</strong>, features in rows, samples in
+columns, with feature IDs as <code>rownames()</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> heatmap_example<span class="sc">$</span>mat</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(mat)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>mat[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div>
 <p><strong>A metadata table</strong>, one row per sample:</p>
-<p><code>{r input-meta} meta &lt;- heatmap_example$meta head(meta, 4)</code></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> heatmap_example<span class="sc">$</span>meta</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(meta, <span class="dv">4</span>)</span></code></pre></div>
 <p>Three columns in the metadata have special meaning, named via
 arguments:</p>
-<p><code>{r input-args, echo = FALSE} knitr::kable(data.frame(   Argument = c("`sample_col`", "`time_col`", "`group_col`"),   Required = c("yes", "yes", "no"),   Meaning = c(     "Sample IDs; must match the matrix column names.",     "**Numeric** ordering variable. Sorted ascending to order the columns.",     "Optional second factor. Splits heatmap columns and colours the line plot."   ) ))</code></p>
 <p>The critical constraint is that <code>time_col</code> must be
 <strong>numeric</strong>. It is what orders the columns and what defines
 a module’s peak. If your axis is categorical but ordered —
 <code>"naive" &lt; "memory" &lt; "exhausted"</code>, or
 <code>"low" &lt; "mid" &lt; "high"</code> — encode it as an integer
 rank:</p>
-<p><code>{r ordinal, eval = FALSE} meta$StageOrder &lt;- c(naive = 1, memory = 2, exhausted = 3)[meta$Stage]</code></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>StageOrder <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">naive =</span> <span class="dv">1</span>, <span class="at">memory =</span> <span class="dv">2</span>, <span class="at">exhausted =</span> <span class="dv">3</span>)[meta<span class="sc">$</span>Stage]</span></code></pre></div>
 <p>Samples present in the metadata but missing from the matrix (or vice
 versa) are silently dropped, so the two only need to overlap.</p>
-<h2 data-number="5.1" id="feature-level-preprocessing"><span
-class="header-section-number">5.1</span> Feature-Level
+<h2 data-number="4.2" id="feature-level-preprocessing"><span
+class="header-section-number">4.2</span> Feature-Level
 Preprocessing</h2>
 <p>Cluster on a <strong>log or variance-stabilised scale</strong> for
 count data. Z-scoring raw counts lets a handful of very high-count
 features dominate the distance metric:</p>
-<p><code>{r preprocess, eval = FALSE} mat &lt;- log2(counts + 1)                       # or DESeq2::vst(dds) mat &lt;- mat[rowMeans(counts) &gt;= 10, ]          # drop low-expressed features</code></p>
-<h1 data-number="6" id="core-workflow"><span
-class="header-section-number">6</span> Core Workflow</h1>
-<h2 data-number="6.1" id="z-scoring"><span
-class="header-section-number">6.1</span> Z-scoring</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">log2</span>(counts <span class="sc">+</span> <span class="dv">1</span>)                       <span class="co"># or DESeq2::vst(dds)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> mat[<span class="fu">rowMeans</span>(counts) <span class="sc">&gt;=</span> <span class="dv">10</span>, ]          <span class="co"># drop low-expressed features</span></span></code></pre></div>
+<h1 data-number="5" id="core-workflow"><span
+class="header-section-number">5</span> Core Workflow</h1>
+<h2 data-number="5.1" id="z-scoring"><span
+class="header-section-number">5.1</span> Z-scoring</h2>
 <p><code>zscore_rows()</code> centres and scales each feature across its
 samples, so that a gene expressed at 10 counts and one at 10,000 counts
 contribute equally if they have the same shape. Zero-variance rows
 become <code>0</code> rather than <code>NaN</code>, so they survive
 clustering instead of breaking it.</p>
-<p><code>{r zscore} z &lt;- zscore_rows(mat) round(rowMeans(z)[1:3], 12)     # centred round(apply(z, 1, sd)[1:3], 12) # scaled</code></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">zscore_rows</span>(mat)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">rowMeans</span>(z)[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="dv">12</span>)     <span class="co"># centred</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">apply</span>(z, <span class="dv">1</span>, sd)[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="dv">12</span>) <span class="co"># scaled</span></span></code></pre></div>
 <p><code>longitudinal_cluster()</code> calls this internally. Pass
 <code>is_zscore = TRUE</code> if your matrix is already z-scored.</p>
-<h2 data-number="6.2" id="choosing-the-number-of-modules"><span
-class="header-section-number">6.2</span> Choosing The Number Of
+<h2 data-number="5.2" id="choosing-the-number-of-modules"><span
+class="header-section-number">5.2</span> Choosing The Number Of
 Modules</h2>
 <p><code>choose_k()</code> scans a range of <code>k</code> and reports
 two diagnostics: the total within-cluster sum of squares (an elbow
 curve) and the mean silhouette width.</p>
-<p><code>{r choose-k, fig.width = 5.5, fig.height = 4} diag &lt;- choose_k(z, k_range = 2:8, method = "kmeans") diag attr(diag, "suggested_k")</code></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>diag <span class="ot">&lt;-</span> <span class="fu">choose_k</span>(z, <span class="at">k_range =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>diag</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(diag, <span class="st">&quot;suggested_k&quot;</span>)</span></code></pre></div>
 <p>When you settle on a <code>k</code> that differs from the elbow, pass
 it back as <code>chosen_k</code>: the diagnostic figure then draws your
 <code>k</code> as a solid line beside the dashed elbow, so it stays
 consistent with the module count in the rest of your figures.</p>
-<p><code>{r choose-k-marked, eval = FALSE} choose_k(z, k_range = 2:8, chosen_k = 4, file = "elbow.pdf")   # mark it choose_k(z, k_range = 2:8, annotate_k = FALSE, file = "elbow.pdf")  # bare curve</code></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">choose_k</span>(z, <span class="at">k_range =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">chosen_k =</span> <span class="dv">4</span>, <span class="at">file =</span> <span class="st">&quot;elbow.pdf&quot;</span>)   <span class="co"># mark it</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">choose_k</span>(z, <span class="at">k_range =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">annotate_k =</span> <span class="cn">FALSE</span>, <span class="at">file =</span> <span class="st">&quot;elbow.pdf&quot;</span>)  <span class="co"># bare curve</span></span></code></pre></div>
 <p>The suggested <code>k</code> is the point furthest from the straight
 line joining the first and last elbow points. <strong>Treat it as a
 starting point, not an answer.</strong> The right <code>k</code> is the
@@ -477,35 +374,50 @@ anti-correlated programmes is actively misleading (see Section
 @ref(module-coherence)). The real-data vignette works through a concrete
 case where the elbow k merges two biologically distinct programmes and
 the reported k is deliberately one higher.</p>
-<h2 data-number="6.3" id="clustering"><span
-class="header-section-number">6.3</span> Clustering</h2>
+<h2 data-number="5.3" id="clustering"><span
+class="header-section-number">5.3</span> Clustering</h2>
 <p><code>longitudinal_cluster()</code> is the workhorse.</p>
-<p><code>{r cluster} obj &lt;- longitudinal_cluster(     mat, meta,     sample_col = "SampleID",     time_col   = "TimeHr",     group_col  = "Condition",     k          = 4,     method     = "kmeans",     aggregate_replicates = TRUE,     stability  = TRUE,     n_resample = 20,     seed       = 1 ) obj</code></p>
-<h3 data-number="6.3.1" id="clustering-methods"><span
-class="header-section-number">6.3.1</span> Clustering methods</h3>
-<p><code>{r methods-table, echo = FALSE} knitr::kable(data.frame(   `method` = c("`\"kmeans\"`", "`\"hierarchical\"`", "`\"pam\"`"),   Notes = c(     "Default. Fast, Hartigan-Wong, `nstart = 50` random starts.",     "Ward.D2 linkage by default via `hclust_method`. Deterministic.",     "Partitioning around medoids; more robust to outliers than k-means."   ),   check.names = FALSE ))</code></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    mat, meta,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_col   =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col  =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">k          =</span> <span class="dv">4</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">method     =</span> <span class="st">&quot;kmeans&quot;</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">stability  =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_resample =</span> <span class="dv">20</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">seed       =</span> <span class="dv">1</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>obj</span></code></pre></div>
+<h3 data-number="5.3.1" id="clustering-methods"><span
+class="header-section-number">5.3.1</span> Clustering methods</h3>
 <p><code>dist_method</code> accepts any <code>stats::dist()</code>
 metric plus <code>"correlation"</code> (<code>1 - Pearson r</code>),
 which is often the better choice for trajectory shape because it ignores
 amplitude entirely:</p>
-<p><code>{r alt-method} obj_corr &lt;- longitudinal_cluster(     mat, meta, sample_col = "SampleID", time_col = "TimeHr",     k = 4, method = "hierarchical", dist_method = "correlation",     stability = FALSE ) table(obj_corr$cluster)</code></p>
-<h3 data-number="6.3.2" id="replicate-aggregation"><span
-class="header-section-number">6.3.2</span> Replicate aggregation</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>obj_corr <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    mat, meta, <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">4</span>, <span class="at">method =</span> <span class="st">&quot;hierarchical&quot;</span>, <span class="at">dist_method =</span> <span class="st">&quot;correlation&quot;</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">stability =</span> <span class="cn">FALSE</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(obj_corr<span class="sc">$</span>cluster)</span></code></pre></div>
+<h3 data-number="5.3.2" id="replicate-aggregation"><span
+class="header-section-number">5.3.2</span> Replicate aggregation</h3>
 <p><code>aggregate_replicates = TRUE</code> averages replicate columns
 within each <code>group_col</code> × <code>time_col</code> cell before
 clustering. This gives cleaner modules and a much narrower heatmap, at
 the cost of no longer seeing replicate variability. Keep it
 <code>FALSE</code> when you want to inspect reproducibility across
 replicates.</p>
-<h2 data-number="6.4" id="what-you-get-back"><span
-class="header-section-number">6.4</span> What You Get Back</h2>
+<h2 data-number="5.4" id="what-you-get-back"><span
+class="header-section-number">5.4</span> What You Get Back</h2>
 <p>The result is a <code>longi</code> object — a plain list, so
 everything is inspectable:</p>
-<p><code>{r longi-structure} names(obj)</code></p>
-<p><code>{r longi-table, echo = FALSE} knitr::kable(data.frame(   Element = c("`z`", "`cluster`", "`membership`", "`centroids`", "`stability`",               "`meta`", "`params`"),   Contents = c(     "z-scored matrix, rows reordered by module then signal strength.",     "Ordered factor giving each row's module.",     "`data.table` of feature ID, module, and max |z|.",     "Mean z per module per (group x) time point.",     "Mean Jaccard per module, or `NULL`.",     "Sample metadata, reordered to match the matrix columns.",     "The settings used, for reproducibility."   ) ))</code></p>
-<p><code>{r membership} head(obj$membership, 4)</code></p>
-<h2 data-number="6.5" id="ordering"><span
-class="header-section-number">6.5</span> How Modules Get Ordered</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(obj)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(obj<span class="sc">$</span>membership, <span class="dv">4</span>)</span></code></pre></div>
+<h2 data-number="5.5" id="ordering"><span
+class="header-section-number">5.5</span> How Modules Get Ordered</h2>
 <p>This is the feature that makes the heatmap readable, so it is worth
 stating explicitly. After clustering, each module’s centroid is computed
 across the ordered time points. Modules are then ranked by <strong>where
@@ -514,63 +426,61 @@ slope so that, among modules peaking at the same time, rising ones come
 before falling ones.</p>
 <p>The consequence: <code>Cluster1</code> always peaks earliest and
 <code>ClusterK</code> latest.</p>
-<p><code>{r centroids} cent &lt;- as.matrix(obj$centroids[, -1]) rownames(cent) &lt;- obj$centroids$Cluster round(cent, 2)</code></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cent <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(obj<span class="sc">$</span>centroids[, <span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(cent) <span class="ot">&lt;-</span> obj<span class="sc">$</span>centroids<span class="sc">$</span>Cluster</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(cent, <span class="dv">2</span>)</span></code></pre></div>
 <p>Within a module, rows are sorted by max |z|, so the strongest
 features sit at the top of each block.</p>
-<h2 data-number="6.6" id="cluster-stability"><span
-class="header-section-number">6.6</span> Cluster stability</h2>
+<h2 data-number="5.6" id="cluster-stability"><span
+class="header-section-number">5.6</span> Cluster stability</h2>
 <p>A module you cannot reproduce is not a finding.
 <code>cluster_stability()</code> — run automatically when
 <code>stability = TRUE</code> — repeatedly subsamples the features,
 re-clusters, and records how well each original module is recovered, as
 a mean maximum Jaccard similarity.</p>
-<p><code>{r stability} obj$stability</code></p>
-<p><code>{r stability-guide, echo = FALSE} knitr::kable(data.frame(   `Mean Jaccard` = c("&gt; 0.85", "0.6 - 0.85", "&lt; 0.6"),   Interpretation = c("Highly reproducible; report with confidence.",                      "A real pattern, but boundaries are fuzzy.",                      "Unstable. Do not interpret as a discrete module."),   check.names = FALSE ))</code></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>obj<span class="sc">$</span>stability</span></code></pre></div>
 <p>Stability is shown twice in the heatmap: as a grey
 <code>Stability</code> bar down the left edge, and as <code>J=</code> in
 each row title.</p>
-<h1 data-number="7" id="visualization"><span
-class="header-section-number">7</span> Visualization</h1>
-<h2 data-number="7.1" id="the-heatmap"><span
-class="header-section-number">7.1</span> The heatmap</h2>
-<p><code>{r heatmap-main, fig.width = 8.5, fig.height = 7.5, fig.cap = "Modules ordered early to late, columns split by condition, top three features labelled per module."} longitudinal_heatmap(     obj,     annotation_cols = c("Condition", "TimeHr"),     top_n_label     = 3,     title           = "Stimulation time course" )</code></p>
+<h1 data-number="6" id="visualization"><span
+class="header-section-number">6</span> Visualization</h1>
+<h2 data-number="6.1" id="the-heatmap"><span
+class="header-section-number">6.1</span> The heatmap</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    obj,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">annotation_cols =</span> <span class="fu">c</span>(<span class="st">&quot;Condition&quot;</span>, <span class="st">&quot;TimeHr&quot;</span>),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_label     =</span> <span class="dv">3</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">title           =</span> <span class="st">&quot;Stimulation time course&quot;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>Reading the figure: rows are split by module and never re-ordered by
 the heatmap itself (<code>cluster_rows = FALSE</code>), because the
 ordering from Section @ref(ordering) is the point. Columns are split by
 <code>group_col</code> and ordered by time. Metadata columns become
 annotation bars along the top.</p>
-<h3 data-number="7.1.1" id="labeling-features"><span
-class="header-section-number">7.1.1</span> Labeling Features</h3>
+<h3 data-number="6.1.1" id="labeling-features"><span
+class="header-section-number">6.1.1</span> Labeling Features</h3>
 <p>Three ways to choose which features get labelled, combinable:</p>
-<p>```{r labels, eval = FALSE} # 1. an explicit list
-longitudinal_heatmap(obj, label_features = c(“Gene001”, “Gene016”))</p>
-<h1 data-number="8" id="top-n-per-module-by-signal-strength"><span
-class="header-section-number">8</span> 2. top N per module by signal
-strength</h1>
-<p>longitudinal_heatmap(obj, top_n_label = 5)</p>
-<h1 data-number="9"
-id="top-n-per-module-by-your-statistic-e.g.--log10-padj-from-deseq2"><span
-class="header-section-number">9</span> 3. top N per module by YOUR
-statistic (e.g. -log10 padj from DESeq2)</h1>
-<p>rank_tab &lt;- data.frame(ID = rownames(obj<span
-class="math inline"><em>z</em>), <em>v</em><em>a</em><em>l</em><em>u</em><em>e</em> = <em>r</em><em>u</em><em>n</em><em>i</em><em>f</em>(<em>n</em><em>r</em><em>o</em><em>w</em>(<em>o</em><em>b</em><em>j</em></span>z)))
-longitudinal_heatmap(obj, top_n_label = 5, rank_table = rank_tab,
-id_field = “ID”, value_field = “value”)</p>
-<pre><code>
-Option 3 is usually what you want for a paper: it labels the features that are
-most *significant*, not merely the most variable.
-
-### Saving
-
-Pass `file` to write directly. The extension picks the device — `.pdf` for
-vector output, `.png` for a raster at 300 dpi.
-
-```{r save, eval = FALSE}
-longitudinal_heatmap(obj, file = &quot;modules.pdf&quot;, width = 9, height = 12)</code></pre>
-<h2 data-number="9.1" id="palettes"><span
-class="header-section-number">9.1</span> Palettes</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. an explicit list</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(obj, <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene016&quot;</span>))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. top N per module by signal strength</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(obj, <span class="at">top_n_label =</span> <span class="dv">5</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. top N per module by YOUR statistic (e.g. -log10 padj from DESeq2)</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>rank_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">ID =</span> <span class="fu">rownames</span>(obj<span class="sc">$</span>z), <span class="at">value =</span> <span class="fu">runif</span>(<span class="fu">nrow</span>(obj<span class="sc">$</span>z)))</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(obj, <span class="at">top_n_label =</span> <span class="dv">5</span>, <span class="at">rank_table =</span> rank_tab,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>                     <span class="at">id_field =</span> <span class="st">&quot;ID&quot;</span>, <span class="at">value_field =</span> <span class="st">&quot;value&quot;</span>)</span></code></pre></div>
+<p>Option 3 is usually what you want for a paper: it labels the features
+that are most <em>significant</em>, not merely the most variable.</p>
+<h3 data-number="6.1.2" id="saving"><span
+class="header-section-number">6.1.2</span> Saving</h3>
+<p>Pass <code>file</code> to write directly. The extension picks the
+device — <code>.pdf</code> for vector output, <code>.png</code> for a
+raster at 300 dpi.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(obj, <span class="at">file =</span> <span class="st">&quot;modules.pdf&quot;</span>, <span class="at">width =</span> <span class="dv">9</span>, <span class="at">height =</span> <span class="dv">12</span>)</span></code></pre></div>
+<h2 data-number="6.2" id="palettes"><span
+class="header-section-number">6.2</span> Palettes</h2>
 <p>Three independent palette slots, each with its own job:</p>
-<p><code>{r palette-table, echo = FALSE} knitr::kable(data.frame(   Argument = c("`cluster_palette`", "`annotation_palette`", "`zscore_palette`"),   Colours = c("module identity bar", "categorical metadata bars", "the matrix body"),   Default = c("`\"paired\"`", "`\"set2\"`", "`\"rdbu\"`"),   Options = c("any qualitative or ramp palette below",               "any qualitative palette below",               "`\"rdbu\"`, `\"viridis\"`") ))</code></p>
 <p>The registry distinguishes two kinds of palette, and this distinction
 matters:</p>
 <ul>
@@ -585,31 +495,51 @@ palette and can be nearly identical to each other.</li>
 <code>"viridis"</code>. Genuine colour scales, interpolated across the
 full range for any <code>n</code>.</li>
 </ul>
-<p><code>{r palette-demo, fig.width = 7, fig.height = 3.2, fig.cap = "Qualitative palettes keep their colours verbatim; ramps interpolate across the full range."} pals &lt;- c("paired", "set2", "set3", "okabe_ito", "spectral", "viridis") op &lt;- par(mar = c(1, 6, 1, 1)) plot(NA, xlim = c(0, 6), ylim = c(0, length(pals)), axes = FALSE,      xlab = "", ylab = "") for (i in seq_along(pals)) {     cols &lt;- ModuleViz:::.moduleviz_discrete_palette(6, pals[i])     rect(0:5, length(pals) - i, 1:6, length(pals) - i + 0.8,          col = cols, border = "white", lwd = 2) } axis(2, at = seq(length(pals) - 0.6, by = -1, length.out = length(pals)),      labels = pals, las = 1, tick = FALSE, cex.axis = 0.85) par(op)</code></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pals <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;paired&quot;</span>, <span class="st">&quot;set2&quot;</span>, <span class="st">&quot;set3&quot;</span>, <span class="st">&quot;okabe_ito&quot;</span>, <span class="st">&quot;spectral&quot;</span>, <span class="st">&quot;viridis&quot;</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>op <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">6</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">length</span>(pals)), <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(pals)) {</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    cols <span class="ot">&lt;-</span> ModuleViz<span class="sc">:::</span><span class="fu">.moduleviz_discrete_palette</span>(<span class="dv">6</span>, pals[i])</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rect</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">5</span>, <span class="fu">length</span>(pals) <span class="sc">-</span> i, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="fu">length</span>(pals) <span class="sc">-</span> i <span class="sc">+</span> <span class="fl">0.8</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">col =</span> cols, <span class="at">border =</span> <span class="st">&quot;white&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">at =</span> <span class="fu">seq</span>(<span class="fu">length</span>(pals) <span class="sc">-</span> <span class="fl">0.6</span>, <span class="at">by =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">length.out =</span> <span class="fu">length</span>(pals)),</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">labels =</span> pals, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">tick =</span> <span class="cn">FALSE</span>, <span class="at">cex.axis =</span> <span class="fl">0.85</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(op)</span></code></pre></div>
 <p>Use <code>viridis</code> when the figure must survive greyscale
 printing or colour-vision deficiency; use <code>rdbu</code> when the
 zero point is meaningful and you want direction to read at a glance.</p>
-<p><code>{r heatmap-viridis, fig.width = 8, fig.height = 7, fig.cap = "The same modules with a viridis body, Spectral module bar, and Set3 metadata bars."} longitudinal_heatmap(     obj,     zscore_palette     = "viridis",     cluster_palette    = "spectral",     annotation_palette = "set3",     top_n_label        = 2,     title              = "Viridis variant" )</code></p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    obj,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">zscore_palette     =</span> <span class="st">&quot;viridis&quot;</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">cluster_palette    =</span> <span class="st">&quot;spectral&quot;</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">annotation_palette =</span> <span class="st">&quot;set3&quot;</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_label        =</span> <span class="dv">2</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title              =</span> <span class="st">&quot;Viridis variant&quot;</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p><code>zscore_limits</code> controls where the scale saturates; widen
 it if <code>±2</code> clips too much of your data.</p>
-<h2 data-number="9.2" id="module-trajectories"><span
-class="header-section-number">9.2</span> Module Trajectories</h2>
+<h2 data-number="6.3" id="module-trajectories"><span
+class="header-section-number">6.3</span> Module Trajectories</h2>
 <p>The heatmap shows every feature; the line plot shows each module’s
 average shape, which is what you actually describe in the text.</p>
-<p><code>{r lineplot, fig.width = 6, fig.height = 7, fig.cap = "Mean z-score trajectory per module. With a group column, each group is a separate coloured line."} pattern_lineplot(obj, palette = "set2", base_size = 12)</code></p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(obj, <span class="at">palette =</span> <span class="st">&quot;set2&quot;</span>, <span class="at">base_size =</span> <span class="dv">12</span>)</span></code></pre></div>
 <p>Returns a <code>ggplot</code>, so it composes with the rest of the
 ggplot ecosystem:</p>
-<p><code>{r lineplot-custom, eval = FALSE} library(ggplot2) pattern_lineplot(obj) + labs(subtitle = "Stimulated vs control")</code></p>
-<h2 data-number="9.3" id="module-coherence"><span
-class="header-section-number">9.3</span> Module coherence</h2>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(obj) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">&quot;Stimulated vs control&quot;</span>)</span></code></pre></div>
+<h2 data-number="6.4" id="module-coherence"><span
+class="header-section-number">6.4</span> Module coherence</h2>
 <p>Clustering guarantees that a module’s members are <em>closer to each
 other than to other modules</em>. It does not guarantee they actually
 agree. A module can look clean in the main heatmap while being the
 average of two anti-correlated sub-programmes.</p>
 <p><code>module_correlation_summary()</code> gives the one-number
 version:</p>
-<p><code>{r cor-summary} module_correlation_summary(obj)</code></p>
-<p><code>{r cor-heatmap, fig.width = 6.5, fig.height = 6, fig.cap = "Gene-gene correlation within one module. A coherent module is a solid high-correlation block; visible sub-blocks mean the module contains more than one programme."} cors &lt;- module_correlation_heatmap(obj, clusters = "Cluster1", max_genes = 40) cors$Cluster1$mean_cor</code></p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_summary</span>(obj)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>cors <span class="ot">&lt;-</span> <span class="fu">module_correlation_heatmap</span>(obj, <span class="at">clusters =</span> <span class="st">&quot;Cluster1&quot;</span>, <span class="at">max_genes =</span> <span class="dv">40</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>cors<span class="sc">$</span>Cluster1<span class="sc">$</span>mean_cor</span></code></pre></div>
 <p>Interpretation: high mean <code>r</code> (roughly &gt; 0.7) means a
 tight, coherent module. A low value with visible blocks in the heatmap
 means you should raise <code>k</code> and re-cluster. A low value with
@@ -619,9 +549,10 @@ no structure means the module is mostly noise.</p>
 <code>select = "random"</code> gives an unbiased view. To write every
 module at once, pass a <code>.pdf</code> path and get one page per
 module:</p>
-<p><code>{r cor-save, eval = FALSE} module_correlation_heatmap(obj, file = "module_correlations.pdf",                            max_genes = 60)</code></p>
-<h1 data-number="10" id="paired-omics"><span
-class="header-section-number">10</span> Paired Omics</h1>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_heatmap</span>(obj, <span class="at">file =</span> <span class="st">&quot;module_correlations.pdf&quot;</span>,</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">max_genes =</span> <span class="dv">60</span>)</span></code></pre></div>
+<h1 data-number="7" id="paired-omics"><span
+class="header-section-number">7</span> Paired Omics</h1>
 <p><code>dual_omics_heatmap()</code> puts two layers side by side,
 linked by gene: RNA next to ATAC, or RNA next to CUT&amp;Run. The
 <strong>primary</strong> layer drives the clustering and the row order;
@@ -635,41 +566,50 @@ a gene’s peaks, <code>aggregate = "top"</code> takes the strongest.</p>
 <code>sub("^.*_", "", id)</code> takes everything after the last
 underscore. So row names of the form <code>peak1243_Pdcd1</code> work
 out of the box.</p>
-<p>```{r dual-omics, fig.width = 10, fig.height = 7, fig.cap = “Paired
-layers linked by gene. The primary layer sets the module structure and
-row order; the secondary is shown in the same order.”} # simulate a
-second layer: two peaks per gene, with noise genes &lt;- rownames(mat)
-atac &lt;- mat[rep(seq_along(genes), each = 2), ] rownames(atac) &lt;-
-paste0(“Peak”, sprintf(“%03d”, seq_len(nrow(atac))), “_“, rep(genes,
-each = 2)) atac &lt;- atac + matrix(rnorm(length(atac), sd = 0.35), nrow
-= nrow(atac))</p>
-<p>res &lt;- dual_omics_heatmap( primary = obj, secondary = atac,
-primary_name = “RNA”, secondary_name = “ATAC”, aggregate = “mean”,
-label_features = c(“Gene001”, “Gene016”, “Gene031”) )</p>
-<pre><code>
-The return value carries the aligned matrices for downstream quantification:
-
-```{r dual-return}
-names(res)
-dim(res$z_secondary)</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># simulate a second layer: two peaks per gene, with noise</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>atac  <span class="ot">&lt;-</span> mat[<span class="fu">rep</span>(<span class="fu">seq_along</span>(genes), <span class="at">each =</span> <span class="dv">2</span>), ]</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(atac) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;Peak&quot;</span>, <span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="fu">seq_len</span>(<span class="fu">nrow</span>(atac))),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                         <span class="st">&quot;_&quot;</span>, <span class="fu">rep</span>(genes, <span class="at">each =</span> <span class="dv">2</span>))</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> atac <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(atac), <span class="at">sd =</span> <span class="fl">0.35</span>), <span class="at">nrow =</span> <span class="fu">nrow</span>(atac))</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">dual_omics_heatmap</span>(</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary        =</span> obj,</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">secondary      =</span> atac,</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary_name   =</span> <span class="st">&quot;RNA&quot;</span>,</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">secondary_name =</span> <span class="st">&quot;ATAC&quot;</span>,</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">aggregate      =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene016&quot;</span>, <span class="st">&quot;Gene031&quot;</span>)</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>The return value carries the aligned matrices for downstream
+quantification:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(res)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(res<span class="sc">$</span>z_secondary)</span></code></pre></div>
 <p>That makes it straightforward to ask whether the second layer tracks
 the first — for example, comparing mean secondary signal at late versus
 early time points for the late-peaking module.</p>
-<h1 data-number="11" id="exporting-results"><span
-class="header-section-number">11</span> Exporting Results</h1>
-<p><code>{r export} demo_prefix &lt;- file.path(tempdir(), "demo") write_memberships(obj, prefix = demo_prefix) list.files(tempdir(), pattern = "^demo_")</code></p>
+<h1 data-number="8" id="exporting-results"><span
+class="header-section-number">8</span> Exporting Results</h1>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>demo_prefix <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">tempdir</span>(), <span class="st">&quot;demo&quot;</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_memberships</span>(obj, <span class="at">prefix =</span> demo_prefix)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">list.files</span>(<span class="fu">tempdir</span>(), <span class="at">pattern =</span> <span class="st">&quot;^demo_&quot;</span>)</span></code></pre></div>
 <p><code>_memberships.txt</code> is the file you feed into GO or GSEA
 enrichment, one module at a time. <code>_centroids.txt</code> holds the
 mean trajectories, and <code>_stability.txt</code> the Jaccard
 scores.</p>
-<h1 data-number="12" id="one-call-wrapper"><span
-class="header-section-number">12</span> One-Call Wrapper</h1>
+<h1 data-number="9" id="one-call-wrapper"><span
+class="header-section-number">9</span> One-Call Wrapper</h1>
 <p><code>run_longitudinal()</code> runs cluster → heatmap → line plot →
 export in a single call, for when you have settled on parameters and
 just want the outputs:</p>
-<p><code>{r wrapper, eval = FALSE} run_longitudinal(     mat, meta, out_prefix = "results/experiment1",     sample_col = "SampleID", time_col = "TimeHr", group_col = "Condition",     k = 4, top_n_label = 5,     zscore_palette = "rdbu", cluster_palette = "paired" )</code></p>
-<h1 data-number="13" id="working-with-published-data"><span
-class="header-section-number">13</span> Working With Published Data</h1>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_longitudinal</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    mat, meta, <span class="at">out_prefix =</span> <span class="st">&quot;results/experiment1&quot;</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>, <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">4</span>, <span class="at">top_n_label =</span> <span class="dv">5</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">zscore_palette =</span> <span class="st">&quot;rdbu&quot;</span>, <span class="at">cluster_palette =</span> <span class="st">&quot;paired&quot;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<h1 data-number="10" id="working-with-published-data"><span
+class="header-section-number">10</span> Working With Published Data</h1>
 <p><code>vignette("cd8-exhaustion-published-data", package = "ModuleViz")</code>
 applies this workflow end to end to two public GEO series — RNA-seq
 (GSE285248) and paired H3K27ac / H3K27me3 CUT&amp;Run (GSE285245) from a
@@ -680,9 +620,9 @@ assignments against canonical marker genes.</p>
 <p>The package also ships <code>examples/validate_real_data.R</code>,
 which runs that entire analysis with 114 correctness assertions.</p>
 <p>For a small set of bundled public time courses:</p>
-<p><code>{r real-data} available_real_timecourse_datasets()</code></p>
-<h1 data-number="14" id="frequently-asked-questions"><span
-class="header-section-number">14</span> Frequently Asked Questions</h1>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span></code></pre></div>
+<h1 data-number="11" id="frequently-asked-questions"><span
+class="header-section-number">11</span> Frequently Asked Questions</h1>
 <p><strong><code>Error: mat has no rownames</code></strong> — feature
 IDs must be <code>rownames(mat)</code>, or passed via
 <code>id_col</code> if they live in a column of a
@@ -708,8 +648,8 @@ integer ranks; the spacing does not need to be even.</p>
 <code>annotation_colors</code> takes a named list of colour vectors, and
 <code>col_fun</code> takes any <code>circlize::colorRamp2()</code>
 function, overriding <code>zscore_palette</code>.</p>
-<h1 data-number="15" id="session-information"><span
-class="header-section-number">15</span> Session Information</h1>
-<p><code>{r session-info} sessionInfo()</code></p>
+<h1 data-number="12" id="session-information"><span
+class="header-section-number">12</span> Session Information</h1>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 </body>
 </html>

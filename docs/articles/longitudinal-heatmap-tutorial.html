@@ -4,167 +4,13 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc 3.10.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Hua Huang" />
+  <meta name="dcterms.date" content="2026-08-04" />
   <title>ModuleViz: Longitudinal Heatmap Tutorial</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    div.abstract {
-      margin: 2em 2em 2em 2em;
-      text-align: left;
-      font-size: 85%;
-    }
-    div.abstract-title {
-      font-weight: bold;
-      text-align: center;
-      padding: 0;
-      margin-bottom: 0.5em;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: 1.5em;}
     div.column{flex: auto;}
@@ -183,13 +29,79 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <link rel="stylesheet" href="../biocstyle.css" />
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">ModuleViz: Longitudinal Heatmap Tutorial</h1>
-<p class="author">true</p>
-<p class="date"><code>r Sys.Date()</code></p>
+<p class="author">Hua Huang</p>
+<p class="date">2026-08-04</p>
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 <p>This tutorial introduces the main ModuleViz workflow with the bundled
@@ -207,30 +119,39 @@ class="toc-section-number">1</span> Introduction</a></li>
 id="toc-load-the-example-time-course"><span
 class="toc-section-number">2</span> Load The Example
 Time-Course</a></li>
+<li><a href="#choose-the-number-of-modules"
+id="toc-choose-the-number-of-modules"><span
+class="toc-section-number">3</span> Choose The Number Of
+Modules</a></li>
 <li><a href="#cluster-temporal-patterns"
 id="toc-cluster-temporal-patterns"><span
-class="toc-section-number">3</span> Cluster Temporal Patterns</a></li>
+class="toc-section-number">4</span> Cluster Temporal Patterns</a></li>
+<li><a href="#draw-the-heatmap" id="toc-draw-the-heatmap"><span
+class="toc-section-number">5</span> Draw The Heatmap</a></li>
 <li><a href="#plot-module-trajectories"
 id="toc-plot-module-trajectories"><span
-class="toc-section-number">4</span> Plot Module Trajectories</a></li>
+class="toc-section-number">6</span> Plot Module Trajectories</a></li>
 <li><a href="#draw-side-by-side-rna-and-atac-patterns"
 id="toc-draw-side-by-side-rna-and-atac-patterns"><span
-class="toc-section-number">5</span> Draw Side-By-Side RNA And ATAC
+class="toc-section-number">7</span> Draw Side-By-Side RNA And ATAC
 Patterns</a></li>
+<li><a href="#single-cell-pseudobulk-example"
+id="toc-single-cell-pseudobulk-example"><span
+class="toc-section-number">8</span> Single-Cell Pseudobulk
+Example</a></li>
 <li><a href="#export-tables" id="toc-export-tables"><span
-class="toc-section-number">6</span> Export Tables</a></li>
+class="toc-section-number">9</span> Export Tables</a></li>
 <li><a href="#real-public-data" id="toc-real-public-data"><span
-class="toc-section-number">7</span> Real Public Data</a></li>
+class="toc-section-number">10</span> Real Public Data</a></li>
 <li><a href="#session-information" id="toc-session-information"><span
-class="toc-section-number">8</span> Session Information</a></li>
+class="toc-section-number">11</span> Session Information</a></li>
 </ul>
 </nav>
-<p><code>{r setup, include=FALSE} knitr::opts_chunk$set(   collapse = TRUE,   comment = "#&gt;" )</code></p>
 <h1 data-number="1" id="introduction"><span
 class="header-section-number">1</span> Introduction</h1>
-<p><code>r Biocpkg("ModuleViz")</code> clusters feature trajectories
-from longitudinal omics experiments and renders ordered temporal
-heatmaps.</p>
+<p><a href="https://bioconductor.org/packages/ModuleViz/">ModuleViz</a>
+clusters feature trajectories from longitudinal omics experiments and
+renders ordered temporal heatmaps.</p>
 <p>The workflow is useful for RNA-seq, ATAC-seq, Cut&amp;Run, or other
 feature-by-sample matrices where columns represent ordered time points,
 treatment conditions, or both.</p>
@@ -238,166 +159,206 @@ treatment conditions, or both.</p>
 dataset so the tutorial runs without network access.</p>
 <h1 data-number="2" id="load-the-example-time-course"><span
 class="header-section-number">2</span> Load The Example Time-Course</h1>
-<p>```{r load} library(ModuleViz) data(“heatmap_example”)</p>
-<p>mat &lt;- heatmap_example<span
-class="math inline"><em>m</em><em>a</em><em>t</em><em>m</em><em>e</em><em>t</em><em>a</em> &lt; −<em>h</em><em>e</em><em>a</em><em>t</em><em>m</em><em>a</em><em>p</em><sub><em>e</em></sub><em>x</em><em>a</em><em>m</em><em>p</em><em>l</em><em>e</em></span>meta</p>
-<p>dim(mat) head(meta)</p>
-<pre><code>
-The returned object is plain R data:
-
-- `mat`: numeric feature-by-sample matrix.
-- `meta`: one row per sample, with sample ID, condition, time, and replicate.
-
-# Choose The Number Of Modules
-
-`choose_k()` calculates a simple within-cluster-sum-of-squares elbow diagnostic.
-Use it as a first pass, then choose a biologically interpretable value.
-
-```{r choose-k}
-diag &lt;- choose_k(
-  zscore_rows(mat),
-  k_range = 2:5,
-  method = &quot;kmeans&quot;
-)
-
-diag
-attr(diag, &quot;suggested_k&quot;)</code></pre>
-<h1 data-number="3" id="cluster-temporal-patterns"><span
-class="header-section-number">3</span> Cluster Temporal Patterns</h1>
-<p>```{r cluster} obj &lt;- longitudinal_cluster( mat, meta, sample_col
-= “SampleID”, time_col = “TimeHr”, group_col = “Condition”, k = 4,
-method = “kmeans”, aggregate_replicates = TRUE, stability = TRUE,
-n_resample = 10 )</p>
-<p>obj</p>
-<pre><code>
-Clusters are reordered by their temporal peak, so early-high modules appear
-before late-high modules.
-
-# Draw The Heatmap
-
-```{r heatmap, fig.width=8, fig.height=8}
-longitudinal_heatmap(
-  obj,
-  annotation_cols = c(&quot;Condition&quot;, &quot;TimeHr&quot;),
-  top_n_label = 3,
-  label_fontsize = 11,
-  cluster_palette = &quot;spectral&quot;,
-  title = &quot;Example longitudinal heatmap&quot;
-)</code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ModuleViz)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;heatmap_example&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> heatmap_example<span class="sc">$</span>mat</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> heatmap_example<span class="sc">$</span>meta</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(mat)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(meta)</span></code></pre></div>
+<p>The returned object is plain R data:</p>
+<ul>
+<li><code>mat</code>: numeric feature-by-sample matrix.</li>
+<li><code>meta</code>: one row per sample, with sample ID, condition,
+time, and replicate.</li>
+</ul>
+<h1 data-number="3" id="choose-the-number-of-modules"><span
+class="header-section-number">3</span> Choose The Number Of Modules</h1>
+<p><code>choose_k()</code> calculates a simple
+within-cluster-sum-of-squares elbow diagnostic. Use it as a first pass,
+then choose a biologically interpretable value.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>diag <span class="ot">&lt;-</span> <span class="fu">choose_k</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">zscore_rows</span>(mat),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">k_range =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>diag</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(diag, <span class="st">&quot;suggested_k&quot;</span>)</span></code></pre></div>
+<h1 data-number="4" id="cluster-temporal-patterns"><span
+class="header-section-number">4</span> Cluster Temporal Patterns</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  mat,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  meta,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">4</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">stability =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_resample =</span> <span class="dv">10</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>obj</span></code></pre></div>
+<p>Clusters are reordered by their temporal peak, so early-high modules
+appear before late-high modules.</p>
+<h1 data-number="5" id="draw-the-heatmap"><span
+class="header-section-number">5</span> Draw The Heatmap</h1>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_cols =</span> <span class="fu">c</span>(<span class="st">&quot;Condition&quot;</span>, <span class="st">&quot;TimeHr&quot;</span>),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_label =</span> <span class="dv">3</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize =</span> <span class="dv">11</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Example longitudinal heatmap&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>To save a PDF:</p>
-<p><code>{r save-heatmap, eval=FALSE} longitudinal_heatmap(   obj,   annotation_cols = c("Condition", "TimeHr"),   top_n_label = 3,   file = "example_heatmap.pdf",   width = 9,   height = 12 )</code></p>
-<h1 data-number="4" id="plot-module-trajectories"><span
-class="header-section-number">4</span> Plot Module Trajectories</h1>
-<p><code>{r lineplot, fig.width=7, fig.height=7} pattern_lineplot(obj, palette = "nature", base_size = 12)</code></p>
-<h1 data-number="5" id="draw-side-by-side-rna-and-atac-patterns"><span
-class="header-section-number">5</span> Draw Side-By-Side RNA And ATAC
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_cols =</span> <span class="fu">c</span>(<span class="st">&quot;Condition&quot;</span>, <span class="st">&quot;TimeHr&quot;</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_label =</span> <span class="dv">3</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;example_heatmap.pdf&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">9</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">12</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<h1 data-number="6" id="plot-module-trajectories"><span
+class="header-section-number">6</span> Plot Module Trajectories</h1>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(obj, <span class="at">palette =</span> <span class="st">&quot;nature&quot;</span>, <span class="at">base_size =</span> <span class="dv">12</span>)</span></code></pre></div>
+<h1 data-number="7" id="draw-side-by-side-rna-and-atac-patterns"><span
+class="header-section-number">7</span> Draw Side-By-Side RNA And ATAC
 Patterns</h1>
 <p>The primary matrix drives clustering and row order. The secondary
 matrix is aligned by gene and displayed next to it. This example
 simulates two ATAC peaks per gene using the bundled expression data so
 the code is fully runnable.</p>
-<p>```{r dual-omics, fig.width=10, fig.height=8} set.seed(99) genes
-&lt;- rownames(mat) atac &lt;- mat[rep(seq_along(genes), each = 2), ,
-drop = FALSE] rownames(atac) &lt;- paste0( “Peak”, sprintf(“%03d”,
-seq_len(nrow(atac))), “_“, rep(genes, each = 2) ) atac &lt;- atac +
-matrix(rnorm(length(atac), sd = 0.35), nrow = nrow(atac))</p>
-<p>dual_omics_heatmap( primary = obj, secondary = atac, primary_name =
-“RNA”, secondary_name = “ATAC”, gene_of_primary = function(id) id,
-gene_of_secondary = function(id) sub(“^.*_“,”“, id), aggregate =”mean”,
-label_features = c(“Gene001”, “Gene016”, “Gene031”, “Gene046”),
-label_fontsize = 11, cluster_palette = “spectral” )</p>
-<pre><code>
-# Single-Cell Pseudobulk Example
-
-Single-cell data can be summarized into pseudobulk profiles by cell type,
-condition, time point, and replicate. The resulting feature-by-pseudobulk matrix
-uses the same ModuleViz functions.
-
-```{r single-cell-pseudobulk, fig.width=9, fig.height=7}
-cell_types &lt;- c(&quot;T_cell&quot;, &quot;Monocyte&quot;, &quot;B_cell&quot;)
-cells_per_sample_type &lt;- 10
-set.seed(2026)
-
-cell_meta &lt;- do.call(rbind, lapply(seq_len(nrow(meta)), function(i) {
-  do.call(rbind, lapply(cell_types, function(ct) {
-    data.frame(
-      CellID = sprintf(&quot;%s_%s_Cell%03d&quot;, meta$SampleID[i], ct,
-                       seq_len(cells_per_sample_type)),
-      SampleID = meta$SampleID[i],
-      Condition = meta$Condition[i],
-      TimeHr = meta$TimeHr[i],
-      Replicate = meta$Replicate[i],
-      CellType = ct,
-      stringsAsFactors = FALSE
-    )
-  }))
-}))
-
-cell_mat &lt;- matrix(NA_real_, nrow = nrow(mat), ncol = nrow(cell_meta),
-                   dimnames = list(rownames(mat), cell_meta$CellID))
-cell_type_effect &lt;- c(T_cell = 0.35, Monocyte = -0.15, B_cell = 0.05)
-
-for (j in seq_len(nrow(cell_meta))) {
-  mu &lt;- mat[, cell_meta$SampleID[j]] + cell_type_effect[[cell_meta$CellType[j]]]
-  cell_mat[, j] &lt;- mu + rnorm(length(mu), sd = 0.55)
-}
-
-pseudobulk_group &lt;- paste(cell_meta$CellType, cell_meta$Condition,
-                          cell_meta$TimeHr, cell_meta$Replicate, sep = &quot;|&quot;)
-pseudobulk_ids &lt;- unique(pseudobulk_group)
-pseudobulk_mat &lt;- sapply(pseudobulk_ids, function(id) {
-  rowMeans(cell_mat[, pseudobulk_group == id, drop = FALSE])
-})
-rownames(pseudobulk_mat) &lt;- rownames(mat)
-colnames(pseudobulk_mat) &lt;- paste0(&quot;PB&quot;, seq_along(pseudobulk_ids))
-
-parts &lt;- strsplit(pseudobulk_ids, &quot;\\|&quot;)
-pseudobulk_meta &lt;- data.frame(
-  SampleID = colnames(pseudobulk_mat),
-  CellType = vapply(parts, `[`, character(1), 1),
-  Condition = vapply(parts, `[`, character(1), 2),
-  TimeHr = as.numeric(vapply(parts, `[`, character(1), 3)),
-  Replicate = as.integer(vapply(parts, `[`, character(1), 4)),
-  stringsAsFactors = FALSE
-)
-pseudobulk_meta$Group &lt;- paste(pseudobulk_meta$CellType,
-                               pseudobulk_meta$Condition, sep = &quot;_&quot;)
-
-sc_obj &lt;- longitudinal_cluster(
-  pseudobulk_mat,
-  pseudobulk_meta,
-  sample_col = &quot;SampleID&quot;,
-  time_col = &quot;TimeHr&quot;,
-  group_col = &quot;Group&quot;,
-  k = 5,
-  aggregate_replicates = TRUE,
-  stability = FALSE
-)
-
-pattern_lineplot(sc_obj, palette = &quot;science&quot;, base_size = 11)</code></pre>
-<h1 data-number="6" id="export-tables"><span
-class="header-section-number">6</span> Export Tables</h1>
-<p><code>{r write} out_dir &lt;- tempdir() write_memberships(obj, prefix = file.path(out_dir, "heatmap_example"))</code></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">99</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> mat[<span class="fu">rep</span>(<span class="fu">seq_along</span>(genes), <span class="at">each =</span> <span class="dv">2</span>), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(atac) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Peak&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="fu">seq_len</span>(<span class="fu">nrow</span>(atac))),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;_&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rep</span>(genes, <span class="at">each =</span> <span class="dv">2</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> atac <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(atac), <span class="at">sd =</span> <span class="fl">0.35</span>), <span class="at">nrow =</span> <span class="fu">nrow</span>(atac))</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">dual_omics_heatmap</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary =</span> obj,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary =</span> atac,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary_name =</span> <span class="st">&quot;RNA&quot;</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary_name =</span> <span class="st">&quot;ATAC&quot;</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_of_primary =</span> <span class="cf">function</span>(id) id,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_of_secondary =</span> <span class="cf">function</span>(id) <span class="fu">sub</span>(<span class="st">&quot;^.*_&quot;</span>, <span class="st">&quot;&quot;</span>, id),</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene016&quot;</span>, <span class="st">&quot;Gene031&quot;</span>, <span class="st">&quot;Gene046&quot;</span>),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize =</span> <span class="dv">11</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<h1 data-number="8" id="single-cell-pseudobulk-example"><span
+class="header-section-number">8</span> Single-Cell Pseudobulk
+Example</h1>
+<p>Single-cell data can be summarized into pseudobulk profiles by cell
+type, condition, time point, and replicate. The resulting
+feature-by-pseudobulk matrix uses the same ModuleViz functions.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cell_types <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;T_cell&quot;</span>, <span class="st">&quot;Monocyte&quot;</span>, <span class="st">&quot;B_cell&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>cells_per_sample_type <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>cell_meta <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(meta)), <span class="cf">function</span>(i) {</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(cell_types, <span class="cf">function</span>(ct) {</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">CellID =</span> <span class="fu">sprintf</span>(<span class="st">&quot;%s_%s_Cell%03d&quot;</span>, meta<span class="sc">$</span>SampleID[i], ct,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">seq_len</span>(cells_per_sample_type)),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">SampleID =</span> meta<span class="sc">$</span>SampleID[i],</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Condition =</span> meta<span class="sc">$</span>Condition[i],</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">TimeHr =</span> meta<span class="sc">$</span>TimeHr[i],</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">Replicate =</span> meta<span class="sc">$</span>Replicate[i],</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">CellType =</span> ct,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>cell_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA_real_</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(mat), <span class="at">ncol =</span> <span class="fu">nrow</span>(cell_meta),</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>                   <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">rownames</span>(mat), cell_meta<span class="sc">$</span>CellID))</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>cell_type_effect <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">T_cell =</span> <span class="fl">0.35</span>, <span class="at">Monocyte =</span> <span class="sc">-</span><span class="fl">0.15</span>, <span class="at">B_cell =</span> <span class="fl">0.05</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(cell_meta))) {</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> mat[, cell_meta<span class="sc">$</span>SampleID[j]] <span class="sc">+</span> cell_type_effect[[cell_meta<span class="sc">$</span>CellType[j]]]</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  cell_mat[, j] <span class="ot">&lt;-</span> mu <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(mu), <span class="at">sd =</span> <span class="fl">0.55</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>pseudobulk_group <span class="ot">&lt;-</span> <span class="fu">paste</span>(cell_meta<span class="sc">$</span>CellType, cell_meta<span class="sc">$</span>Condition,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                          cell_meta<span class="sc">$</span>TimeHr, cell_meta<span class="sc">$</span>Replicate, <span class="at">sep =</span> <span class="st">&quot;|&quot;</span>)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>pseudobulk_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(pseudobulk_group)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>pseudobulk_mat <span class="ot">&lt;-</span> <span class="fu">sapply</span>(pseudobulk_ids, <span class="cf">function</span>(id) {</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowMeans</span>(cell_mat[, pseudobulk_group <span class="sc">==</span> id, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(pseudobulk_mat) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(pseudobulk_mat) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;PB&quot;</span>, <span class="fu">seq_along</span>(pseudobulk_ids))</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>parts <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(pseudobulk_ids, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">|&quot;</span>)</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>pseudobulk_meta <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">SampleID =</span> <span class="fu">colnames</span>(pseudobulk_mat),</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">CellType =</span> <span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">1</span>),</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">Condition =</span> <span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">2</span>),</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">TimeHr =</span> <span class="fu">as.numeric</span>(<span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">3</span>)),</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">Replicate =</span> <span class="fu">as.integer</span>(<span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">4</span>)),</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>pseudobulk_meta<span class="sc">$</span>Group <span class="ot">&lt;-</span> <span class="fu">paste</span>(pseudobulk_meta<span class="sc">$</span>CellType,</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>                               pseudobulk_meta<span class="sc">$</span>Condition, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>)</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>sc_obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>  pseudobulk_mat,</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>  pseudobulk_meta,</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Group&quot;</span>,</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">5</span>,</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">stability =</span> <span class="cn">FALSE</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(sc_obj, <span class="at">palette =</span> <span class="st">&quot;science&quot;</span>, <span class="at">base_size =</span> <span class="dv">11</span>)</span></code></pre></div>
+<h1 data-number="9" id="export-tables"><span
+class="header-section-number">9</span> Export Tables</h1>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>out_dir <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_memberships</span>(obj, <span class="at">prefix =</span> <span class="fu">file.path</span>(out_dir, <span class="st">&quot;heatmap_example&quot;</span>))</span></code></pre></div>
 <p>This writes:</p>
 <ul>
 <li><code>heatmap_example_memberships.txt</code></li>
 <li><code>heatmap_example_centroids.txt</code></li>
 <li><code>heatmap_example_stability.txt</code></li>
 </ul>
-<h1 data-number="7" id="real-public-data"><span
-class="header-section-number">7</span> Real Public Data</h1>
+<h1 data-number="10" id="real-public-data"><span
+class="header-section-number">10</span> Real Public Data</h1>
 <p>The package also includes a helper for public datasets in
 Bioconductor <code>timecoursedata</code>. These examples are optional
 because they require installing the experiment-data package.</p>
-<p><code>{r available} available_real_timecourse_datasets()</code></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span></code></pre></div>
 <p>Install the optional data package before running the real-data
 workflow:</p>
-<p><code>{r install-timecoursedata, eval=FALSE} if (!requireNamespace("BiocManager", quietly = TRUE)) {   install.packages("BiocManager") } BiocManager::install("timecoursedata")</code></p>
-<p><code>{r sorghum, eval=FALSE} sorghum &lt;- load_real_timecourse_example(   dataset = "sorghum_leaf",   genotype = "BT642",   min_week = 3,   top_n_features = 1000 )</code></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;timecoursedata&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sorghum <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset =</span> <span class="st">&quot;sorghum_leaf&quot;</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="st">&quot;BT642&quot;</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_week =</span> <span class="dv">3</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>For the mouse influenza microarray dataset:</p>
-<p><code>{r influenza, eval=FALSE} flu &lt;- load_real_timecourse_example(   dataset = "influenza_mouse",   group = c("C", "K", "M"),   top_n_features = 1000 )</code></p>
-<h1 data-number="8" id="session-information"><span
-class="header-section-number">8</span> Session Information</h1>
-<p><code>{r session-info} sessionInfo()</code></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>flu <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset =</span> <span class="st">&quot;influenza_mouse&quot;</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;C&quot;</span>, <span class="st">&quot;K&quot;</span>, <span class="st">&quot;M&quot;</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<h1 data-number="11" id="session-information"><span
+class="header-section-number">11</span> Session Information</h1>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 </body>
 </html>
