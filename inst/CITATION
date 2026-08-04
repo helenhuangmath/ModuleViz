@@ -8,7 +8,7 @@ citEntry(
   note = "R package version 0.1.0",
   url = "https://github.com/helenhuangmath/ModuleViz",
   textVersion = paste(
-    "Huang H (2026). ModuleViz: an R package for temporal module discovery",
+    "Hua Huang (2026). ModuleViz: an R package for temporal module discovery",
     "and visualization in longitudinal omics data. R package version 0.1.0.",
     "https://github.com/helenhuangmath/ModuleViz"
   )
