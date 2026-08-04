@@ -634,13 +634,17 @@ The package includes three Bioconductor-style vignettes:
 - `vignette("longitudinal-heatmap-tutorial")`: tutorial using bundled and
   optional public time-course data.
 
-HTML versions are available in `docs/`:
+Rendered HTML versions are available through GitHub Pages after the `docs/`
+folder is merged into `main`:
 
-- `docs/index.html`: HTML README/package overview.
-- `docs/articles/ModuleViz.html`: complete user guide.
-- `docs/articles/cd8-exhaustion-published-data.html`: published-data workflow.
-- `docs/articles/longitudinal-heatmap-tutorial.html`: longitudinal heatmap
-  tutorial.
+- [Package overview](https://helenhuangmath.github.io/ModuleViz/):
+  `docs/index.html`
+- [Complete user guide](https://helenhuangmath.github.io/ModuleViz/articles/ModuleViz.html):
+  `docs/articles/ModuleViz.html`
+- [Published CD8 T cell exhaustion workflow](https://helenhuangmath.github.io/ModuleViz/articles/cd8-exhaustion-published-data.html):
+  `docs/articles/cd8-exhaustion-published-data.html`
+- [Longitudinal heatmap tutorial](https://helenhuangmath.github.io/ModuleViz/articles/longitudinal-heatmap-tutorial.html):
+  `docs/articles/longitudinal-heatmap-tutorial.html`
 
 ## Package Checks
 
