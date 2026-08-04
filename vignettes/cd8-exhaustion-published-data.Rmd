@@ -1,8 +1,22 @@
 ---
-title: "Reproducible Walkthrough: CD8 T Cell Exhaustion (GSE285248 / GSE285245)"
-output: rmarkdown::html_vignette
+title: "ModuleViz: CD8 T Cell Exhaustion Published Data"
+author:
+- name: Hua Huang
+  email: helenhuang.math@gmail.com
+date: "`r Sys.Date()`"
+package: ModuleViz
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+abstract: |
+  This vignette demonstrates a reproducible ModuleViz workflow using published
+  RNA-seq and CUT&Run data from memory and exhausted CD8 T cells. RNA-seq data
+  define temporal modules along an ordered differentiation axis, and H3K27ac
+  CUT&Run signal is aligned to those modules by gene.
 vignette: >
-  %\VignetteIndexEntry{Reproducible Walkthrough: CD8 T Cell Exhaustion (GSE285248 / GSE285245)}
+  %\VignetteIndexEntry{ModuleViz: CD8 T Cell Exhaustion Published Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +29,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Introduction
+# Introduction
+
+`r Biocpkg("ModuleViz")` can be used with an ordered biological axis even when
+the axis is not clock time. This vignette demonstrates that workflow on
+published CD8 T cell differentiation data.
 
 The other vignette uses the bundled synthetic dataset so it runs offline. This
 one is the opposite: it walks through a complete, published, real analysis end
@@ -53,7 +71,7 @@ grades, dose levels, or developmental stages.
 > `Rscript examples/validate_real_data.R` from the package root, which executes
 > this exact analysis plus 114 correctness assertions.
 
-## 1. Requirements
+# Requirements
 
 ```{r requirements}
 library(ModuleViz)
@@ -86,7 +104,7 @@ geo_path <- function(entry) {
 paths <- lapply(GEO, geo_path)
 ```
 
-## 2. Read The RNA-seq Matrix
+# Read The RNA-seq Matrix
 
 The RNA table carries six annotation columns (`Chr`, `Start`, `End`, `Geneid`,
 `Gene.Name`, `Strand`) followed by the 16 sample columns. A handful of gene
@@ -111,7 +129,7 @@ dim(rna_mat)
 #> [1] 16429    16
 ```
 
-## 3. Build The Sample Metadata
+# Build The Sample Metadata
 
 `ModuleViz` needs one row per sample with a sample ID and a **numeric** ordering
 column. The GEO column names encode everything we need in the pattern
@@ -156,7 +174,7 @@ twice, once alongside each infection, so they serve as the day-matched baseline
 for both arms. That imbalance is fine — nothing in `ModuleViz` requires equal
 group sizes.
 
-## 4. Select Differentially Expressed Genes
+# Select Differentially Expressed Genes
 
 Real analyses do not cluster the whole transcriptome. Clustering 16,429 genes
 would bury the interesting structure under thousands of flat, uninformative
@@ -236,7 +254,7 @@ head(sig$ID, 12)
 `Tox`, the master transcription factor of CD8 T cell exhaustion, is already in
 the top 12 — a good sign that the selection is picking up real biology.
 
-## 5. Choose The Number Of Modules
+# Choose The Number Of Modules
 
 ```{r choose-k}
 z <- zscore_rows(deg_mat)
@@ -275,7 +293,7 @@ record the k you settled on, `choose_k(..., chosen_k = K)` draws it as a solid
 line beside the dashed elbow, and `annotate_k = FALSE` strips both markers for a
 bare curve.
 
-## 6. Cluster Into Temporal Modules
+# Cluster Into Temporal Modules
 
 ```{r cluster}
 obj <- longitudinal_cluster(
@@ -329,7 +347,7 @@ round(cent, 2)
 #> Cluster6 -0.65 -0.26  1.55   <- exhaustion-specific
 ```
 
-## 7. Check The Modules Against Known Biology
+# Check The Modules Against Known Biology
 
 This is the step worth doing before any figure goes into a paper. Canonical
 markers should land where the biology says they should.
@@ -360,7 +378,7 @@ two exhaustion-peaking modules. Every naive/stemness gene falls in Cluster1 or
 Cluster2, the naive-peaking modules. The clustering recovered the expected
 programme without being told anything about it.
 
-## 8. Draw The Heatmap
+# Draw The Heatmap
 
 Three palettes are in play, and each is chosen for its job:
 
@@ -411,7 +429,7 @@ top *n* genes per module by a statistic you supply, which is usually what you
 want for a figure; `label_features` labels an explicit list of genes. The two
 can be combined.
 
-## 9. Plot Module Trajectories
+# Plot Module Trajectories
 
 ```{r lineplot}
 pattern_lineplot(
@@ -428,7 +446,7 @@ pattern_lineplot(
 
 ![Mean z-score trajectory per module](figures/cd8_03_module_patterns.png)
 
-## 10. Check Module Coherence
+# Check Module Coherence
 
 Clustering guarantees that a module's genes are closer to each other than to
 other modules. It does not guarantee they actually agree. Correlating every
@@ -476,7 +494,7 @@ A `.pdf` destination writes one page per module instead:
 module_correlation_heatmap(obj, file = "cd8_module_correlations.pdf")
 ```
 
-## 11. Export The Tables
+# Export The Tables
 
 ```{r export}
 write_memberships(obj, prefix = "cd8_modules")
@@ -486,7 +504,7 @@ Writes `cd8_modules_memberships.txt` (gene to module), `_centroids.txt` (mean
 trajectory per module), and `_stability.txt`. The membership table is what you
 would feed into GO or GSEA enrichment, one module at a time.
 
-## 12. Add The CUT&Run Layer
+# Add The CUT&Run Layer
 
 Now the paired-omics question: does chromatin state track these expression
 modules?
@@ -619,7 +637,7 @@ The activating mark is gained at exhaustion-induced genes; the repressive mark
 is flat to slightly lost. Chromatin accessibility tracks the expression
 modules, which is exactly the claim the original study makes.
 
-## 13. Reproducing Everything
+# Reproducing Everything
 
 The complete script, with 114 assertions covering data integrity, clustering
 correctness, palette behaviour, marker-gene placement, and cross-omics
@@ -633,7 +651,7 @@ system("Rscript examples/validate_real_data.R")
 It caches the downloads under `examples/outputs/geo_cache/`, so re-runs are
 offline and fast.
 
-## 14. Adapting This To Your Own Data
+# Adapting This To Your Own Data
 
 The only project-specific parts are steps 2 to 4. Everything from step 5 onward
 is generic. To reuse the workflow you need:
@@ -647,7 +665,7 @@ is generic. To reuse the workflow you need:
 4. Optionally, a secondary matrix whose rownames end in `_<GeneSymbol>`, or a
    custom `gene_of_secondary` function.
 
-## Citation
+# Citation
 
 Cite the original study and the GEO accessions alongside `ModuleViz`:
 
@@ -659,7 +677,7 @@ citation("ModuleViz")
 - GSE285245 — CUT&Run, histone modifications in the same cells.
 - PubMed [40389726](https://pubmed.ncbi.nlm.nih.gov/40389726/).
 
-## Session Information
+# Session Information
 
 ```{r session-info, eval=TRUE}
 sessionInfo()

@@ -5,18 +5,10 @@
 ## (RNA-seq, ATAC-seq, Cut&Run, drug-treatment time courses, ...).
 ##
 ## Given a matrix of features (genes or peaks) measured across an ordered set of
-## samples (time points / conditions), these functions:
-##
-##   1. cluster the features into temporal patterns / modules, with a choice of
-##      algorithm (k-means, hierarchical, PAM) and a stability assessment so the
-##      modules are reproducible;                              -> longitudinal_cluster()
-##   2. draw an ordered heatmap running from "high at the first time point" to
-##      "high at the last time point", with metadata colour bars;   -> longitudinal_heatmap()
-##   3. draw a line/pattern plot of the mean trajectory per module;  -> pattern_lineplot()
-##   4. write out the cluster memberships (and centroids, stability);-> write_memberships()
-##   5. let the user pick specific features to label on the heatmap; -> label_features= arg
-##   6. put two data sets side by side (e.g. RNA + ATAC, RNA + Cut&Run) so genes
-##      and peaks are shown together in one figure.                  -> dual_omics_heatmap()
+## samples (time points / conditions), these functions cluster features into
+## temporal modules, draw ordered heatmaps, summarize module trajectories,
+## export module tables, label selected features, and align paired omics layers
+## such as RNA with ATAC or Cut&Run.
 ##
 ## The functions are deliberately generic: nothing is hard-coded to a particular
 ## project.  Feature selection (which genes/peaks are "interesting") is expected
@@ -403,7 +395,7 @@ choose_k <- function(z, k_range = 2:20, method = "kmeans",
 }
 
 ## =============================================================================
-## 1. Cluster the data into temporal patterns / modules
+## Longitudinal clustering
 ## =============================================================================
 
 #' Cluster longitudinal features into temporal modules.
@@ -643,7 +635,7 @@ resolve_labels <- function(obj, features = NULL, top_n = 0,
 }
 
 ## =============================================================================
-## 2. + 5. The ordered heatmap (with metadata bars and feature labels)
+## Ordered heatmap
 ## =============================================================================
 
 #' Draw the ordered longitudinal heatmap.
@@ -830,7 +822,7 @@ longitudinal_heatmap <- function(obj,
 }
 
 ## =============================================================================
-## 3. The per-module pattern / line plot
+## Module trajectory plot
 ## =============================================================================
 
 #' Line plot of the mean z-score trajectory per module.
@@ -951,7 +943,7 @@ pattern_lineplot <- function(obj, file = NULL, width = NULL, height = NULL,
 }
 
 ## =============================================================================
-## 4. Write out memberships / centroids / stability
+## Membership and summary export
 ## =============================================================================
 
 #' Write the cluster memberships (and, optionally, centroids + stability).
@@ -982,7 +974,7 @@ write_memberships <- function(obj, file = NULL, prefix = NULL,
 }
 
 ## =============================================================================
-## 6. Two data sets side by side (RNA + ATAC, RNA + Cut&Run, ...)
+## Paired omics heatmap
 ## =============================================================================
 
 #' Draw two omics layers side by side, linked by gene.
