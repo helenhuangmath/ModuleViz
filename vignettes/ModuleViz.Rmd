@@ -16,7 +16,7 @@ abstract: |
   together. It clusters trajectories, orders the modules from earliest-peaking
   to latest-peaking, measures how reproducible each module is, and renders the
   result as publication-ready heatmaps, trajectory plots, and per-module
-  correlation maps. Paired omics layers such as RNA and CUT&Run can be aligned
+  correlation maps. Paired omics layers such as RNA and CUT&RUN can be aligned
   by gene and shown side by side. This vignette is the complete user guide.
 vignette: >
   %\VignetteIndexEntry{ModuleViz: Temporal Modules from Longitudinal Omics}
@@ -64,7 +64,7 @@ and fall, which come up late and stay up, which respond only in the treated arm.
 `ModuleViz` fits any experiment where the columns have an order and the rows are
 features:
 
-* bulk RNA-seq / ATAC-seq / CUT&Run time courses;
+* bulk RNA-seq / ATAC-seq / CUT&RUN time courses;
 * drug or stimulation time courses, with or without a control arm;
 * differentiation or disease-stage series (the axis need not be clock time);
 * pseudobulk profiles derived from single-cell data.
@@ -79,7 +79,7 @@ the matrix you want to see.
 | Vignette | Data | Purpose |
 |---|---|---|
 | **This one** | Bundled synthetic dataset | Complete API reference, runs offline |
-| `vignette("cd8-exhaustion-published-data")` | GEO GSE285248 + GSE285245 | Real published RNA-seq + CUT&Run walkthrough |
+| `vignette("cd8-exhaustion-published-data")` | GEO GSE285248 + GSE285245 | Real published RNA-seq + CUT&RUN walkthrough |
 
 # Installation
 
@@ -500,7 +500,7 @@ module_correlation_heatmap(obj, file = "module_correlations.pdf",
 # Paired Omics
 
 `dual_omics_heatmap()` puts two layers side by side, linked by gene: RNA next to
-ATAC, or RNA next to CUT&Run. The **primary** layer drives the clustering and
+ATAC, or RNA next to CUT&RUN. The **primary** layer drives the clustering and
 the row order; the secondary is displayed in that same order, so each row is one
 gene across both assays.
 
@@ -571,9 +571,9 @@ run_longitudinal(
 
 `vignette("cd8-exhaustion-published-data", package = "ModuleViz")` applies this
 workflow end to end to two public GEO series — RNA-seq (GSE285248) and paired
-H3K27ac / H3K27me3 CUT&Run (GSE285245) from a CD8 T cell memory-versus-exhaustion
+H3K27ac / H3K27me3 CUT&RUN (GSE285245) from a CD8 T cell memory-versus-exhaustion
 study. It covers the parts this vignette does not: downloading processed
-matrices from GEO, ANOVA-based DEG selection, mapping CUT&Run peaks to genes,
+matrices from GEO, ANOVA-based DEG selection, mapping CUT&RUN peaks to genes,
 and checking module assignments against canonical marker genes.
 
 The package also ships `examples/validate_real_data.R`, which runs that entire

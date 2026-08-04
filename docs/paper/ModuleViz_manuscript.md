@@ -26,10 +26,10 @@ matrices. The package z-scores features, clusters rows into temporal modules,
 orders modules from earliest-peaking to latest-peaking patterns, generates
 publication-ready heatmaps using `ComplexHeatmap`, summarizes module
 trajectories with `ggplot2`, aligns paired omics layers such as RNA and
-ATAC/CUT&Run by gene, and exports module membership tables. Additional
+ATAC/CUT&RUN by gene, and exports module membership tables. Additional
 diagnostics help users choose the number of modules and evaluate module
 stability and within-module correlation structure. `ModuleViz` is designed for
-bulk RNA-seq, pseudobulk single-cell RNA-seq, ATAC-seq, CUT&Run, and related
+bulk RNA-seq, pseudobulk single-cell RNA-seq, ATAC-seq, CUT&RUN, and related
 quantitative omics data represented as standard R matrices.
 
 ### Availability and Implementation
@@ -42,7 +42,7 @@ documentation and tutorials are available at
 ### Keywords
 
 longitudinal omics; time course; temporal modules; heatmap; RNA-seq; ATAC-seq;
-CUT&Run; Bioconductor; visualization
+CUT&RUN; Bioconductor; visualization
 
 ## Introduction
 
@@ -135,7 +135,7 @@ state-specific expression.
 
 For paired-assay studies, `dual_omics_heatmap()` aligns a secondary assay to
 primary modules by gene. For example, RNA-defined modules can be shown beside
-ATAC-seq or CUT&Run signal after mapping peaks to genes. The secondary layer
+ATAC-seq or CUT&RUN signal after mapping peaks to genes. The secondary layer
 can be aggregated per gene using the mean or strongest matching feature. This
 enables coordinated visualization of transcriptional and regulatory dynamics
 without requiring users to manually synchronize row order across assays.
@@ -205,7 +205,7 @@ The repository includes a real-data vignette demonstrating `ModuleViz` on
 published CD8 T cell differentiation data from the Gene Expression Omnibus. The
 workflow uses RNA-seq data from GSE285248 to define temporal modules across an
 ordered axis from naive cells to memory cells to exhausted cells, and aligns
-H3K27ac CUT&Run signal from GSE285245 to the RNA-defined modules by gene. This
+H3K27ac CUT&RUN signal from GSE285245 to the RNA-defined modules by gene. This
 case study illustrates an important design feature of `ModuleViz`: the ordered
 axis does not need to be clock time. It can also represent an ordinal
 biological state, such as differentiation stage, dose, disease grade, or
@@ -226,7 +226,7 @@ repository:
   `inst/extdata/results/01_longitudinal_clustered_heatmap.png`.
 - Figure 2: module-average trajectory plot,
   `inst/extdata/results/02_module_line_patterns.png`.
-- Figure 3: RNA/ATAC or RNA/CUT&Run side-by-side heatmap,
+- Figure 3: RNA/ATAC or RNA/CUT&RUN side-by-side heatmap,
   `inst/extdata/results/03_rna_atac_side_by_side_heatmap.png`.
 - Figure 4: real-data CD8 module heatmap and paired H3K27ac visualization,
   `vignettes/figures/cd8_01_module_heatmap.png` and
@@ -319,4 +319,4 @@ repository.
 
 ## References
 
-References are provided in `paper/references.bib`.
+References are provided in `docs/paper/references.bib`.

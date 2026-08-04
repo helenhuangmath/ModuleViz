@@ -105,9 +105,9 @@
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 <p>This vignette demonstrates a reproducible ModuleViz workflow using
-published RNA-seq and CUT&amp;Run data from memory and exhausted CD8 T
+published RNA-seq and CUT&amp;RUN data from memory and exhausted CD8 T
 cells. RNA-seq data define temporal modules along an ordered
-differentiation axis, and H3K27ac CUT&amp;Run signal is aligned to those
+differentiation axis, and H3K27ac CUT&amp;RUN signal is aligned to those
 modules by gene.</p>
 </div>
 </header>
@@ -150,7 +150,7 @@ class="toc-section-number">11</span> Check Module Coherence</a></li>
 <li><a href="#export-the-tables" id="toc-export-the-tables"><span
 class="toc-section-number">12</span> Export The Tables</a></li>
 <li><a href="#add-the-cutrun-layer" id="toc-add-the-cutrun-layer"><span
-class="toc-section-number">13</span> Add The CUT&amp;Run Layer</a></li>
+class="toc-section-number">13</span> Add The CUT&amp;RUN Layer</a></li>
 <li><a href="#reproducing-everything"
 id="toc-reproducing-everything"><span
 class="toc-section-number">14</span> Reproducing Everything</a></li>
@@ -202,7 +202,7 @@ href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE285248">GSE285248</a
 <tr>
 <td><a
 href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE285245">GSE285245</a></td>
-<td>CUT&amp;Run (H3K27ac, H3K27me3)</td>
+<td>CUT&amp;RUN (H3K27ac, H3K27me3)</td>
 <td>86</td>
 <td>Chromatin layer aligned to those modules</td>
 </tr>
@@ -213,7 +213,7 @@ transferred into recipient mice infected with LCMV Armstrong, which
 resolves and yields <strong>memory</strong> cells (harvested day 30), or
 LCMV Clone 13, which persists and yields <strong>exhausted</strong>
 cells (harvested day 32). Spleens were profiled by RNA-seq and by
-CUT&amp;Run for activating (H3K27ac, H3K4me3) and repressive (H3K27me3,
+CUT&amp;RUN for activating (H3K27ac, H3K4me3) and repressive (H3K27me3,
 H3K9me3) marks.</p>
 <p><strong>The trajectory.</strong> <code>ModuleViz</code> was built for
 time courses, but nothing in it requires the ordering variable to be
@@ -285,7 +285,7 @@ a <strong>numeric</strong> ordering column. The GEO column names encode
 everything we need in the pattern
 <code>&lt;Infection&gt;_P14_Day&lt;d&gt;_&lt;assay&gt;_Rep&lt;n&gt;_S&lt;n&gt;</code>,
 so the metadata can be parsed straight out of them. Writing this as a
-function pays off later, because the CUT&amp;Run tables follow exactly
+function pays off later, because the CUT&amp;RUN tables follow exactly
 the same naming scheme.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>make_meta <span class="ot">&lt;-</span> <span class="cf">function</span>(cols, assay) {</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  infection <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">&quot;_P14_.*&quot;</span>, <span class="st">&quot;&quot;</span>, cols)</span>
@@ -604,10 +604,10 @@ class="header-section-number">12</span> Export The Tables</h1>
 <code>_stability.txt</code>. The membership table is what you would feed
 into GO or GSEA enrichment, one module at a time.</p>
 <h1 data-number="13" id="add-the-cutrun-layer"><span
-class="header-section-number">13</span> Add The CUT&amp;Run Layer</h1>
+class="header-section-number">13</span> Add The CUT&amp;RUN Layer</h1>
 <p>Now the paired-omics question: does chromatin state track these
 expression modules?</p>
-<p>The CUT&amp;Run tables give peak coordinates but <strong>no gene
+<p>The CUT&amp;RUN tables give peak coordinates but <strong>no gene
 symbol</strong>, so peaks have to be assigned to genes first. We map
 each peak to its nearest gene transcription start site, using the
 coordinates already present in the RNA annotation, and keep peaks within
@@ -752,7 +752,7 @@ class="header-section-number">16</span> Citation</h1>
 <div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;ModuleViz&quot;</span>)</span></code></pre></div>
 <ul>
 <li>GSE285248 — RNA-seq, memory and exhausted CD8 T cells.</li>
-<li>GSE285245 — CUT&amp;Run, histone modifications in the same
+<li>GSE285245 — CUT&amp;RUN, histone modifications in the same
 cells.</li>
 <li>PubMed <a
 href="https://pubmed.ncbi.nlm.nih.gov/40389726/">40389726</a>.</li>

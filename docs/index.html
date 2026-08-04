@@ -222,7 +222,7 @@ class="header-section-number">1.0.0.2</span> 2026-05-01</h4>
 class="header-section-number">1.1</span> Introduction</h2>
 <p><code>ModuleViz</code> is an R package for clustering and visualizing
 longitudinal high-throughput omics data. It is designed for
-feature-by-sample matrices from RNA-seq, ATAC-seq, CUT&amp;Run,
+feature-by-sample matrices from RNA-seq, ATAC-seq, CUT&amp;RUN,
 pseudobulk single-cell summaries, and related time-course or
 ordered-state experiments.</p>
 <p>The central question addressed by <code>ModuleViz</code> is: which
@@ -245,7 +245,7 @@ temporal modules.</li>
 heatmaps.</li>
 <li><code>pattern_lineplot()</code>: plot mean module trajectories.</li>
 <li><code>dual_omics_heatmap()</code>: align a second omics layer, such
-as ATAC or CUT&amp;Run, to RNA-defined modules.</li>
+as ATAC or CUT&amp;RUN, to RNA-defined modules.</li>
 <li><code>module_correlation_heatmap()</code>: inspect gene-gene
 correlation within modules.</li>
 <li><code>module_correlation_summary()</code>: summarize within-module
@@ -659,7 +659,7 @@ the column names to pass to <code>longitudinal_cluster()</code>.</p>
 class="header-section-number">1.6</span> Paired Omics Analysis</h2>
 <p><code>dual_omics_heatmap()</code> compares two assays in a shared row
 order. The primary layer, often RNA, defines the module structure. The
-secondary layer, such as ATAC or CUT&amp;Run, is aligned by gene and
+secondary layer, such as ATAC or CUT&amp;RUN, is aligned by gene and
 shown beside the primary layer.</p>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rna_obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    rna,</span>
@@ -715,7 +715,7 @@ sub-blocks can indicate that the module should be split by increasing
 <h2 data-number="1.8" id="published-data-example"><span
 class="header-section-number">1.8</span> Published Data Example</h2>
 <p>The vignette <code>vignette("cd8-exhaustion-published-data")</code>
-demonstrates a published-data workflow using RNA-seq and CUT&amp;Run
+demonstrates a published-data workflow using RNA-seq and CUT&amp;RUN
 data from memory and exhausted CD8 T cells. RNA-seq defines the modules
 and H3K27ac signal is aligned to those modules by gene.</p>
 <figure>
@@ -788,7 +788,7 @@ class="header-section-number">1.11</span> Vignettes</h2>
 <ul>
 <li><code>vignette("ModuleViz")</code>: complete user guide.</li>
 <li><code>vignette("cd8-exhaustion-published-data")</code>: published
-RNA-seq and CUT&amp;Run workflow.</li>
+RNA-seq and CUT&amp;RUN workflow.</li>
 <li><code>vignette("longitudinal-heatmap-tutorial")</code>: tutorial
 using bundled and optional public time-course data.</li>
 </ul>

@@ -111,7 +111,7 @@ rise and fall together. It clusters trajectories, orders the modules
 from earliest-peaking to latest-peaking, measures how reproducible each
 module is, and renders the result as publication-ready heatmaps,
 trajectory plots, and per-module correlation maps. Paired omics layers
-such as RNA and CUT&amp;Run can be aligned by gene and shown side by
+such as RNA and CUT&amp;RUN can be aligned by gene and shown side by
 side. This vignette is the complete user guide.</p>
 </div>
 </header>
@@ -240,7 +240,7 @@ class="header-section-number">1.2</span> When To Use It</h2>
 <p><code>ModuleViz</code> fits any experiment where the columns have an
 order and the rows are features:</p>
 <ul>
-<li>bulk RNA-seq / ATAC-seq / CUT&amp;Run time courses;</li>
+<li>bulk RNA-seq / ATAC-seq / CUT&amp;RUN time courses;</li>
 <li>drug or stimulation time courses, with or without a control
 arm;</li>
 <li>differentiation or disease-stage series (the axis need not be clock
@@ -277,7 +277,7 @@ class="header-section-number">1.3</span> Package Vignettes</h2>
 <tr>
 <td><code>vignette("cd8-exhaustion-published-data")</code></td>
 <td>GEO GSE285248 + GSE285245</td>
-<td>Real published RNA-seq + CUT&amp;Run walkthrough</td>
+<td>Real published RNA-seq + CUT&amp;RUN walkthrough</td>
 </tr>
 </tbody>
 </table>
@@ -554,7 +554,7 @@ module:</p>
 <h1 data-number="7" id="paired-omics"><span
 class="header-section-number">7</span> Paired Omics</h1>
 <p><code>dual_omics_heatmap()</code> puts two layers side by side,
-linked by gene: RNA next to ATAC, or RNA next to CUT&amp;Run. The
+linked by gene: RNA next to ATAC, or RNA next to CUT&amp;RUN. The
 <strong>primary</strong> layer drives the clustering and the row order;
 the secondary is displayed in that same order, so each row is one gene
 across both assays.</p>
@@ -612,10 +612,10 @@ just want the outputs:</p>
 class="header-section-number">10</span> Working With Published Data</h1>
 <p><code>vignette("cd8-exhaustion-published-data", package = "ModuleViz")</code>
 applies this workflow end to end to two public GEO series — RNA-seq
-(GSE285248) and paired H3K27ac / H3K27me3 CUT&amp;Run (GSE285245) from a
+(GSE285248) and paired H3K27ac / H3K27me3 CUT&amp;RUN (GSE285245) from a
 CD8 T cell memory-versus-exhaustion study. It covers the parts this
 vignette does not: downloading processed matrices from GEO, ANOVA-based
-DEG selection, mapping CUT&amp;Run peaks to genes, and checking module
+DEG selection, mapping CUT&amp;RUN peaks to genes, and checking module
 assignments against canonical marker genes.</p>
 <p>The package also ships <code>examples/validate_real_data.R</code>,
 which runs that entire analysis with 114 correctness assertions.</p>
