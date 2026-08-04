@@ -18,6 +18,13 @@ Perelman School of Medicine, Philadelphia, PA, 19104, USA
 
 Source: `vignettes/ModuleViz.Rmd`
 
+## Manuscript
+
+The manuscript draft for this package is available at
+[docs/paper/ModuleViz_manuscript.md](docs/paper/ModuleViz_manuscript.md).
+The accompanying bibliography is available at
+[docs/paper/references.bib](docs/paper/references.bib).
+
 ## Introduction
 
 `ModuleViz` is an R package for clustering and visualizing longitudinal
