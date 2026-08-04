@@ -1,87 +1,79 @@
 # ModuleViz
 
-An installable R package for longitudinal / time-course omics analysis
-(RNA-seq, ATAC-seq, Cut&Run, drug-treatment time courses, ...) built on
-[ComplexHeatmap](https://bioconductor.org/packages/ComplexHeatmap/).
+`ModuleViz` is an R package for clustering and visualizing longitudinal
+high-throughput omics data. It is designed for RNA-seq, ATAC-seq, CUT&Run,
+pseudobulk single-cell summaries, and other matrix-like time-course assays.
 
-Give it a matrix of features (genes or peaks) measured across an ordered set of
-samples (time points / conditions) plus a small sample-metadata table, and it
-will cluster the features into temporal modules and produce publication-ready
-heatmaps and pattern plots.
+Given a feature-by-sample matrix and a sample metadata table, `ModuleViz`
+clusters features into temporal modules, orders those modules by trajectory, and
+produces publication-ready heatmaps, module pattern plots, paired-omics
+heatmaps, and within-module correlation diagnostics.
 
-## What it does
+`ModuleViz` builds on
+[`ComplexHeatmap`](https://bioconductor.org/packages/ComplexHeatmap/) for
+heatmap rendering and uses standard R matrix/data-frame inputs so it can be
+used in existing Bioconductor workflows.
 
-| # | Output | Function |
-|---|--------|----------|
-| 1 | Cluster features into temporal patterns/modules, with a choice of algorithm (k-means, hierarchical, PAM) and a **stability** assessment so modules are reproducible | `longitudinal_cluster()` |
-| 2 | Ordered heatmap running from *high at the first time point* → *high at the last time point*, with metadata colour bars | `longitudinal_heatmap()` |
-| 3 | Line/pattern plot of the mean trajectory per module | `pattern_lineplot()` |
-| 4 | Write out cluster memberships (+ centroids + stability) | `write_memberships()` |
-| 5 | Let the user pick specific features to label on the heatmap (plus auto top-N) | `label_features=` / `resolve_labels()` |
-| 6 | Put **two data sets side by side** (RNA + ATAC, RNA + Cut&Run) so genes and peaks are shown together — a *separate* new figure | `dual_omics_heatmap()` |
+## Features
 
-Helpers: `choose_k()` (elbow + silhouette diagnostics to pick the number of
-clusters), `cluster_stability()` (resampling Jaccard per module),
-`run_longitudinal()` (one call that does cluster + heatmap + line plot + write).
-Plot defaults use a publishable blue-white-red z-score heatmap, a Spectral
-module color bar, larger gene labels, and Nature-style line colors. Line plots
-can also use a Science-style palette with `palette = "science"`.
+| Task | Function |
+|------|----------|
+| Cluster genes, peaks, or other features into ordered temporal modules | `longitudinal_cluster()` |
+| Draw clustered longitudinal heatmaps with sample annotations | `longitudinal_heatmap()` |
+| Plot mean temporal trajectories for each module | `pattern_lineplot()` |
+| Compare paired omics layers, such as RNA and ATAC/CUT&Run, aligned by gene | `dual_omics_heatmap()` |
+| Inspect within-module gene-gene correlation structure | `module_correlation_heatmap()` |
+| Summarize mean within-module correlations | `module_correlation_summary()` |
+| Choose a cluster count with elbow and silhouette diagnostics | `choose_k()` |
+| Estimate module stability by resampling | `cluster_stability()` |
+| Export module memberships, centroids, and stability tables | `write_memberships()` |
+| Run clustering, plotting, and export in one workflow | `run_longitudinal()` |
 
-The package code lives in [`R/`](R/); runnable templates are in
-[`examples/`](examples/), including a real public-data example using
-Bioconductor `timecoursedata`.
+## Installation
 
-## Install
+Install the current development version from GitHub:
 
 ```r
-install.packages(c("data.table", "circlize", "RColorBrewer", "ggplot2", "cluster"))
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install(c("ComplexHeatmap", "timecoursedata"))
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
 
-install.packages("remotes")
-remotes::install_github("helenhuangmath/Heatmap_Plot")
+BiocManager::install(c("ComplexHeatmap", "circlize"))
+install.packages(c("cluster", "data.table", "ggplot2", "RColorBrewer", "remotes"))
+
+remotes::install_github("helenhuangmath/ModuleViz")
 ```
 
-For local development from this folder:
+Optional packages used by vignettes and public-data examples:
 
 ```r
-install.packages("devtools")
+BiocManager::install(c("BiocStyle", "timecoursedata"))
+install.packages(c("knitr", "rmarkdown", "testthat"))
+```
+
+For local development from this repository:
+
+```r
 devtools::load_all(".")
 ```
 
-## Package checks
+## Input Data
 
-Before submitting to GitHub, CRAN, or Bioconductor, run:
+`ModuleViz` expects two inputs:
 
-```bash
-R CMD build .
-env _R_CHECK_FORCE_SUGGESTS_=false R CMD check --no-manual ModuleViz_0.1.0.tar.gz
-```
+- A numeric matrix with features in rows and samples in columns. Rows may be
+  genes, peaks, proteins, or any other measured feature. Feature IDs should be
+  stored in `rownames(mat)`.
+- A sample metadata table with one row per sample. The metadata must contain a
+  sample ID column matching `colnames(mat)` and a numeric or ordered time column.
+  A grouping column, such as condition, genotype, treatment, or cell state, is
+  optional.
 
-For Bioconductor-style checks:
+Values are z-scored by row automatically unless `is_zscore = TRUE` is supplied.
+Feature selection should be done upstream; pass the package the features you
+want to cluster and plot.
 
-```r
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install("BiocCheck")
-BiocCheck::BiocCheck(".")
-```
-
-`timecoursedata` is optional and only needed for the public real-data examples.
-
-## Inputs
-
-- **Matrix** — features (rows) × samples (columns). Feature IDs as rownames
-  (e.g. `"chr1:3046477-3046808_Xkr4"` or a gene symbol), or a data.table with an
-  `id_col`. Values are z-scored by row automatically (`is_zscore = TRUE` to skip).
-  *Feature selection (which genes/peaks are interesting) is done upstream* — pass
-  in the matrix you want to plot.
-- **Metadata** — one row per sample, with:
-  - a sample-ID column matching the matrix columns (`sample_col`),
-  - a **numeric time** column (`time_col`) used to order clusters and columns,
-  - optionally a grouping column (`group_col`, e.g. genotype or treatment arm)
-    that splits the heatmap columns and overlays lines in the pattern plot.
-
-## Quick start
+## Quick Start
 
 ```r
 library(ModuleViz)
@@ -90,205 +82,224 @@ data("heatmap_example")
 mat <- heatmap_example$mat
 meta <- heatmap_example$meta
 
-# 1. cluster into temporal modules (ordered early-high -> late-high)
 obj <- longitudinal_cluster(
-  mat, meta,
-  sample_col = "SampleID", time_col = "TimeHr", group_col = "Condition",
-  k = 4, method = "kmeans",      # or "hierarchical" / "pam"
-  stability = TRUE               # per-module reproducibility (mean Jaccard)
+    mat,
+    meta,
+    sample_col = "SampleID",
+    time_col = "TimeHr",
+    group_col = "Condition",
+    k = 4,
+    method = "kmeans",
+    stability = TRUE
 )
-print(obj)
 
-# 2. + 5. ordered heatmap with metadata bars and labelled genes
 longitudinal_heatmap(
-  obj,
-  annotation_cols = c("Condition", "TimeHr"),
-  top_n_label     = 2,                              # auto-label top genes...
-  label_features  = c("Gene001", "Gene016"),        # ...plus chosen features
-  label_fontsize   = 11,
-  cluster_palette  = "spectral",
-  file = "heatmap.pdf"
+    obj,
+    annotation_cols = c("Condition", "TimeHr"),
+    top_n_label = 2,
+    label_features = c("Gene001", "Gene016"),
+    cluster_palette = "paired",
+    file = "moduleviz_heatmap.pdf"
 )
 
-# 3. per-module pattern line plot
-pattern_lineplot(obj, palette = "nature", file = "pattern_lines.pdf")
+pattern_lineplot(
+    obj,
+    palette = "set2",
+    file = "moduleviz_patterns.pdf"
+)
 
-# 4. cluster memberships (+ centroids + stability)
-write_memberships(obj, prefix = "results")
-
-# --- or everything at once ---
-run_longitudinal(mat, meta, out_prefix = "results",
-                 sample_col = "SampleID", time_col = "TimeHr",
-                 group_col = "Condition", k = 4, top_n_label = 2)
+write_memberships(obj, prefix = "moduleviz")
 ```
 
-## Example plot gallery
+The same workflow can be run with one convenience function:
 
-Run the bundled gallery script to generate examples of all three main outputs:
+```r
+run_longitudinal(
+    mat,
+    meta,
+    out_prefix = "moduleviz",
+    sample_col = "SampleID",
+    time_col = "TimeHr",
+    group_col = "Condition",
+    k = 4,
+    top_n_label = 2
+)
+```
+
+## Example Figures
+
+The bundled gallery script generates the main example outputs:
 
 ```r
 source("examples/example_moduleviz_gallery.R")
 ```
 
-It writes:
+### Longitudinal Module Heatmap
 
-- `examples/outputs/moduleviz_gallery/01_longitudinal_clustered_heatmap.pdf`
-- `examples/outputs/moduleviz_gallery/02_module_line_patterns.pdf`
-- `examples/outputs/moduleviz_gallery/03_rna_atac_side_by_side_heatmap.pdf`
-- `examples/outputs/moduleviz_gallery/moduleviz_example_memberships.txt`
-- `examples/outputs/moduleviz_gallery/moduleviz_example_centroids.txt`
-- `examples/outputs/moduleviz_gallery/moduleviz_example_stability.txt`
-
-Preview images committed with the package:
+Features are clustered into temporal modules and ordered from early-peaking to
+late-peaking patterns. Sample metadata can be displayed as annotation bars.
 
 ![Longitudinal clustered heatmap](inst/extdata/results/01_longitudinal_clustered_heatmap.png)
 
+### Module Trajectory Plot
+
+`pattern_lineplot()` summarizes the mean z-score trajectory for each module.
+
 ![Module line patterns](inst/extdata/results/02_module_line_patterns.png)
+
+### Paired Omics Heatmap
+
+`dual_omics_heatmap()` uses the primary layer, such as RNA, to define module
+order and aligns a secondary layer, such as ATAC or CUT&Run, by gene.
 
 ![RNA ATAC side-by-side heatmap](inst/extdata/results/03_rna_atac_side_by_side_heatmap.png)
 
-Single-cell-style pseudobulk example:
+### Pseudobulk Single-Cell Example
+
+The pseudobulk example shows the same workflow on grouped single-cell summaries.
 
 ```r
 source("examples/example_single_cell_pseudobulk.R")
 ```
 
-It writes:
-
-- `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_heatmap.pdf`
-- `examples/outputs/single_cell_pseudobulk/single_cell_pseudobulk_patterns.pdf`
-- pseudobulk membership/centroid/stability tables
-
-Preview images committed with the package:
-
 ![Single-cell pseudobulk heatmap](inst/extdata/results/04_single_cell_pseudobulk_heatmap.png)
 
 ![Single-cell pseudobulk line patterns](inst/extdata/results/05_single_cell_pseudobulk_patterns.png)
 
-### Choosing the number of clusters
+### Published CD8 T Cell Exhaustion Example
+
+The vignette `vignettes/cd8-exhaustion-published-data.Rmd` demonstrates an
+end-to-end analysis using published RNA-seq and CUT&Run data.
+
+![CD8 module heatmap](vignettes/figures/cd8_01_module_heatmap.png)
+
+![CD8 module patterns](vignettes/figures/cd8_03_module_patterns.png)
+
+![CD8 RNA versus H3K27ac heatmap](vignettes/figures/cd8_04_rna_vs_h3k27ac.png)
+
+![CD8 module correlation heatmap](vignettes/figures/cd8_05_module_correlation.png)
+
+## Choosing The Number Of Modules
+
+`choose_k()` reports clustering diagnostics across candidate module counts and
+stores the elbow estimate in the returned table.
 
 ```r
-diag <- choose_k(zscore_rows(mat), k_range = 2:20, method = "kmeans",
-                 file = "elbow.pdf")
-attr(diag, "suggested_k")   # distance-to-line elbow
+diag <- choose_k(
+    zscore_rows(mat),
+    k_range = 2:10,
+    method = "kmeans",
+    chosen_k = 4,
+    file = "choose_k_elbow.pdf"
+)
+
+attr(diag, "suggested_k")
 ```
 
-### Two data sets side by side (requirement 6)
+The elbow is a diagnostic. Choose a module count that is biologically
+interpretable and stable for the dataset.
 
-The primary layer (e.g. RNA) drives the clustering and row order; the secondary
-layer (ATAC / Cut&Run) is aligned per gene and drawn alongside. Because one gene
-can map to several peaks, the secondary layer is collapsed to one row per gene
-(`aggregate = "mean"` or `"top"`).
+## Paired Omics Workflow
+
+For paired assays, the primary layer drives clustering and row order. The
+secondary layer is aligned by gene and collapsed to one row per gene when
+multiple secondary features map to the same gene.
 
 ```r
-rna_obj <- longitudinal_cluster(rna, meta, sample_col = "SampleID",
-                                time_col = "TimeHr", group_col = "Genotype", k = 10)
+rna_obj <- longitudinal_cluster(
+    rna,
+    meta,
+    sample_col = "SampleID",
+    time_col = "TimeHr",
+    group_col = "Genotype",
+    k = 10
+)
 
 dual_omics_heatmap(
-  primary = rna_obj, secondary = atac,
-  primary_name = "RNA", secondary_name = "ATAC",
-  gene_of_secondary = function(id) sub("^.*_", "", id),  # "PeakID_SYMBOL" -> "SYMBOL"
-  aggregate = "mean",
-  label_features = c("Sox2", "Pax6"),
-  file = "RNA_ATAC_sidebyside.pdf"
+    primary = rna_obj,
+    secondary = atac,
+    primary_name = "RNA",
+    secondary_name = "ATAC",
+    gene_of_secondary = function(id) sub("^.*_", "", id),
+    aggregate = "mean",
+    label_features = c("Sox2", "Pax6"),
+    file = "rna_atac_heatmap.pdf"
 )
 ```
 
-See [`examples/example_single_omics.R`](examples/example_single_omics.R) and
-[`examples/example_dual_omics.R`](examples/example_dual_omics.R) for full,
-DESeq2-style templates.
+See `examples/example_single_omics.R`, `examples/example_dual_omics.R`, and
+`examples/example_module_correlation.R` for complete runnable templates.
 
-## Real public-data example
+## Public Time-Course Data
 
-The helper `load_real_timecourse_example()` loads public time-course data from
-Bioconductor `timecoursedata` and returns a plain matrix + metadata table ready
-for this package. The supported datasets are:
+`load_real_timecourse_example()` loads supported public time-course datasets
+from the optional Bioconductor `timecoursedata` package and returns a matrix and
+metadata table ready for `ModuleViz`.
 
 ```r
 available_real_timecourse_datasets()
-```
-
-Example using the Varoquaux 2019 sorghum leaf drought RNA-seq time course:
-
-```r
-library(ModuleViz)
 
 example <- load_real_timecourse_example(
-  dataset = "sorghum_leaf",
-  genotype = "BT642",
-  min_week = 3,
-  top_n_features = 1000
+    dataset = "sorghum_leaf",
+    genotype = "BT642",
+    min_week = 3,
+    top_n_features = 1000
 )
-
-diag <- choose_k(zscore_rows(example$mat), k_range = 2:10,
-                 file = "choose_k_elbow.pdf")
 
 obj <- longitudinal_cluster(
-  example$mat,
-  example$meta,
-  sample_col = example$sample_col,
-  time_col = example$time_col,
-  group_col = example$group_col,
-  k = attr(diag, "suggested_k"),
-  aggregate_replicates = TRUE,
-  stability = TRUE,
-  n_resample = 20
+    example$mat,
+    example$meta,
+    sample_col = example$sample_col,
+    time_col = example$time_col,
+    group_col = example$group_col,
+    k = 5,
+    aggregate_replicates = TRUE,
+    stability = TRUE
 )
-
-longitudinal_heatmap(obj, top_n_label = 3,
-                     file = "sorghum_leaf_heatmap.pdf")
-pattern_lineplot(obj, file = "sorghum_leaf_patterns.pdf")
-write_memberships(obj, prefix = "sorghum_leaf")
 ```
 
-See [`examples/example_real_timecoursedata.R`](examples/example_real_timecoursedata.R)
-and the tutorial
-[`vignettes/longitudinal-heatmap-tutorial.Rmd`](vignettes/longitudinal-heatmap-tutorial.Rmd).
+See `examples/example_real_timecoursedata.R` and
+`vignettes/longitudinal-heatmap-tutorial.Rmd` for a full workflow.
 
-Data source links:
+## Vignettes
 
-- Bioconductor package page: <https://bioconductor.org/packages/timecoursedata/>
-- Dataset documentation: <https://bioconductor.posit.co/packages/release/data/experiment/vignettes/timecoursedata/inst/doc/documentation.html>
-- Sorghum tutorial context in `moanin`: <https://bioconductor.org/packages/release/bioc/vignettes/moanin/inst/doc/documentation.html>
+The package includes:
 
-## Notes on design
+- `vignette("ModuleViz")`: complete user guide for clustering, heatmaps,
+  palettes, paired omics, and module correlation plots.
+- `vignette("cd8-exhaustion-published-data")`: published-data RNA/CUT&Run
+  workflow.
+- `vignette("longitudinal-heatmap-tutorial")`: tutorial using public
+  time-course data.
 
-- **Temporal ordering.** Each module's centroid across the ordered time points is
-  computed; modules are ranked by the time point where they peak (ties broken by
-  overall slope), so the heatmap reads top-to-bottom from early-peaking to
-  late-peaking. Rows within a module are ordered by strongest signal (max |z|).
-- **Stability.** `cluster_stability()` sub-samples the features, re-clusters, and
-  reports the mean maximum Jaccard overlap per module (à la `fpc::clusterboot`).
-  Values near 1 mean a reproducible module; below ~0.6, interpret with caution.
-  Stability is shown in the heatmap row titles (`J=…`) and as a left annotation.
-- **Algorithms.** k-means (Hartigan–Wong, robust to empty clusters),
-  hierarchical (`hclust`/`cutree`, default `ward.D2`), or PAM (`cluster::pam`).
-  Distance can be Euclidean or `1 - correlation` (`dist_method = "correlation"`).
+## Package Checks
 
----
+Before Bioconductor submission, run checks from a clean R/Bioconductor
+environment with all required and suggested dependencies installed:
 
-<details>
-<summary>Other quick ways to plot a heatmap (reference snippets)</summary>
+```bash
+R CMD build .
+R CMD check --no-manual ModuleViz_*.tar.gz
+```
 
-**pheatmap**
+Run Bioconductor-specific checks:
+
 ```r
-pheatmap(scaled_mat, scale = "none", kmeans_k = 5, show_rownames = FALSE)
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+BiocManager::install("BiocCheck")
+BiocCheck::BiocCheck(".")
 ```
 
-**ComplexHeatmap**
+## Citation
+
+After installation, cite `ModuleViz` from R with:
+
 ```r
-Heatmap(scaled_mat, show_row_names = FALSE)
+citation("ModuleViz")
 ```
 
-**heatmaply** — <https://cran.r-project.org/web/packages/heatmaply/vignettes/heatmaply.html>
-```r
-heatmaply(as.matrix(dt[, 1:12]), scale = "row",
-          scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(low = "blue", high = "red"),
-          file = "heatmap.pdf", height = 900, showticklabels = c(TRUE, FALSE))
-```
+## License
 
-**ggheatmap**
-```r
-ggheatmap(dt, scale = "column", row_side_colors = dt[, c("cyl", "gear")])
-```
-</details>
+`ModuleViz` is distributed under the MIT license.
