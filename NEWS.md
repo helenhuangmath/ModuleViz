@@ -1,4 +1,4 @@
-# ModuleViz 0.1.0.9000 (development)
+# ModuleViz 0.1.0
 
 ## New features
 
@@ -45,7 +45,7 @@
   walkthrough on published GEO data (GSE285248 RNA-seq + GSE285245 CUT&Run).
 * New `examples/example_module_correlation.R`.
 
-# ModuleViz 0.1.0
+# Initial release
 
 * Initial package release.
 * Adds temporal module clustering, ordered longitudinal heatmaps, module

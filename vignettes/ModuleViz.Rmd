@@ -3,7 +3,7 @@ title: "ModuleViz: Temporal Modules from Longitudinal Omics"
 author:
 - name: Hua Huang
   email: helenhuang.math@gmail.com
-date: "`r Sys.Date()`"
+date: "2026-05-01"
 package: ModuleViz
 output:
   BiocStyle::html_document:
