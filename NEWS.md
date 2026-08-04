@@ -42,7 +42,7 @@
   requirements, the clustering and module-ordering rules, stability, palettes,
   every plot type, paired omics, and an FAQ, with evaluated figures throughout.
 * New vignette `vignette("cd8-exhaustion-published-data")`: an end-to-end
-  walkthrough on published GEO data (GSE285248 RNA-seq + GSE285245 CUT&Run).
+  walkthrough on published GEO data (GSE285248 RNA-seq + GSE285245 CUT&RUN).
 * New `examples/example_module_correlation.R`.
 
 # Initial release

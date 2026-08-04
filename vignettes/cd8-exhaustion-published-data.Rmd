@@ -12,9 +12,9 @@ output:
     number_sections: true
 abstract: |
   This vignette demonstrates a reproducible ModuleViz workflow using published
-  RNA-seq and CUT&Run data from memory and exhausted CD8 T cells. RNA-seq data
+  RNA-seq and CUT&RUN data from memory and exhausted CD8 T cells. RNA-seq data
   define temporal modules along an ordered differentiation axis, and H3K27ac
-  CUT&Run signal is aligned to those modules by gene.
+  CUT&RUN signal is aligned to those modules by gene.
 vignette: >
   %\VignetteIndexEntry{ModuleViz: CD8 T Cell Exhaustion Published Data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -46,12 +46,12 @@ and exhausted CD8 T cells (PubMed
 | Accession | Assay | Samples | What we use it for |
 |---|---|---|---|
 | [GSE285248](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE285248) | RNA-seq | 16 | Defines the temporal modules |
-| [GSE285245](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE285245) | CUT&Run (H3K27ac, H3K27me3) | 86 | Chromatin layer aligned to those modules |
+| [GSE285245](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE285245) | CUT&RUN (H3K27ac, H3K27me3) | 86 | Chromatin layer aligned to those modules |
 
 **The experiment.** Naive P14 CD8 T cells were transferred into recipient mice
 infected with LCMV Armstrong, which resolves and yields **memory** cells
 (harvested day 30), or LCMV Clone 13, which persists and yields **exhausted**
-cells (harvested day 32). Spleens were profiled by RNA-seq and by CUT&Run for
+cells (harvested day 32). Spleens were profiled by RNA-seq and by CUT&RUN for
 activating (H3K27ac, H3K4me3) and repressive (H3K27me3, H3K9me3) marks.
 
 **The trajectory.** `ModuleViz` was built for time courses, but nothing in it
@@ -135,7 +135,7 @@ dim(rna_mat)
 column. The GEO column names encode everything we need in the pattern
 `<Infection>_P14_Day<d>_<assay>_Rep<n>_S<n>`, so the metadata can be parsed
 straight out of them. Writing this as a function pays off later, because the
-CUT&Run tables follow exactly the same naming scheme.
+CUT&RUN tables follow exactly the same naming scheme.
 
 ```{r metadata}
 make_meta <- function(cols, assay) {
@@ -504,12 +504,12 @@ Writes `cd8_modules_memberships.txt` (gene to module), `_centroids.txt` (mean
 trajectory per module), and `_stability.txt`. The membership table is what you
 would feed into GO or GSEA enrichment, one module at a time.
 
-# Add The CUT&Run Layer
+# Add The CUT&RUN Layer
 
 Now the paired-omics question: does chromatin state track these expression
 modules?
 
-The CUT&Run tables give peak coordinates but **no gene symbol**, so peaks have
+The CUT&RUN tables give peak coordinates but **no gene symbol**, so peaks have
 to be assigned to genes first. We map each peak to its nearest gene
 transcription start site, using the coordinates already present in the RNA
 annotation, and keep peaks within 25 kb.
@@ -674,7 +674,7 @@ citation("ModuleViz")
 ```
 
 - GSE285248 — RNA-seq, memory and exhausted CD8 T cells.
-- GSE285245 — CUT&Run, histone modifications in the same cells.
+- GSE285245 — CUT&RUN, histone modifications in the same cells.
 - PubMed [40389726](https://pubmed.ncbi.nlm.nih.gov/40389726/).
 
 # Session Information

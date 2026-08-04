@@ -1,16 +1,35 @@
-# ModuleViz: Longitudinal Omics Heatmaps and Temporal Module Plots
+# ModuleViz: an R package for temporal module discovery and visualization in longitudinal omics data
 
 #### Hua Huang
+
+Department of Systems Pharmacology and Translational Therapeutics, University
+of Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104, USA
+
+Institute for Immunology and Immune Health, University of Pennsylvania Perelman
+School of Medicine, Philadelphia, PA, 19104, USA
+
+Epigenetics Institute, University of Pennsylvania Perelman School of Medicine,
+Philadelphia, PA, 19104, USA
+
+Department of Cell and Developmental Biology, University of Pennsylvania
+Perelman School of Medicine, Philadelphia, PA, 19104, USA
 
 #### 2026-05-01
 
 Source: `vignettes/ModuleViz.Rmd`
 
+## Manuscript
+
+The manuscript draft for this package is available at
+[docs/paper/ModuleViz_manuscript.md](docs/paper/ModuleViz_manuscript.md).
+The accompanying bibliography is available at
+[docs/paper/references.bib](docs/paper/references.bib).
+
 ## Introduction
 
 `ModuleViz` is an R package for clustering and visualizing longitudinal
 high-throughput omics data. It is designed for feature-by-sample matrices from
-RNA-seq, ATAC-seq, CUT&Run, pseudobulk single-cell summaries, and related
+RNA-seq, ATAC-seq, CUT&RUN, pseudobulk single-cell summaries, and related
 time-course or ordered-state experiments.
 
 The central question addressed by `ModuleViz` is: which genes, peaks, or other
@@ -31,7 +50,7 @@ The main functions are:
 - `longitudinal_cluster()`: cluster features into ordered temporal modules.
 - `longitudinal_heatmap()`: draw annotated module heatmaps.
 - `pattern_lineplot()`: plot mean module trajectories.
-- `dual_omics_heatmap()`: align a second omics layer, such as ATAC or CUT&Run,
+- `dual_omics_heatmap()`: align a second omics layer, such as ATAC or CUT&RUN,
   to RNA-defined modules.
 - `module_correlation_heatmap()`: inspect gene-gene correlation within modules.
 - `module_correlation_summary()`: summarize within-module coherence.
@@ -515,7 +534,7 @@ The returned object contains `mat`, `meta`, and the column names to pass to
 
 `dual_omics_heatmap()` compares two assays in a shared row order. The primary
 layer, often RNA, defines the module structure. The secondary layer, such as
-ATAC or CUT&Run, is aligned by gene and shown beside the primary layer.
+ATAC or CUT&RUN, is aligned by gene and shown beside the primary layer.
 
 ```r
 rna_obj <- longitudinal_cluster(
@@ -569,7 +588,7 @@ indicate that the module should be split by increasing `k`.
 ## Published Data Example
 
 The vignette `vignette("cd8-exhaustion-published-data")` demonstrates a
-published-data workflow using RNA-seq and CUT&Run data from memory and
+published-data workflow using RNA-seq and CUT&RUN data from memory and
 exhausted CD8 T cells. RNA-seq defines the modules and H3K27ac signal is
 aligned to those modules by gene.
 
@@ -629,7 +648,7 @@ See `examples/example_real_timecoursedata.R` and
 The package includes three Bioconductor-style vignettes:
 
 - `vignette("ModuleViz")`: complete user guide.
-- `vignette("cd8-exhaustion-published-data")`: published RNA-seq and CUT&Run
+- `vignette("cd8-exhaustion-published-data")`: published RNA-seq and CUT&RUN
   workflow.
 - `vignette("longitudinal-heatmap-tutorial")`: tutorial using bundled and
   optional public time-course data.

@@ -2,7 +2,7 @@
 ## Validate ModuleViz on real public data: CD8 T cell memory vs exhaustion
 ##
 ##   GSE285248 - RNA-seq   (16 samples, naive / memory / exhausted P14 cells)
-##   GSE285245 - CUT&Run   (H3K27ac activating, H3K27me3 repressive)
+##   GSE285245 - CUT&RUN   (H3K27ac activating, H3K27me3 repressive)
 ##
 ##   "Deciphering the role of histone modifications in memory and exhausted
 ##   CD8 T cells."  Naive P14 cells were transferred into recipients infected
@@ -166,7 +166,7 @@ if (nrow(sig) > MAX_DEG) {
   sig <- sig[seq_len(MAX_DEG)]
 }
 ## Cluster on the log scale: z-scoring raw counts lets a few high-count outliers
-## dominate the distance metric.  The CUT&Run layers are logged the same way.
+## dominate the distance metric.  The CUT&RUN layers are logged the same way.
 deg_mat <- log2(rna_mat[sig$ID, , drop = FALSE] + 1)
 fwrite(sig, file.path(out_dir, "01_DEG_table.txt"), sep = "\t")
 
@@ -511,11 +511,11 @@ chk("collapsed heatmap written", file.exists(ah) && file.size(ah) > 40000)
 ## (no line plot here: it would be 04_module_patterns.pdf again)
 
 ## ---------------------------------------------------------------------------
-## 12. CUT&Run: map peaks to genes, then draw the paired-omics figure
+## 12. CUT&RUN: map peaks to genes, then draw the paired-omics figure
 ## ---------------------------------------------------------------------------
-section("12. dual_omics_heatmap: RNA + H3K27ac CUT&Run")
+section("12. dual_omics_heatmap: RNA + H3K27ac CUT&RUN")
 
-## The CUT&Run tables carry peak coordinates but no gene symbol, so peaks are
+## The CUT&RUN tables carry peak coordinates but no gene symbol, so peaks are
 ## assigned to the nearest gene TSS (taken from the RNA annotation) within a
 ## window.  Row IDs are then built as "<peak>_<Symbol>", the PeakID_SYMBOL
 ## convention that dual_omics_heatmap()'s default gene_of_secondary expects.

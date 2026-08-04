@@ -10,13 +10,13 @@ GitHub issue in `Bioconductor/Contributions`.
 visualization. It clusters rows of an expression, accessibility, or other omics
 matrix into temporal modules, orders modules by trajectory, and creates
 publication-ready heatmaps and module pattern plots. It also supports paired
-omics visualization, such as RNA and ATAC/CUT&Run data aligned by gene.
+omics visualization, such as RNA and ATAC/CUT&RUN data aligned by gene.
 
 The package is intended for high-throughput genomic data analysis and
 visualization, including:
 
 - RNA-seq time courses
-- ATAC-seq or CUT&Run time courses
+- ATAC-seq or CUT&RUN time courses
 - paired RNA/chromatin assays
 - pseudobulk single-cell time-course summaries
 - treatment, differentiation, or exhaustion trajectories
@@ -233,7 +233,7 @@ ModuleViz provides visualization and clustering tools for longitudinal
 high-throughput omics data. It clusters features into ordered temporal modules,
 draws ComplexHeatmap-based module heatmaps, summarizes module trajectories with
 line plots, and supports paired RNA/chromatin visualizations aligned by gene.
-The package is intended for RNA-seq, ATAC-seq, CUT&Run, pseudobulk single-cell,
+The package is intended for RNA-seq, ATAC-seq, CUT&RUN, pseudobulk single-cell,
 and related genomic time-course workflows.
 
 Why Bioconductor:
