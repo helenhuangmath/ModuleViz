@@ -2,18 +2,6 @@
 
 #### Hua Huang
 
-Department of Systems Pharmacology and Translational Therapeutics, University
-of Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104, USA
-
-Institute for Immunology and Immune Health, University of Pennsylvania Perelman
-School of Medicine, Philadelphia, PA, 19104, USA
-
-Epigenetics Institute, University of Pennsylvania Perelman School of Medicine,
-Philadelphia, PA, 19104, USA
-
-Department of Cell and Developmental Biology, University of Pennsylvania
-Perelman School of Medicine, Philadelphia, PA, 19104, USA
-
 #### 2026-05-01
 
 Source: `vignettes/ModuleViz.Rmd`
@@ -22,8 +10,6 @@ Source: `vignettes/ModuleViz.Rmd`
 
 The manuscript draft for this package is available at
 [docs/paper/ModuleViz_manuscript.md](docs/paper/ModuleViz_manuscript.md).
-The accompanying bibliography is available at
-[docs/paper/references.bib](docs/paper/references.bib).
 
 ## Introduction
 
@@ -42,7 +28,7 @@ by row, clusters features into temporal modules, orders modules from
 early-peaking to late-peaking patterns, and renders the result as heatmaps,
 module trajectory plots, paired-omics heatmaps, and module coherence
 diagnostics. Heatmaps are drawn with
-[`ComplexHeatmap`](https://bioconductor.org/packages/ComplexHeatmap/), so the
+`ComplexHeatmap`, so the
 package fits naturally into Bioconductor workflows.
 
 The main functions are:
