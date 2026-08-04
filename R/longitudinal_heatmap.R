@@ -26,29 +26,107 @@
 ## source(), install the packages listed in README.md first.
 ## =============================================================================
 
-## Default diverging palette for z-scores (publishable blue-white-red).
-.longi_default_col_fun <- function() {
-  circlize::colorRamp2(c(-2, -1, 0, 1, 2),
-                       c("#313695", "#74ADD1", "#F7F7F7", "#F46D43", "#A50026"))
+## Palette registry ------------------------------------------------------------
+##
+## Two kinds of palette live here and they must be sampled differently:
+##
+##   - qualitative palettes (Paired, Set2, Set3, Okabe-Ito, ...) are sets of
+##     hand-picked, maximally distinguishable colours.  For n <= length(base) we
+##     take the FIRST n as-is.  Interpolating them would blend neighbouring hues
+##     into muddy in-between colours that are not in the palette at all (and, for
+##     Okabe-Ito, would destroy its colour-blind safety).
+##   - ramp palettes (Spectral, Viridis) are continuous colour scales, so the
+##     correct way to get n colours is to interpolate across the whole ramp.
+.moduleviz_palettes <- list(
+  paired    = list(ramp = FALSE, cols = NULL),   # filled in below from RColorBrewer
+  set2      = list(ramp = FALSE, cols = NULL),
+  set3      = list(ramp = FALSE, cols = NULL),
+  spectral  = list(ramp = TRUE,  cols = NULL),
+  viridis   = list(ramp = TRUE,  cols = NULL),
+  okabe_ito = list(ramp = FALSE,
+                   cols = c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00",
+                            "#56B4E9", "#F0E442", "#000000")),
+  nature    = list(ramp = FALSE,
+                   cols = c("#E64B35", "#4DBBD5", "#00A087", "#3C5488", "#F39B7F",
+                            "#8491B4", "#91D1C2", "#DC0000", "#7E6148", "#B09C85")),
+  science   = list(ramp = FALSE,
+                   cols = c("#3B4992", "#EE0000", "#008B45", "#631879", "#008280",
+                            "#BB0021", "#5F559B", "#A20056", "#808180", "#1B1919"))
+)
+
+.moduleviz_palette_names <- function() names(.moduleviz_palettes)
+
+.moduleviz_palette_base <- function(palette) {
+  switch(palette,
+    paired   = RColorBrewer::brewer.pal(12, "Paired"),
+    set2     = RColorBrewer::brewer.pal(8,  "Set2"),
+    set3     = RColorBrewer::brewer.pal(12, "Set3"),
+    spectral = rev(RColorBrewer::brewer.pal(11, "Spectral")),
+    viridis  = grDevices::hcl.colors(11, "viridis"),
+    .moduleviz_palettes[[palette]]$cols)
 }
 
-.moduleviz_discrete_palette <- function(n, palette = "okabe_ito") {
-  palette <- match.arg(palette, c("okabe_ito", "spectral", "nature", "science"))
-  base <- switch(palette,
-    okabe_ito = c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00",
-                  "#56B4E9", "#F0E442", "#000000"),
-    spectral = rev(RColorBrewer::brewer.pal(11, "Spectral")),
-    nature = c("#E64B35", "#4DBBD5", "#00A087", "#3C5488", "#F39B7F",
-               "#8491B4", "#91D1C2", "#DC0000", "#7E6148", "#B09C85"),
-    science = c("#3B4992", "#EE0000", "#008B45", "#631879", "#008280",
-                "#BB0021", "#5F559B", "#A20056", "#808180", "#1B1919")
-  )
+#' Build `n` discrete colours from a named ModuleViz palette.
+#'
+#' @param n number of colours needed.
+#' @param palette one of "paired", "set2", "set3", "spectral", "viridis",
+#'   "okabe_ito", "nature", "science".
+#' @return character vector of `n` hex colours.
+#' @noRd
+.moduleviz_discrete_palette <- function(n, palette = "paired") {
+  palette <- .moduleviz_match_palette(palette)
+  base <- .moduleviz_palette_base(palette)
+  if (!.moduleviz_palettes[[palette]]$ramp && n <= length(base)) {
+    return(base[seq_len(n)])
+  }
   grDevices::colorRampPalette(base)(n)
 }
 
-.moduleviz_cluster_cols <- function(levels, palette = "spectral") {
-  if (identical(palette, "spectual")) palette <- "spectral"
+## Accept a few friendly aliases (and the historical "spectual" typo).
+.moduleviz_match_palette <- function(palette) {
+  palette <- tolower(as.character(palette)[1])
+  palette <- switch(palette,
+    spectual = "spectral", okabeito = "okabe_ito", "okabe-ito" = "okabe_ito",
+    rdylbu = "spectral", palette)
+  match.arg(palette, .moduleviz_palette_names())
+}
+
+.moduleviz_cluster_cols <- function(levels, palette = "paired") {
   setNames(.moduleviz_discrete_palette(length(levels), palette), levels)
+}
+
+## Continuous z-score colour maps ---------------------------------------------
+
+#' Diverging / sequential colour map for z-scores.
+#'
+#' @param palette "rdbu" (default; ColorBrewer RdBu reversed so high = red) or
+#'   "viridis" (perceptually uniform, colour-blind safe, good for print).
+#' @param limits numeric length-2 z-score range to saturate at.
+#' @return a `circlize::colorRamp2` function.
+#' @noRd
+.moduleviz_zscore_col_fun <- function(palette = c("rdbu", "viridis"),
+                                      limits = c(-2, 2)) {
+  palette <- tolower(as.character(palette)[1])
+  palette <- match.arg(palette, c("rdbu", "viridis"))
+  cols <- if (palette == "viridis") {
+    grDevices::hcl.colors(7, "viridis")
+  } else {
+    ## brewer RdBu runs red -> blue; reverse it so LOW = blue, HIGH = red.
+    rev(RColorBrewer::brewer.pal(7, "RdBu"))
+  }
+  circlize::colorRamp2(seq(limits[1], limits[2], length.out = length(cols)), cols)
+}
+
+## Back-compat alias for the previous internal name.
+.longi_default_col_fun <- function(palette = "rdbu", limits = c(-2, 2)) {
+  .moduleviz_zscore_col_fun(palette, limits)
+}
+
+## Legend text sizing, shared by every heatmap in the package so that one
+## `legend_fontsize` argument moves the title and the labels together.
+.moduleviz_legend_gp <- function(legend_fontsize) {
+  list(title_gp  = gpar(fontsize = legend_fontsize, fontface = "bold"),
+       labels_gp = gpar(fontsize = legend_fontsize))
 }
 
 .moduleviz_write_plot <- function(file, width, height, draw_it) {
@@ -256,10 +334,18 @@ cluster_stability <- function(z, cluster, k, method = "kmeans",
 #' @param method clustering method (silhouette is computed for all methods).
 #' @param seed base seed.
 #' @param file optional path; if given, a PDF diagnostic plot is written.
+#' @param chosen_k optional k actually used downstream.  When supplied it is
+#'   drawn as a solid line beside the dashed elbow, so the diagnostic figure
+#'   stays consistent with the module count in the rest of the analysis - the
+#'   elbow is only a heuristic and is often not the k you want to report.
+#' @param annotate_k if FALSE, draw the bare elbow curve with no marker lines
+#'   and no subtitle.
+#' @param base_size base font size for the diagnostic plot.
 #' @return data.table of diagnostics; attribute "suggested_k" holds the elbow k.
 choose_k <- function(z, k_range = 2:20, method = "kmeans",
                      nstart = 25, hclust_method = "ward.D2",
-                     dist_method = "euclidean", seed = 100, file = NULL) {
+                     dist_method = "euclidean", seed = 100, file = NULL,
+                     chosen_k = NULL, annotate_k = TRUE, base_size = 11) {
   k_range <- k_range[k_range < nrow(unique(z))]
   d_for_sil <- if (dist_method == "correlation") as.dist(1 - cor(t(z)))
                else dist(z, method = dist_method)
@@ -291,16 +377,27 @@ choose_k <- function(z, k_range = 2:20, method = "kmeans",
   setattr(diag_dt, "suggested_k", elbow)
 
   if (!is.null(file)) {
-    p <- ggplot(diag_dt, aes(k, tot_withinss)) +
+    subtitle <- NULL
+    p <- ggplot(diag_dt, aes(k, tot_withinss))
+    if (annotate_k) {
+      subtitle <- sprintf("dashed: distance-to-line elbow = k%s", elbow)
+      p <- p + geom_vline(xintercept = elbow, linetype = 2, color = "#b2182b")
+      if (!is.null(chosen_k)) {
+        p <- p + geom_vline(xintercept = chosen_k, linetype = 1,
+                            linewidth = 0.9, color = "#2166ac")
+        subtitle <- sprintf("%s   |   solid: k used downstream = k%s",
+                            subtitle, chosen_k)
+      }
+    }
+    p <- p +
       geom_line(color = "#2b2b2b") + geom_point(size = 2, color = "#2b2b2b") +
-      geom_vline(xintercept = elbow, linetype = 2, color = "#b2182b") +
       scale_x_continuous(breaks = k_range) +
-      theme_bw(base_size = 11) +
-      theme(panel.grid.minor = element_blank()) +
+      theme_bw(base_size = base_size) +
+      theme(panel.grid.minor = element_blank(),
+            plot.subtitle = element_text(size = base_size * 0.85)) +
       labs(x = "k", y = "total within-cluster sum of squares",
-           title = "k-means elbow diagnostic",
-           subtitle = sprintf("distance-to-line elbow = k%s", elbow))
-    ggsave(file, p, width = 5.2, height = 3.8)
+           title = "k-means elbow diagnostic", subtitle = subtitle)
+    ggsave(file, p, width = 6.2, height = 4)
   }
   diag_dt[]
 }
@@ -564,10 +661,23 @@ resolve_labels <- function(obj, features = NULL, top_n = 0,
 #' @param top_n_label per-cluster automatic labels (0 = none).
 #' @param rank_table optional ranking table for automatic labels.
 #' @param id_field,value_field,bigger_is_better passed to resolve_labels.
-#' @param col_fun colour mapping for z-scores (circlize::colorRamp2).
+#' @param col_fun colour mapping for z-scores (circlize::colorRamp2).  Overrides
+#'   `zscore_palette` when supplied.
+#' @param zscore_palette continuous palette for the z-score body: "rdbu"
+#'   (default, blue-white-red) or "viridis".
+#' @param zscore_limits numeric length-2 z-score range to saturate the colour
+#'   scale at.
 #' @param cluster_palette discrete palette for the module annotation bar.
-#'   Defaults to "spectral"; "spectual" is accepted as a typo alias.
+#'   Defaults to "paired"; "spectral" and the other registry palettes also work.
+#' @param annotation_palette discrete palette for categorical metadata bars
+#'   (e.g. condition / genotype).  Defaults to "set2"; "set3" is a good choice
+#'   when there are more than 8 levels.
 #' @param label_fontsize,row_title_fontsize,column_name_fontsize text sizes.
+#' @param annotation_name_fontsize,legend_fontsize,title_fontsize text sizes for
+#'   the annotation track names, all legends, and the heatmap title.
+#' @param show_column_names show sample names along the bottom.  Set FALSE when
+#'   sample IDs are long or uninformative and the annotation bars already say
+#'   what each column is.
 #' @param show_stability if TRUE and available, annotate module stability.
 #' @param file optional PDF or PNG path; if set the heatmap is written there.
 #' @param width,height PDF size in inches.
@@ -582,16 +692,23 @@ longitudinal_heatmap <- function(obj,
                                  id_field = "ID", value_field = "value",
                                  bigger_is_better = TRUE,
                                  col_fun = NULL,
-                                 cluster_palette = "spectral",
+                                 zscore_palette = c("rdbu", "viridis"),
+                                 zscore_limits = c(-2, 2),
+                                 cluster_palette = "paired",
+                                 annotation_palette = "set2",
                                  label_fontsize = 10,
                                  row_title_fontsize = 10,
                                  column_name_fontsize = 9,
                                  annotation_name_fontsize = 10,
+                                 legend_fontsize = 10,
+                                 title_fontsize = 13,
+                                 show_column_names = TRUE,
                                  show_stability = TRUE,
                                  file = NULL, width = 9, height = 13,
                                  title = NULL) {
   stopifnot(inherits(obj, "longi"))
-  if (is.null(col_fun)) col_fun <- .longi_default_col_fun()
+  if (is.null(col_fun))
+    col_fun <- .moduleviz_zscore_col_fun(zscore_palette, zscore_limits)
   p    <- obj$params
   meta <- obj$meta
   z    <- obj$z
@@ -609,6 +726,14 @@ longitudinal_heatmap <- function(obj,
     annotation_cols <- c(p$group_col, p$time_col)
     annotation_cols <- annotation_cols[!vapply(annotation_cols, is.null, logical(1))]
   }
+  ## Requested-but-absent annotations are dropped, but say so: after
+  ## aggregate_replicates = TRUE the metadata is rebuilt with only the sample,
+  ## group, and time columns, so any other column silently disappears.
+  missing_anno <- setdiff(annotation_cols, names(meta))
+  if (length(missing_anno))
+    warning("annotation_cols not found in the object's metadata and skipped: ",
+            paste(missing_anno, collapse = ", "),
+            ". Available: ", paste(names(meta), collapse = ", "), call. = FALSE)
   annotation_cols <- intersect(annotation_cols, names(meta))
   top_anno <- NULL
   if (length(annotation_cols)) {
@@ -619,16 +744,20 @@ longitudinal_heatmap <- function(obj,
       if (!is.null(col_list[[a]])) next
       vals <- anno_df[[a]]
       if (is.numeric(vals)) {
+        ## sequential ramp for continuous metadata (e.g. time)
         col_list[[a]] <- circlize::colorRamp2(
           range(vals, na.rm = TRUE),
           c("#deebf7", "#08519c"))
       } else {
         lv <- unique(as.character(vals))
-        col_list[[a]] <- setNames(.moduleviz_discrete_palette(length(lv), "okabe_ito"), lv)
+        col_list[[a]] <- setNames(
+          .moduleviz_discrete_palette(length(lv), annotation_palette), lv)
       }
     }
-    top_anno <- HeatmapAnnotation(df = anno_df, col = col_list,
-                                  annotation_name_gp = gpar(fontsize = annotation_name_fontsize))
+    top_anno <- HeatmapAnnotation(
+      df = anno_df, col = col_list,
+      annotation_name_gp = gpar(fontsize = annotation_name_fontsize),
+      annotation_legend_param = .moduleviz_legend_gp(legend_fontsize))
   }
 
   ## ---- left annotation: module colour + optional stability ---------------
@@ -636,6 +765,7 @@ longitudinal_heatmap <- function(obj,
   left_args <- list(Cluster = cluster,
                     col = list(Cluster = cluster_cols),
                     show_annotation_name = FALSE,
+                    annotation_legend_param = .moduleviz_legend_gp(legend_fontsize),
                     width = unit(4, "mm"))
   if (show_stability && !is.null(obj$stability)) {
     stab_map <- setNames(obj$stability$MeanJaccard, obj$stability$Cluster)
@@ -676,14 +806,17 @@ longitudinal_heatmap <- function(obj,
     row_gap = unit(1.5, "mm"), show_row_names = FALSE,
     column_split = col_split, cluster_columns = FALSE,
     column_gap = unit(1.5, "mm"),
+    show_column_names = show_column_names,
     column_names_gp = gpar(fontsize = column_name_fontsize),
     column_title = title,
+    column_title_gp = gpar(fontsize = title_fontsize),
     top_annotation = top_anno, left_annotation = left_anno,
     right_annotation = right_anno,
     use_raster = TRUE, raster_quality = 2,
-    heatmap_legend_param = list(direction = "horizontal",
-                                title_position = "topcenter",
-                                legend_width = unit(4, "cm")))
+    heatmap_legend_param = c(list(direction = "horizontal",
+                                  title_position = "topcenter",
+                                  legend_width = unit(4, "cm")),
+                             .moduleviz_legend_gp(legend_fontsize)))
 
   draw_it <- function() draw(ht, heatmap_legend_side = "bottom",
                              annotation_legend_side = "bottom",
@@ -710,15 +843,43 @@ longitudinal_heatmap <- function(obj,
 #' @param file optional PDF path.
 #' @param width,height PDF size; height auto-scales with the module count if NULL.
 #' @param ncol number of facet columns when there is no group_col.
-#' @param palette line colour palette: "nature" or "science".
+#' @param palette colour palette for the group / condition lines.  Defaults to
+#'   "set2"; any registry palette works ("set3", "paired", "nature", ...).
+#' @param cluster_palette palette used to colour the per-module lines when the
+#'   object has no group_col.  Defaults to "paired".
+#' @param group_colors optional named character vector of explicit colours for
+#'   the group lines, e.g. `c(Control = "grey70", Stimulated = "firebrick")`.
+#'   Overrides `palette` for the levels it names; any level it does not name
+#'   keeps its palette colour.
 #' @param base_size ggplot base font size.
+#' @param title plot title; `NULL` drops it entirely.
+#' @param title_fontsize title size in points.  Defaults to `base_size`, so the
+#'   title stays proportionate instead of inflating with the base size.
+#' @param xlab x-axis label; defaults to the name of `time_col`.
+#' @param time_labels optional relabelling of the x-axis ticks, e.g.
+#'   `c("1" = "Naive", "2" = "Memory", "3" = "Exhausted")` when the ordering
+#'   column is an integer rank rather than real time.
+#' @param x_angle rotation of the x tick labels in degrees.  Use `0` when the
+#'   labels are short enough to sit flat.
+#' @param line_width,point_size line and point size.
 #' @return a ggplot object (also saved if `file` is given).
 pattern_lineplot <- function(obj, file = NULL, width = NULL, height = NULL,
                              ncol = 1,
-                             palette = c("nature", "science"),
-                             base_size = 12) {
+                             palette = "set2",
+                             cluster_palette = "paired",
+                             group_colors = NULL,
+                             base_size = 12,
+                             title = "Module patterns",
+                             title_fontsize = NULL,
+                             xlab = NULL,
+                             time_labels = NULL,
+                             x_angle = 45,
+                             line_width = 1.1,
+                             point_size = 2.2) {
   stopifnot(inherits(obj, "longi"))
-  palette <- match.arg(palette)
+  palette <- .moduleviz_match_palette(palette)
+  cluster_palette <- .moduleviz_match_palette(cluster_palette)
+  if (is.null(title_fontsize)) title_fontsize <- base_size
   p  <- obj$params
   cn <- table(obj$cluster)
   facet_lab <- setNames(sprintf("%s (n=%d)", levels(obj$cluster), as.integer(cn)),
@@ -739,6 +900,14 @@ pattern_lineplot <- function(obj, file = NULL, width = NULL, height = NULL,
     long[, Group := factor(Group, levels = unique(Group))]
     group_cols <- setNames(.moduleviz_discrete_palette(nlevels(long$Group), palette),
                            levels(long$Group))
+    ## explicit colours win for the levels they name
+    if (!is.null(group_colors)) {
+      named <- intersect(names(group_colors), names(group_cols))
+      if (!length(named))
+        warning("none of `group_colors` match the group levels: ",
+                paste(levels(long$Group), collapse = ", "))
+      group_cols[named] <- group_colors[named]
+    }
     gg <- ggplot(long, aes(factor(Time), z, group = Group, color = Group)) +
       scale_color_manual(values = group_cols) +
       facet_grid(rows = vars(ClusterF), scales = "free_x")
@@ -747,8 +916,9 @@ pattern_lineplot <- function(obj, file = NULL, width = NULL, height = NULL,
     long[, Time := suppressWarnings(as.numeric(as.character(key)))]
     if (any(is.na(long$Time))) long[, Time := key]      # non-numeric keys
     setorder(long, Cluster, Time)
-    cluster_cols <- setNames(.moduleviz_discrete_palette(nlevels(obj$cluster), palette),
-                             levels(obj$cluster))
+    cluster_cols <- setNames(
+      .moduleviz_discrete_palette(nlevels(obj$cluster), cluster_palette),
+      levels(obj$cluster))
     gg <- ggplot(long, aes(factor(Time), z, group = Cluster, color = Cluster)) +
       scale_color_manual(values = cluster_cols, guide = "none") +
       facet_wrap(~ ClusterF, ncol = ncol, strip.position = "right")
@@ -757,13 +927,19 @@ pattern_lineplot <- function(obj, file = NULL, width = NULL, height = NULL,
 
   gg <- gg +
     geom_hline(yintercept = 0, linetype = 2, color = "grey70") +
-    geom_line(linewidth = 1.1) + geom_point(size = 2.2) +
+    geom_line(linewidth = line_width) + geom_point(size = point_size) +
     theme_bw(base_size = base_size) +
     theme(panel.grid.minor = element_blank(),
           strip.text.y.right = element_text(angle = 0),
-          axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = p$time_col, y = "mean z-score", color = p$group_col,
-         title = "Module patterns")
+          plot.title = element_text(size = title_fontsize),
+          axis.text.x = element_text(angle = x_angle,
+                                     hjust = if (x_angle == 0) 0.5 else 1)) +
+    labs(x = if (is.null(xlab)) p$time_col else xlab,
+         y = "mean z-score", color = p$group_col, title = title)
+
+  ## optional relabelling of the ordering axis (e.g. 1/2/3 -> naive/mem/exh)
+  if (!is.null(time_labels))
+    gg <- gg + scale_x_discrete(labels = time_labels)
 
   if (!is.null(file)) {
     if (is.null(width))  width  <- if (!is.null(p$group_col)) 5.2 else 4.2
@@ -832,9 +1008,16 @@ write_memberships <- function(obj, file = NULL, prefix = NULL,
 #'   for the secondary and uses the ID as-is for the primary.
 #' @param aggregate how to collapse secondary peaks per gene ("mean" or "top").
 #' @param label_features genes to label down the middle (character vector).
-#' @param col_fun z-score colour map.
+#' @param col_fun z-score colour map.  Overrides `zscore_palette` when supplied.
+#' @param zscore_palette continuous palette for both layers: "rdbu" (default) or
+#'   "viridis".  Both layers share one scale so they stay comparable.
+#' @param zscore_limits numeric length-2 z-score saturation range.
 #' @param cluster_palette discrete palette for the module annotation bar.
+#'   Defaults to "paired".
 #' @param label_fontsize,row_title_fontsize,column_name_fontsize text sizes.
+#' @param legend_fontsize,title_fontsize text sizes for the legends and the
+#'   per-layer column titles.
+#' @param show_column_names show sample names along the bottom of both layers.
 #' @param file optional PDF or PNG path (this is a *separate* new figure).
 #' @param width,height PDF size.
 #' @param ... passed through to longitudinal_cluster when raw matrices are given.
@@ -847,13 +1030,19 @@ dual_omics_heatmap <- function(primary, secondary,
                                aggregate = c("mean", "top"),
                                label_features = NULL,
                                col_fun = NULL,
-                               cluster_palette = "spectral",
+                               zscore_palette = c("rdbu", "viridis"),
+                               zscore_limits = c(-2, 2),
+                               cluster_palette = "paired",
                                label_fontsize = 10,
                                row_title_fontsize = 10,
                                column_name_fontsize = 9,
+                               legend_fontsize = 10,
+                               title_fontsize = 13,
+                               show_column_names = TRUE,
                                file = NULL, width = 12, height = 13, ...) {
   aggregate <- match.arg(aggregate)
-  if (is.null(col_fun)) col_fun <- .longi_default_col_fun()
+  if (is.null(col_fun))
+    col_fun <- .moduleviz_zscore_col_fun(zscore_palette, zscore_limits)
 
   ## Allow raw matrices: cluster the primary here.
   if (!inherits(primary, "longi")) {
@@ -940,23 +1129,32 @@ dual_omics_heatmap <- function(primary, secondary,
     row_gap = unit(1.5, "mm"), show_row_names = FALSE,
     column_split = split_primary, cluster_columns = FALSE,
     column_title = primary_name, column_gap = unit(1.5, "mm"),
+    column_title_gp = gpar(fontsize = title_fontsize),
+    show_column_names = show_column_names,
     column_names_gp = gpar(fontsize = column_name_fontsize),
-    left_annotation = rowAnnotation(Cluster = cluster,
-                                    col = list(Cluster = cluster_cols),
-                                    show_annotation_name = FALSE,
-                                    width = unit(4, "mm")),
+    left_annotation = rowAnnotation(
+      Cluster = cluster, col = list(Cluster = cluster_cols),
+      show_annotation_name = FALSE,
+      annotation_legend_param = .moduleviz_legend_gp(legend_fontsize),
+      width = unit(4, "mm")),
     use_raster = TRUE, raster_quality = 2,
-    heatmap_legend_param = list(direction = "horizontal", title_position = "topcenter"))
+    heatmap_legend_param = c(list(direction = "horizontal",
+                                  title_position = "topcenter"),
+                             .moduleviz_legend_gp(legend_fontsize)))
 
   ht_secondary <- Heatmap(
     z_secondary, name = paste0(secondary_name, "\nz-score"), col = col_fun,
     cluster_rows = FALSE, show_row_names = FALSE,
     column_split = split_secondary, cluster_columns = FALSE,
     column_title = secondary_name, column_gap = unit(1.5, "mm"),
+    column_title_gp = gpar(fontsize = title_fontsize),
+    show_column_names = show_column_names,
     column_names_gp = gpar(fontsize = column_name_fontsize),
     right_annotation = right_anno,
     use_raster = TRUE, raster_quality = 2,
-    heatmap_legend_param = list(direction = "horizontal", title_position = "topcenter"))
+    heatmap_legend_param = c(list(direction = "horizontal",
+                                  title_position = "topcenter"),
+                             .moduleviz_legend_gp(legend_fontsize)))
 
   combined <- ht_primary + ht_secondary
   draw_it <- function() draw(combined, heatmap_legend_side = "bottom",
@@ -984,19 +1182,28 @@ dual_omics_heatmap <- function(primary, secondary,
 #' @param mat,meta,... passed to longitudinal_cluster().
 #' @param out_prefix path prefix for all output files.
 #' @param label_features,top_n_label,annotation_cols passed to longitudinal_heatmap().
+#' @param zscore_palette,cluster_palette,annotation_palette palettes forwarded to
+#'   longitudinal_heatmap() / pattern_lineplot().
 #' @param heatmap_width,heatmap_height heatmap PDF size.
 #' @return the "longi" object (invisibly).
 run_longitudinal <- function(mat, meta, out_prefix,
                              label_features = NULL, top_n_label = 5,
                              annotation_cols = NULL, rank_table = NULL,
+                             zscore_palette = "rdbu",
+                             cluster_palette = "paired",
+                             annotation_palette = "set2",
                              heatmap_width = 9, heatmap_height = 13, ...) {
   obj <- longitudinal_cluster(mat, meta, ...)
   longitudinal_heatmap(obj, annotation_cols = annotation_cols,
                        label_features = label_features, top_n_label = top_n_label,
                        rank_table = rank_table,
+                       zscore_palette = zscore_palette,
+                       cluster_palette = cluster_palette,
+                       annotation_palette = annotation_palette,
                        file = paste0(out_prefix, "_heatmap.pdf"),
                        width = heatmap_width, height = heatmap_height)
-  pattern_lineplot(obj, file = paste0(out_prefix, "_pattern_lines.pdf"))
+  pattern_lineplot(obj, file = paste0(out_prefix, "_pattern_lines.pdf"),
+                   cluster_palette = cluster_palette)
   write_memberships(obj, prefix = out_prefix)
   invisible(obj)
 }

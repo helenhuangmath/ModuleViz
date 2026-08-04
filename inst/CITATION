@@ -3,7 +3,7 @@ citHeader("To cite ModuleViz in publications, please use:")
 citEntry(
   entry = "Manual",
   title = "ModuleViz: Longitudinal Omics Heatmaps and Temporal Module Plots",
-  author = personList(as.person("Helen Huang")),
+  author = personList(as.person("Hua Huang")),
   year = "2026",
   note = "R package version 0.1.0",
   url = "https://github.com/helenhuangmath/Heatmap_Plot",

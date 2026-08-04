@@ -1,0 +1,615 @@
+---
+title: "ModuleViz: temporal modules from longitudinal omics"
+author:
+- name: Helen Huang
+  email: helenhuang.math@gmail.com
+package: ModuleViz
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+abstract: |
+  ModuleViz turns a feature-by-sample matrix with an ordered sample axis into
+  interpretable temporal modules: groups of genes or peaks that rise and fall
+  together. It clusters trajectories, orders the modules from earliest-peaking
+  to latest-peaking, measures how reproducible each module is, and renders the
+  result as publication-ready heatmaps, trajectory plots, and per-module
+  correlation maps. Paired omics layers such as RNA and CUT&Run can be aligned
+  by gene and shown side by side. This vignette is the complete user guide.
+vignette: >
+  %\VignetteIndexEntry{ModuleViz: temporal modules from longitudinal omics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dev = "png",
+  dpi = 110,
+  fig.align = "center"
+)
+set.seed(1)
+```
+
+# Introduction
+
+## What problem does this solve?
+
+A longitudinal omics experiment produces a matrix of features (genes, peaks,
+proteins) measured across samples that have a meaningful **order**: time points,
+doses, disease grades, or differentiation stages. The interesting signal is
+rarely in any single feature. It is in the *shapes*: which features rise early
+and fall, which come up late and stay up, which respond only in the treated arm.
+
+`ModuleViz` finds those shapes and makes them legible. The workflow is:
+
+1. **z-score** each feature so shape matters, not absolute abundance;
+2. **cluster** features into temporal modules;
+3. **order** the modules from earliest-peaking to latest-peaking, so the heatmap
+   reads like a timeline from top to bottom;
+4. **assess** how reproducible each module is under resampling;
+5. **visualise** modules as heatmaps, mean-trajectory line plots, and
+   gene-gene correlation maps;
+6. optionally **align a second omics layer** by gene.
+
+## When to use it
+
+`ModuleViz` fits any experiment where the columns have an order and the rows are
+features:
+
+* bulk RNA-seq / ATAC-seq / CUT&Run time courses;
+* drug or stimulation time courses, with or without a control arm;
+* differentiation or disease-stage series (the axis need not be clock time);
+* pseudobulk profiles derived from single-cell data.
+
+It deliberately does *not* do feature selection or differential testing. Choose
+which features are interesting upstream — with `r Biocpkg("DESeq2")`,
+`r Biocpkg("edgeR")`, `r Biocpkg("limma")`, or a variance filter — and pass in
+the matrix you want to see.
+
+## The two vignettes
+
+| Vignette | Data | Purpose |
+|---|---|---|
+| **This one** | Bundled synthetic dataset | Complete API reference, runs offline |
+| `vignette("cd8-exhaustion-published-data")` | GEO GSE285248 + GSE285245 | Real published RNA-seq + CUT&Run walkthrough |
+
+# Installation
+
+```{r install, eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ComplexHeatmap")
+
+# then install ModuleViz itself, e.g.
+# remotes::install_github("helenhuangmath/ModuleViz")
+```
+
+```{r load-pkg, message = FALSE}
+library(ModuleViz)
+```
+
+# Quick start
+
+Five lines from data to figure. Everything after this section explains what
+these calls are doing and how to control them.
+
+```{r quickstart, fig.width = 8, fig.height = 7, fig.cap = "Quick-start heatmap. Rows are split into four temporal modules ordered early-peaking to late-peaking; columns are split by condition and ordered by time."}
+data("heatmap_example")
+
+obj <- longitudinal_cluster(
+    heatmap_example$mat, heatmap_example$meta,
+    sample_col = "SampleID", time_col = "TimeHr", group_col = "Condition",
+    k = 4, aggregate_replicates = TRUE
+)
+
+longitudinal_heatmap(obj, top_n_label = 3, title = "Quick start")
+```
+
+# Input data
+
+## The two objects you supply
+
+`ModuleViz` needs exactly two things.
+
+**A numeric matrix**, features in rows, samples in columns, with feature IDs as
+`rownames()`:
+
+```{r input-mat}
+mat <- heatmap_example$mat
+dim(mat)
+mat[1:4, 1:4]
+```
+
+**A metadata table**, one row per sample:
+
+```{r input-meta}
+meta <- heatmap_example$meta
+head(meta, 4)
+```
+
+Three columns in the metadata have special meaning, named via arguments:
+
+```{r input-args, echo = FALSE}
+knitr::kable(data.frame(
+  Argument = c("`sample_col`", "`time_col`", "`group_col`"),
+  Required = c("yes", "yes", "no"),
+  Meaning = c(
+    "Sample IDs; must match the matrix column names.",
+    "**Numeric** ordering variable. Sorted ascending to order the columns.",
+    "Optional second factor. Splits heatmap columns and colours the line plot."
+  )
+))
+```
+
+The critical constraint is that `time_col` must be **numeric**. It is what
+orders the columns and what defines a module's peak. If your axis is
+categorical but ordered — `"naive" < "memory" < "exhausted"`, or
+`"low" < "mid" < "high"` — encode it as an integer rank:
+
+```{r ordinal, eval = FALSE}
+meta$StageOrder <- c(naive = 1, memory = 2, exhausted = 3)[meta$Stage]
+```
+
+Samples present in the metadata but missing from the matrix (or vice versa) are
+silently dropped, so the two only need to overlap.
+
+## Feature-level preprocessing
+
+Cluster on a **log or variance-stabilised scale** for count data. Z-scoring raw
+counts lets a handful of very high-count features dominate the distance metric:
+
+```{r preprocess, eval = FALSE}
+mat <- log2(counts + 1)                       # or DESeq2::vst(dds)
+mat <- mat[rowMeans(counts) >= 10, ]          # drop low-expressed features
+```
+
+# The core workflow
+
+## Z-scoring
+
+`zscore_rows()` centres and scales each feature across its samples, so that a
+gene expressed at 10 counts and one at 10,000 counts contribute equally if they
+have the same shape. Zero-variance rows become `0` rather than `NaN`, so they
+survive clustering instead of breaking it.
+
+```{r zscore}
+z <- zscore_rows(mat)
+round(rowMeans(z)[1:3], 12)     # centred
+round(apply(z, 1, sd)[1:3], 12) # scaled
+```
+
+`longitudinal_cluster()` calls this internally. Pass `is_zscore = TRUE` if your
+matrix is already z-scored.
+
+## Choosing the number of modules
+
+`choose_k()` scans a range of `k` and reports two diagnostics: the total
+within-cluster sum of squares (an elbow curve) and the mean silhouette width.
+
+```{r choose-k, fig.width = 5.5, fig.height = 4}
+diag <- choose_k(z, k_range = 2:8, method = "kmeans")
+diag
+attr(diag, "suggested_k")
+```
+
+When you settle on a `k` that differs from the elbow, pass it back as
+`chosen_k`: the diagnostic figure then draws your `k` as a solid line beside the
+dashed elbow, so it stays consistent with the module count in the rest of your
+figures.
+
+```{r choose-k-marked, eval = FALSE}
+choose_k(z, k_range = 2:8, chosen_k = 4, file = "elbow.pdf")   # mark it
+choose_k(z, k_range = 2:8, annotate_k = FALSE, file = "elbow.pdf")  # bare curve
+```
+
+The suggested `k` is the point furthest from the straight line joining the first
+and last elbow points. **Treat it as a starting point, not an answer.** The
+right `k` is the one that separates programmes you can interpret. Over-splitting
+is usually more informative than under-splitting: two near-identical modules are
+easy to merge mentally, whereas one module hiding two anti-correlated programmes
+is actively misleading (see Section \@ref(module-coherence)). The real-data
+vignette works through a concrete case where the elbow k merges two biologically
+distinct programmes and the reported k is deliberately one higher.
+
+## Clustering
+
+`longitudinal_cluster()` is the workhorse.
+
+```{r cluster}
+obj <- longitudinal_cluster(
+    mat, meta,
+    sample_col = "SampleID",
+    time_col   = "TimeHr",
+    group_col  = "Condition",
+    k          = 4,
+    method     = "kmeans",
+    aggregate_replicates = TRUE,
+    stability  = TRUE,
+    n_resample = 20,
+    seed       = 1
+)
+obj
+```
+
+### Clustering methods
+
+```{r methods-table, echo = FALSE}
+knitr::kable(data.frame(
+  `method` = c("`\"kmeans\"`", "`\"hierarchical\"`", "`\"pam\"`"),
+  Notes = c(
+    "Default. Fast, Hartigan-Wong, `nstart = 50` random starts.",
+    "Ward.D2 linkage by default via `hclust_method`. Deterministic.",
+    "Partitioning around medoids; more robust to outliers than k-means."
+  ),
+  check.names = FALSE
+))
+```
+
+`dist_method` accepts any `stats::dist()` metric plus `"correlation"`
+(`1 - Pearson r`), which is often the better choice for trajectory shape because
+it ignores amplitude entirely:
+
+```{r alt-method}
+obj_corr <- longitudinal_cluster(
+    mat, meta, sample_col = "SampleID", time_col = "TimeHr",
+    k = 4, method = "hierarchical", dist_method = "correlation",
+    stability = FALSE
+)
+table(obj_corr$cluster)
+```
+
+### Replicate aggregation
+
+`aggregate_replicates = TRUE` averages replicate columns within each
+`group_col` × `time_col` cell before clustering. This gives cleaner modules and
+a much narrower heatmap, at the cost of no longer seeing replicate variability.
+Keep it `FALSE` when you want to inspect reproducibility across replicates.
+
+## What you get back
+
+The result is a `longi` object — a plain list, so everything is inspectable:
+
+```{r longi-structure}
+names(obj)
+```
+
+```{r longi-table, echo = FALSE}
+knitr::kable(data.frame(
+  Element = c("`z`", "`cluster`", "`membership`", "`centroids`", "`stability`",
+              "`meta`", "`params`"),
+  Contents = c(
+    "z-scored matrix, rows reordered by module then signal strength.",
+    "Ordered factor giving each row's module.",
+    "`data.table` of feature ID, module, and max |z|.",
+    "Mean z per module per (group x) time point.",
+    "Mean Jaccard per module, or `NULL`.",
+    "Sample metadata, reordered to match the matrix columns.",
+    "The settings used, for reproducibility."
+  )
+))
+```
+
+```{r membership}
+head(obj$membership, 4)
+```
+
+## How modules get ordered {#ordering}
+
+This is the feature that makes the heatmap readable, so it is worth stating
+explicitly. After clustering, each module's centroid is computed across the
+ordered time points. Modules are then ranked by **where that centroid peaks**
+(its arg-max), with ties broken by overall slope so that, among modules peaking
+at the same time, rising ones come before falling ones.
+
+The consequence: `Cluster1` always peaks earliest and `ClusterK` latest.
+
+```{r centroids}
+cent <- as.matrix(obj$centroids[, -1])
+rownames(cent) <- obj$centroids$Cluster
+round(cent, 2)
+```
+
+Within a module, rows are sorted by max |z|, so the strongest features sit at
+the top of each block.
+
+## Cluster stability
+
+A module you cannot reproduce is not a finding. `cluster_stability()` — run
+automatically when `stability = TRUE` — repeatedly subsamples the features,
+re-clusters, and records how well each original module is recovered, as a mean
+maximum Jaccard similarity.
+
+```{r stability}
+obj$stability
+```
+
+```{r stability-guide, echo = FALSE}
+knitr::kable(data.frame(
+  `Mean Jaccard` = c("> 0.85", "0.6 - 0.85", "< 0.6"),
+  Interpretation = c("Highly reproducible; report with confidence.",
+                     "A real pattern, but boundaries are fuzzy.",
+                     "Unstable. Do not interpret as a discrete module."),
+  check.names = FALSE
+))
+```
+
+Stability is shown twice in the heatmap: as a grey `Stability` bar down the left
+edge, and as `J=` in each row title.
+
+# Visualisation
+
+## The heatmap
+
+```{r heatmap-main, fig.width = 8.5, fig.height = 7.5, fig.cap = "Modules ordered early to late, columns split by condition, top three features labelled per module."}
+longitudinal_heatmap(
+    obj,
+    annotation_cols = c("Condition", "TimeHr"),
+    top_n_label     = 3,
+    title           = "Stimulation time course"
+)
+```
+
+Reading the figure: rows are split by module and never re-ordered by the
+heatmap itself (`cluster_rows = FALSE`), because the ordering from Section
+\@ref(ordering) is the point. Columns are split by `group_col` and ordered by
+time. Metadata columns become annotation bars along the top.
+
+### Labelling features
+
+Three ways to choose which features get labelled, combinable:
+
+```{r labels, eval = FALSE}
+# 1. an explicit list
+longitudinal_heatmap(obj, label_features = c("Gene001", "Gene016"))
+
+# 2. top N per module by signal strength
+longitudinal_heatmap(obj, top_n_label = 5)
+
+# 3. top N per module by YOUR statistic (e.g. -log10 padj from DESeq2)
+rank_tab <- data.frame(ID = rownames(obj$z), value = runif(nrow(obj$z)))
+longitudinal_heatmap(obj, top_n_label = 5, rank_table = rank_tab,
+                     id_field = "ID", value_field = "value")
+```
+
+Option 3 is usually what you want for a paper: it labels the features that are
+most *significant*, not merely the most variable.
+
+### Saving
+
+Pass `file` to write directly. The extension picks the device — `.pdf` for
+vector output, `.png` for a raster at 300 dpi.
+
+```{r save, eval = FALSE}
+longitudinal_heatmap(obj, file = "modules.pdf", width = 9, height = 12)
+```
+
+## Palettes {#palettes}
+
+Three independent palette slots, each with its own job:
+
+```{r palette-table, echo = FALSE}
+knitr::kable(data.frame(
+  Argument = c("`cluster_palette`", "`annotation_palette`", "`zscore_palette`"),
+  Colours = c("module identity bar", "categorical metadata bars", "the matrix body"),
+  Default = c("`\"paired\"`", "`\"set2\"`", "`\"rdbu\"`"),
+  Options = c("any qualitative or ramp palette below",
+              "any qualitative palette below",
+              "`\"rdbu\"`, `\"viridis\"`")
+))
+```
+
+The registry distinguishes two kinds of palette, and this distinction matters:
+
+* **Qualitative** — `"paired"`, `"set2"`, `"set3"`, `"okabe_ito"`, `"nature"`,
+  `"science"`. Hand-picked, maximally distinguishable colours. For `n` at or
+  below the palette size, the first `n` are used **verbatim**. Interpolating
+  them would invent blended colours that are not in the palette and can be
+  nearly identical to each other.
+* **Continuous ramps** — `"spectral"`, `"viridis"`. Genuine colour scales,
+  interpolated across the full range for any `n`.
+
+```{r palette-demo, fig.width = 7, fig.height = 3.2, fig.cap = "Qualitative palettes keep their colours verbatim; ramps interpolate across the full range."}
+pals <- c("paired", "set2", "set3", "okabe_ito", "spectral", "viridis")
+op <- par(mar = c(1, 6, 1, 1))
+plot(NA, xlim = c(0, 6), ylim = c(0, length(pals)), axes = FALSE,
+     xlab = "", ylab = "")
+for (i in seq_along(pals)) {
+    cols <- ModuleViz:::.moduleviz_discrete_palette(6, pals[i])
+    rect(0:5, length(pals) - i, 1:6, length(pals) - i + 0.8,
+         col = cols, border = "white", lwd = 2)
+}
+axis(2, at = seq(length(pals) - 0.6, by = -1, length.out = length(pals)),
+     labels = pals, las = 1, tick = FALSE, cex.axis = 0.85)
+par(op)
+```
+
+Use `viridis` when the figure must survive greyscale printing or colour-vision
+deficiency; use `rdbu` when the zero point is meaningful and you want direction
+to read at a glance.
+
+```{r heatmap-viridis, fig.width = 8, fig.height = 7, fig.cap = "The same modules with a viridis body, Spectral module bar, and Set3 metadata bars."}
+longitudinal_heatmap(
+    obj,
+    zscore_palette     = "viridis",
+    cluster_palette    = "spectral",
+    annotation_palette = "set3",
+    top_n_label        = 2,
+    title              = "Viridis variant"
+)
+```
+
+`zscore_limits` controls where the scale saturates; widen it if `±2` clips too
+much of your data.
+
+## Module trajectories
+
+The heatmap shows every feature; the line plot shows each module's average
+shape, which is what you actually describe in the text.
+
+```{r lineplot, fig.width = 6, fig.height = 7, fig.cap = "Mean z-score trajectory per module. With a group column, each group is a separate coloured line."}
+pattern_lineplot(obj, palette = "set2", base_size = 12)
+```
+
+Returns a `ggplot`, so it composes with the rest of the ggplot ecosystem:
+
+```{r lineplot-custom, eval = FALSE}
+library(ggplot2)
+pattern_lineplot(obj) + labs(subtitle = "Stimulated vs control")
+```
+
+## Module coherence {#module-coherence}
+
+Clustering guarantees that a module's members are *closer to each other than to
+other modules*. It does not guarantee they actually agree. A module can look
+clean in the main heatmap while being the average of two anti-correlated
+sub-programmes.
+
+`module_correlation_summary()` gives the one-number version:
+
+```{r cor-summary}
+module_correlation_summary(obj)
+```
+
+```{r cor-heatmap, fig.width = 6.5, fig.height = 6, fig.cap = "Gene-gene correlation within one module. A coherent module is a solid high-correlation block; visible sub-blocks mean the module contains more than one programme."}
+cors <- module_correlation_heatmap(obj, clusters = "Cluster1", max_genes = 40)
+cors$Cluster1$mean_cor
+```
+
+Interpretation: high mean `r` (roughly > 0.7) means a tight, coherent module.
+A low value with visible blocks in the heatmap means you should raise `k` and
+re-cluster. A low value with no structure means the module is mostly noise.
+
+Large modules are subsampled to `max_genes` for legibility —
+`select = "top"` keeps the strongest-signal features, `select = "random"` gives
+an unbiased view. To write every module at once, pass a `.pdf` path and get one
+page per module:
+
+```{r cor-save, eval = FALSE}
+module_correlation_heatmap(obj, file = "module_correlations.pdf",
+                           max_genes = 60)
+```
+
+# Paired omics
+
+`dual_omics_heatmap()` puts two layers side by side, linked by gene: RNA next to
+ATAC, or RNA next to CUT&Run. The **primary** layer drives the clustering and
+the row order; the secondary is displayed in that same order, so each row is one
+gene across both assays.
+
+Because one gene often maps to several peaks, the secondary layer is collapsed
+to one row per gene — `aggregate = "mean"` averages a gene's peaks,
+`aggregate = "top"` takes the strongest.
+
+Genes are recovered from secondary row IDs by `gene_of_secondary`, whose default
+`sub("^.*_", "", id)` takes everything after the last underscore. So row names
+of the form `peak1243_Pdcd1` work out of the box.
+
+```{r dual-omics, fig.width = 10, fig.height = 7, fig.cap = "Paired layers linked by gene. The primary layer sets the module structure and row order; the secondary is shown in the same order."}
+# simulate a second layer: two peaks per gene, with noise
+genes <- rownames(mat)
+atac  <- mat[rep(seq_along(genes), each = 2), ]
+rownames(atac) <- paste0("Peak", sprintf("%03d", seq_len(nrow(atac))),
+                         "_", rep(genes, each = 2))
+atac <- atac + matrix(rnorm(length(atac), sd = 0.35), nrow = nrow(atac))
+
+res <- dual_omics_heatmap(
+    primary        = obj,
+    secondary      = atac,
+    primary_name   = "RNA",
+    secondary_name = "ATAC",
+    aggregate      = "mean",
+    label_features = c("Gene001", "Gene016", "Gene031")
+)
+```
+
+The return value carries the aligned matrices for downstream quantification:
+
+```{r dual-return}
+names(res)
+dim(res$z_secondary)
+```
+
+That makes it straightforward to ask whether the second layer tracks the first —
+for example, comparing mean secondary signal at late versus early time points
+for the late-peaking module.
+
+# Exporting results
+
+```{r export}
+demo_prefix <- file.path(tempdir(), "demo")
+write_memberships(obj, prefix = demo_prefix)
+list.files(tempdir(), pattern = "^demo_")
+```
+
+`_memberships.txt` is the file you feed into GO or GSEA enrichment, one module
+at a time. `_centroids.txt` holds the mean trajectories, and `_stability.txt`
+the Jaccard scores.
+
+# The one-call wrapper
+
+`run_longitudinal()` runs cluster → heatmap → line plot → export in a single
+call, for when you have settled on parameters and just want the outputs:
+
+```{r wrapper, eval = FALSE}
+run_longitudinal(
+    mat, meta, out_prefix = "results/experiment1",
+    sample_col = "SampleID", time_col = "TimeHr", group_col = "Condition",
+    k = 4, top_n_label = 5,
+    zscore_palette = "rdbu", cluster_palette = "paired"
+)
+```
+
+# Working with published data
+
+`vignette("cd8-exhaustion-published-data", package = "ModuleViz")` applies this
+workflow end to end to two public GEO series — RNA-seq (GSE285248) and paired
+H3K27ac / H3K27me3 CUT&Run (GSE285245) from a CD8 T cell memory-versus-exhaustion
+study. It covers the parts this vignette does not: downloading processed
+matrices from GEO, ANOVA-based DEG selection, mapping CUT&Run peaks to genes,
+and checking module assignments against canonical marker genes.
+
+The package also ships `examples/validate_real_data.R`, which runs that entire
+analysis with 114 correctness assertions.
+
+For a small set of bundled public time courses:
+
+```{r real-data}
+available_real_timecourse_datasets()
+```
+
+# Frequently asked questions
+
+**`Error: mat has no rownames`** — feature IDs must be `rownames(mat)`, or
+passed via `id_col` if they live in a column of a `data.frame`.
+
+**`Error: No overlap between meta[[sample_col]] and the matrix columns`** —
+`meta[[sample_col]]` must contain the literal matrix column names. Check for
+whitespace or a factor that has been coerced to integers.
+
+**My modules are dominated by a few features.** You are clustering on a raw
+count scale. Use `log2(x + 1)` or a variance-stabilising transform first.
+
+**Everything lands in one module.** Usually too few features, or features that
+were not selected for variability. Filter to differential or high-variance
+features first.
+
+**A module has low stability.** Lower `k`, switch to
+`dist_method = "correlation"`, or accept that the module is a continuum rather
+than a discrete group and describe it that way.
+
+**Can the axis be non-numeric?** No — `time_col` must be numeric. Encode ordered
+categories as integer ranks; the spacing does not need to be even.
+
+**Can I use my own colours?** Yes. `annotation_colors` takes a named list of
+colour vectors, and `col_fun` takes any `circlize::colorRamp2()` function,
+overriding `zscore_palette`.
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```

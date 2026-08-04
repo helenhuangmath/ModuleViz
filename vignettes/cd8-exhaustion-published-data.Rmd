@@ -1,0 +1,666 @@
+---
+title: "Reproducible Walkthrough: CD8 T Cell Exhaustion (GSE285248 / GSE285245)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reproducible Walkthrough: CD8 T Cell Exhaustion (GSE285248 / GSE285245)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+## Introduction
+
+The other vignette uses the bundled synthetic dataset so it runs offline. This
+one is the opposite: it walks through a complete, published, real analysis end
+to end, on data anyone can download.
+
+We use two GEO series from the same study of histone modifications in memory
+and exhausted CD8 T cells (PubMed
+[40389726](https://pubmed.ncbi.nlm.nih.gov/40389726/)):
+
+| Accession | Assay | Samples | What we use it for |
+|---|---|---|---|
+| [GSE285248](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE285248) | RNA-seq | 16 | Defines the temporal modules |
+| [GSE285245](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE285245) | CUT&Run (H3K27ac, H3K27me3) | 86 | Chromatin layer aligned to those modules |
+
+**The experiment.** Naive P14 CD8 T cells were transferred into recipient mice
+infected with LCMV Armstrong, which resolves and yields **memory** cells
+(harvested day 30), or LCMV Clone 13, which persists and yields **exhausted**
+cells (harvested day 32). Spleens were profiled by RNA-seq and by CUT&Run for
+activating (H3K27ac, H3K4me3) and repressive (H3K27me3, H3K9me3) marks.
+
+**The trajectory.** `ModuleViz` was built for time courses, but nothing in it
+requires the ordering variable to be wall-clock time. Here the ordered axis is a
+*differentiation* axis:
+
+```
+TN (naive)  ->  TMEM (memory)  ->  TEX (exhausted)
+```
+
+Any ordinal sample axis works the same way: differentiation stages, disease
+grades, dose levels, or developmental stages.
+
+> **Chunks in this vignette are not evaluated at build time**, because they
+> download data from the NCBI FTP server. Every chunk is runnable as written —
+> copy them in order, or run the whole thing at once with
+> `Rscript examples/validate_real_data.R` from the package root, which executes
+> this exact analysis plus 114 correctness assertions.
+
+## 1. Requirements
+
+```{r requirements}
+library(ModuleViz)
+library(data.table)
+```
+
+Only the small processed count matrices are downloaded, about 4.7 MB in total.
+The multi-gigabyte `_RAW.tar` archives on GEO are never touched.
+
+```{r download}
+cache_dir <- "geo_cache"
+dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+
+GEO <- list(
+  rna      = list(gse = "GSE285248", file = "GSE285248_NormRC_filter_wanno.txt.gz"),
+  h3k27ac  = list(gse = "GSE285245", file = "GSE285245_NormRC_H3K27ac_wID.txt.gz"),
+  h3k27me3 = list(gse = "GSE285245", file = "GSE285245_NormRC_H3K27me3_wID.txt.gz")
+)
+
+geo_path <- function(entry) {
+  dest <- file.path(cache_dir, entry$file)
+  if (!file.exists(dest)) {
+    url <- sprintf("https://ftp.ncbi.nlm.nih.gov/geo/series/%snnn/%s/suppl/%s",
+                   substr(entry$gse, 1, 6), entry$gse, entry$file)
+    utils::download.file(url, dest, mode = "wb")
+  }
+  dest
+}
+
+paths <- lapply(GEO, geo_path)
+```
+
+## 2. Read The RNA-seq Matrix
+
+The RNA table carries six annotation columns (`Chr`, `Start`, `End`, `Geneid`,
+`Gene.Name`, `Strand`) followed by the 16 sample columns. A handful of gene
+symbols appear under more than one Ensembl ID, so we keep the most highly
+expressed copy of each symbol and use symbols as rownames.
+
+```{r read-rna}
+rna_raw  <- fread(paths$rna)
+rna_cols <- grep("_RNA_", names(rna_raw), value = TRUE)
+
+rna_raw[, .mean_expr := rowMeans(as.matrix(.SD)), .SDcols = rna_cols]
+setorder(rna_raw, Gene.Name, -.mean_expr)
+rna_uniq <- rna_raw[!duplicated(Gene.Name)]
+
+rna_mat <- as.matrix(rna_uniq[, ..rna_cols])
+rownames(rna_mat) <- rna_uniq$Gene.Name
+
+dim(rna_mat)
+```
+
+```
+#> [1] 16429    16
+```
+
+## 3. Build The Sample Metadata
+
+`ModuleViz` needs one row per sample with a sample ID and a **numeric** ordering
+column. The GEO column names encode everything we need in the pattern
+`<Infection>_P14_Day<d>_<assay>_Rep<n>_S<n>`, so the metadata can be parsed
+straight out of them. Writing this as a function pays off later, because the
+CUT&Run tables follow exactly the same naming scheme.
+
+```{r metadata}
+make_meta <- function(cols, assay) {
+  infection <- sub("_P14_.*", "", cols)
+  day       <- as.integer(sub(".*_Day([0-9]+)_.*", "\\1", cols))
+  state     <- c(Naive = "TN", Arm = "TMEM", Cl13 = "TEX")[infection]
+  data.table(
+    SampleID   = cols,
+    State      = factor(state, levels = c("TN", "TMEM", "TEX")),
+    # the ordered differentiation axis handed to time_col
+    StateOrder = unname(c(TN = 1, TMEM = 2, TEX = 3)[state]),
+    # naive cells are the pre-infection baseline, so they sit at day 0
+    Day        = ifelse(infection == "Naive", 0L, day),
+    Replicate  = as.integer(sub(".*_Rep([0-9]+)_.*", "\\1", cols)),
+    Assay      = assay
+  )
+}
+
+rna_meta <- make_meta(rna_cols, "RNA")
+rna_meta[, .N, by = .(State, Day)]
+```
+
+```
+#>     State   Day     N
+#>    <fctr> <int> <int>
+#> 1:     TN     0     8
+#> 2:   TMEM    30     4
+#> 3:    TEX    32     4
+```
+
+`StateOrder` is the key column: it is what `time_col` will point at, and it is
+what makes the modules come out ordered naive-high through exhaustion-high.
+
+Note that there are **eight** naive samples, not four. Naive cells were profiled
+twice, once alongside each infection, so they serve as the day-matched baseline
+for both arms. That imbalance is fine — nothing in `ModuleViz` requires equal
+group sizes.
+
+## 4. Select Differentially Expressed Genes
+
+Real analyses do not cluster the whole transcriptome. Clustering 16,429 genes
+would bury the interesting structure under thousands of flat, uninformative
+profiles. We select the genes that actually move across the three states.
+
+A vectorised one-way ANOVA across `TN` / `TMEM` / `TEX` is fast and needs no
+extra packages. If you already have `DESeq2` or `edgeR` results for this
+comparison, substitute them here — all that matters downstream is a set of gene
+IDs and, optionally, a ranking statistic.
+
+```{r deg}
+log_rna <- log2(rna_mat + 1)
+
+deg_anova <- function(x, grp) {
+  grp <- factor(grp)
+  n <- ncol(x); k <- nlevels(grp)
+  grand <- rowMeans(x)
+  ssb <- 0; ssw <- 0
+  for (g in levels(grp)) {
+    cols <- which(grp == g)
+    mg   <- rowMeans(x[, cols, drop = FALSE])
+    ssb  <- ssb + length(cols) * (mg - grand)^2
+    ssw  <- ssw + rowSums((x[, cols, drop = FALSE] - mg)^2)
+  }
+  df1 <- k - 1; df2 <- n - k
+  Fstat <- (ssb / df1) / (ssw / df2)
+  Fstat[!is.finite(Fstat)] <- 0
+  data.table(
+    ID     = rownames(x),
+    Fstat  = Fstat,
+    pvalue = stats::pf(Fstat, df1, df2, lower.tail = FALSE),
+    padj   = stats::p.adjust(stats::pf(Fstat, df1, df2, lower.tail = FALSE),
+                             method = "BH")
+  )
+}
+
+state_of <- rna_meta$State[match(colnames(log_rna), rna_meta$SampleID)]
+deg <- deg_anova(log_rna, state_of)
+
+mean_by <- function(s) rowMeans(log_rna[, state_of == s, drop = FALSE])
+deg[, `:=`(
+  log2FC_TMEM_vs_TN  = mean_by("TMEM") - mean_by("TN"),
+  log2FC_TEX_vs_TN   = mean_by("TEX")  - mean_by("TN"),
+  log2FC_TEX_vs_TMEM = mean_by("TEX")  - mean_by("TMEM"),
+  baseMean           = rowMeans(rna_mat)
+)]
+deg[, maxAbsLFC := pmax(abs(log2FC_TMEM_vs_TN), abs(log2FC_TEX_vs_TN),
+                        abs(log2FC_TEX_vs_TMEM))]
+
+sig <- deg[padj < 0.01 & maxAbsLFC >= 1 & baseMean >= 10]
+setorder(sig, -Fstat)
+nrow(sig)
+```
+
+```
+#> [1] 4176
+```
+
+4,176 genes pass. We keep the top 3,000 by ANOVA *F* so the vignette runs
+quickly; raise or drop the cap freely.
+
+```{r deg-matrix}
+sig <- sig[seq_len(min(3000, nrow(sig)))]
+
+# Cluster on the log scale: z-scoring raw counts lets a few high-count
+# outliers dominate the distance metric.
+deg_mat <- log2(rna_mat[sig$ID, , drop = FALSE] + 1)
+
+head(sig$ID, 12)
+```
+
+```
+#>  [1] "Pik3ap1" "Myo1f"   "Chsy1"   "Gnptab"  "Ccr9"    "Satb1"
+#>  [7] "Rapgef6" "Il6ra"   "Sytl2"   "Ccr5"    "Tox"     "Fam169b"
+```
+
+`Tox`, the master transcription factor of CD8 T cell exhaustion, is already in
+the top 12 — a good sign that the selection is picking up real biology.
+
+## 5. Choose The Number Of Modules
+
+```{r choose-k}
+z <- zscore_rows(deg_mat)
+
+K <- 6   # see the note below
+diag <- choose_k(z, k_range = 2:12, method = "kmeans",
+                 file = "choose_k_elbow.pdf")
+diag
+attr(diag, "suggested_k")
+```
+
+```
+#>         k tot_withinss mean_silhouette elbow_k
+#>  1:     2    10243.402       0.6761535       5
+#>  2:     3     7723.609       0.5215970       5
+#>  3:     4     6094.619       0.3693580       5
+#>  4:     5     5088.006       0.3522561       5
+#>  5:     6     4378.953       0.3252019       5
+#>  ...
+#> [1] 5
+```
+
+The elbow lands at k = 5, but we use **k = 6**. This is worth being explicit
+about, because it is the most common judgement call in this workflow.
+
+At k = 5 there is **no memory-peaking module at all**: the TMEM-specific
+programme is absorbed into its neighbours, so the modules run naive -> naive ->
+naive -> exhausted -> exhausted. Since memory-versus-exhaustion is the
+comparison this study exists to make, k = 5 would hide the result. At k = 6 a
+module with a clear TMEM peak appears (Cluster4 below), and every module still
+has a stability above 0.9.
+
+The elbow is a heuristic; a k that merges two biologically distinct programmes
+is worse than one that splits a module in two. If you want the figure itself to
+record the k you settled on, `choose_k(..., chosen_k = K)` draws it as a solid
+line beside the dashed elbow, and `annotate_k = FALSE` strips both markers for a
+bare curve.
+
+## 6. Cluster Into Temporal Modules
+
+```{r cluster}
+obj <- longitudinal_cluster(
+  deg_mat, rna_meta,
+  sample_col = "SampleID",
+  time_col   = "StateOrder",   # the ordered differentiation axis
+  k          = K,
+  method     = "kmeans",
+  stability  = TRUE,
+  n_resample = 20,
+  seed       = 1
+)
+
+obj
+obj$stability
+```
+
+```
+#> <longi>  3000 features x 16 samples,  6 modules (kmeans)
+#>   stability (mean Jaccard): 0.90 - 0.97
+#>     Cluster MeanJaccard     N
+#> 1: Cluster1       0.958   388
+#> 2: Cluster2       0.975   776
+#> 3: Cluster3       0.972   158
+#> 4: Cluster4       0.901   243
+#> 5: Cluster5       0.958  1019
+#> 6: Cluster6       0.968   416
+```
+
+Every module has a mean Jaccard above 0.9 under resampling, so all six are
+reproducible. Values below roughly 0.6 would mean a module is an artefact of one
+particular clustering run and should not be interpreted.
+
+Modules are automatically renumbered so that `Cluster1` peaks earliest and
+`Cluster6` peaks latest:
+
+```{r centroids}
+cent <- as.matrix(obj$centroids[, -1])
+rownames(cent) <- obj$centroids$Cluster
+colnames(cent) <- c("TN", "TMEM", "TEX")
+round(cent, 2)
+```
+
+```
+#>            TN  TMEM   TEX
+#> Cluster1  0.74 -0.01 -1.48   <- naive-high, lost on activation
+#> Cluster2  0.92 -0.87 -0.98   <- naive-specific
+#> Cluster3  0.53 -1.53  0.46   <- down in memory, partly restored in exhaustion
+#> Cluster4 -0.83  1.31  0.34   <- memory-specific
+#> Cluster5 -0.92  0.69  1.15   <- shared effector, highest in exhaustion
+#> Cluster6 -0.65 -0.26  1.55   <- exhaustion-specific
+```
+
+## 7. Check The Modules Against Known Biology
+
+This is the step worth doing before any figure goes into a paper. Canonical
+markers should land where the biology says they should.
+
+```{r biology}
+module_of <- setNames(as.character(obj$cluster), rownames(obj$z))
+
+TEX_MARKERS <- c("Pdcd1", "Tox", "Havcr2", "Lag3", "Entpd1", "Cd101", "Cd160")
+TN_MARKERS  <- c("Sell", "Ccr7", "Lef1", "Tcf7")
+
+data.table(Gene = TEX_MARKERS, Module = module_of[TEX_MARKERS])
+data.table(Gene = TN_MARKERS,  Module = module_of[TN_MARKERS])
+```
+
+```
+#>      Gene   Module          #>      Gene   Module
+#> 1:  Pdcd1 Cluster6          #> 1:   Sell Cluster2
+#> 2:    Tox Cluster6          #> 2:   Ccr7 Cluster2
+#> 3: Havcr2 Cluster5          #> 3:   Lef1 Cluster1
+#> 4:   Lag3 Cluster6          #> 4:   Tcf7 Cluster1
+#> 5: Entpd1 Cluster5
+#> 6:  Cd101 Cluster6
+#> 7:  Cd160 Cluster5
+```
+
+Every inhibitory-receptor and exhaustion gene falls in Cluster5 or Cluster6, the
+two exhaustion-peaking modules. Every naive/stemness gene falls in Cluster1 or
+Cluster2, the naive-peaking modules. The clustering recovered the expected
+programme without being told anything about it.
+
+## 8. Draw The Heatmap
+
+Three palettes are in play, and each is chosen for its job:
+
+- `cluster_palette` — a **qualitative** palette for module identity (`"paired"`,
+  `"set2"`, `"set3"`, `"okabe_ito"`, ...).
+- `annotation_palette` — a qualitative palette for categorical metadata bars.
+  `"set2"` is the default; use `"set3"` beyond eight levels.
+- `zscore_palette` — a **continuous** scale for the matrix body: `"viridis"`
+  (perceptually uniform and colour-blind safe) or `"rdbu"` (diverging). This
+  walkthrough uses one scheme throughout; change the single argument to swap it.
+
+```{r heatmap}
+rank_tab <- sig[, .(ID, value = -log10(pmax(padj, .Machine$double.xmin)))]
+
+longitudinal_heatmap(
+  obj,
+  annotation_cols    = c("State", "Day"),
+  rank_table         = rank_tab,   # label the most significant genes per module
+  id_field           = "ID",
+  value_field        = "value",
+  top_n_label        = 3,
+  zscore_palette     = "viridis",  # <- "rdbu" for the diverging alternative
+  cluster_palette    = "paired",
+  annotation_palette = "set2",
+  # the GEO sample IDs are long and the State bar already says what each
+  # column is, so suppress them and scale the remaining text up for print
+  show_column_names        = FALSE,
+  label_fontsize           = 13,
+  row_title_fontsize       = 13,
+  annotation_name_fontsize = 13,
+  legend_fontsize          = 12,
+  title_fontsize           = 16,
+  title  = "CD8 T cell differentiation: DEG modules (GSE285248)",
+  file   = "cd8_module_heatmap.png",
+  width  = 10,
+  height = 12
+)
+```
+
+![CD8 T cell DEG modules](figures/cd8_01_module_heatmap.png)
+
+Rows are split by module and ordered early-peaking to late-peaking; columns run
+naive, memory, exhausted. The `Stability` bar on the left encodes each module's
+Jaccard score, and row titles carry both module size and stability.
+
+Note the two ways of choosing labels. `rank_table` + `top_n_label` labels the
+top *n* genes per module by a statistic you supply, which is usually what you
+want for a figure; `label_features` labels an explicit list of genes. The two
+can be combined.
+
+## 9. Plot Module Trajectories
+
+```{r lineplot}
+pattern_lineplot(
+  obj, cluster_palette = "paired", base_size = 15,
+  title_fontsize = 14,
+  # the ordering column is an integer rank, so relabel the axis with the
+  # state names it stands for
+  xlab        = "Differentiation state",
+  time_labels = c("1" = "TN", "2" = "TMEM", "3" = "TEX"),
+  x_angle     = 0,
+  file = "cd8_module_patterns.pdf"
+)
+```
+
+![Mean z-score trajectory per module](figures/cd8_03_module_patterns.png)
+
+## 10. Check Module Coherence
+
+Clustering guarantees that a module's genes are closer to each other than to
+other modules. It does not guarantee they actually agree. Correlating every
+gene in a module against every other one shows whether the module is one
+programme or several averaging together.
+
+```{r coherence}
+module_correlation_summary(obj)
+```
+
+```
+#>     Cluster     N NShown MeanCor
+#> 1: Cluster1   388    388   0.876
+#> 2: Cluster2   776    776   0.916
+#> 3: Cluster3   158    158   0.829
+#> 4: Cluster4   243    243   0.857
+#> 5: Cluster5  1019   1019   0.931
+#> 6: Cluster6   416    416   0.886
+```
+
+Every module sits between 0.83 and 0.93, so all six are internally coherent. A value below
+roughly 0.3, or visible sub-blocks in the heatmap below, would mean the module
+should be split by raising `k`.
+
+```{r coherence-heatmap}
+module_correlation_heatmap(
+  obj,
+  clusters        = "Cluster6",   # the exhaustion-specific module
+  # every gene in the module is used by default; printing 416 row names would
+  # be unreadable, so only the 30 strongest-signal genes get labelled
+  label_top_n     = 30,
+  corr_palette    = "rdbu",   # correlations diverge around 0
+  label_fontsize  = 9,
+  legend_fontsize = 12,
+  title_fontsize  = 11,
+  file = "cd8_correlation.png", width = 7.5, height = 7
+)
+```
+
+![Gene-gene correlation inside the exhaustion module](figures/cd8_05_module_correlation.png)
+
+A `.pdf` destination writes one page per module instead:
+
+```{r coherence-pdf}
+module_correlation_heatmap(obj, file = "cd8_module_correlations.pdf")
+```
+
+## 11. Export The Tables
+
+```{r export}
+write_memberships(obj, prefix = "cd8_modules")
+```
+
+Writes `cd8_modules_memberships.txt` (gene to module), `_centroids.txt` (mean
+trajectory per module), and `_stability.txt`. The membership table is what you
+would feed into GO or GSEA enrichment, one module at a time.
+
+## 12. Add The CUT&Run Layer
+
+Now the paired-omics question: does chromatin state track these expression
+modules?
+
+The CUT&Run tables give peak coordinates but **no gene symbol**, so peaks have
+to be assigned to genes first. We map each peak to its nearest gene
+transcription start site, using the coordinates already present in the RNA
+annotation, and keep peaks within 25 kb.
+
+```{r peak-mapping}
+gene_tss <- unique(rna_uniq[, .(Chr,
+                                TSS  = ifelse(Strand == "+", Start, End),
+                                Gene = Gene.Name)])
+
+map_peaks_to_nearest_gene <- function(peaks, genes, max_dist = 25000) {
+  out <- list()
+  for (ch in intersect(unique(peaks$Chr), unique(genes$Chr))) {
+    gg <- genes[Chr == ch][order(TSS)]
+    pp <- peaks[Chr == ch]
+    if (!nrow(gg) || !nrow(pp)) next
+    i  <- findInterval(pp$Mid, gg$TSS)
+    lo <- pmax(i, 1L); hi <- pmin(i + 1L, nrow(gg))
+    dlo <- abs(pp$Mid - gg$TSS[lo]); dhi <- abs(pp$Mid - gg$TSS[hi])
+    pick <- ifelse(dlo <= dhi, lo, hi)
+    out[[length(out) + 1L]] <- data.table(peakN = pp$peakN,
+                                          Gene  = gg$Gene[pick],
+                                          dist  = pmin(dlo, dhi))
+  }
+  rbindlist(out)[dist <= max_dist]
+}
+```
+
+`dual_omics_heatmap()` recovers the gene from a secondary row ID using
+`gene_of_secondary`, whose default is `sub("^.*_", "", id)` — everything after
+the last underscore. So we name the rows `peak1243_Pdcd1` and the default just
+works.
+
+```{r load-cutrun}
+load_cutrun <- function(path, mark) {
+  tab   <- fread(path)
+  scols <- grep(paste0("_", mark, "_Rep"), names(tab), value = TRUE)
+  pk    <- tab[, .(peakN, Chr, Mid = as.integer((Start + End) / 2))]
+  ann   <- map_peaks_to_nearest_gene(pk, gene_tss)
+  tab   <- tab[peakN %in% ann$peakN]
+  ann   <- ann[match(tab$peakN, peakN)]
+  m     <- as.matrix(tab[, ..scols])
+  rownames(m) <- paste0(ann$peakN, "_", ann$Gene)   # PeakID_SYMBOL
+  list(mat = log2(m + 1), meta = make_meta(scols, mark), ann = ann)
+}
+
+ac <- load_cutrun(paths$h3k27ac, "H3K27ac")
+dim(ac$mat)
+```
+
+```
+#> [1] 20879    16
+```
+
+A gene can carry several peaks; `aggregate = "mean"` averages a gene's peaks,
+`aggregate = "top"` takes the single strongest one.
+
+```{r dual-omics}
+ac_obj <- longitudinal_cluster(ac$mat, ac$meta,
+                               sample_col = "SampleID",
+                               time_col   = "StateOrder",
+                               k = 4, stability = FALSE)
+
+d_ac <- dual_omics_heatmap(
+  primary        = obj,        # RNA drives the module structure and row order
+  secondary      = ac_obj,     # chromatin is shown in that same order
+  primary_name   = "RNA",
+  secondary_name = "H3K27ac",
+  aggregate      = "mean",
+  label_features = c(TEX_MARKERS, TN_MARKERS),
+  zscore_palette  = "viridis",
+  cluster_palette = "paired",
+  show_column_names  = FALSE,
+  label_fontsize     = 13,
+  row_title_fontsize = 13,
+  legend_fontsize    = 12,
+  title_fontsize     = 16,
+  file = "cd8_rna_vs_h3k27ac.png", width = 15, height = 12
+)
+```
+
+![RNA modules with matched H3K27ac signal](figures/cd8_04_rna_vs_h3k27ac.png)
+
+The chromatin panel mirrors the expression panel block for block. The
+naive-high modules carry naive-high H3K27ac; the exhaustion-high module
+containing *Pdcd1*, *Tox*, and *Lag3* carries exhaustion-high H3K27ac. The
+activating mark is deposited where the genes are expressed.
+
+The repressive mark behaves differently, which is the point of the comparison:
+
+```{r repressive}
+me3 <- load_cutrun(paths$h3k27me3, "H3K27me3")
+
+d_me3 <- dual_omics_heatmap(
+  primary = obj, secondary = me3$mat,     # a raw matrix also works
+  primary_name = "RNA", secondary_name = "H3K27me3",
+  label_features = TEX_MARKERS,
+  file = "cd8_rna_vs_h3k27me3.png", width = 15, height = 12
+)
+```
+
+Quantifying the contrast over the exhaustion-induced genes:
+
+```{r concordance}
+peak_state <- setNames(colnames(cent)[apply(cent, 1, which.max)], rownames(cent))
+tex_genes  <- names(module_of)[peak_state[module_of] == "TEX"]
+
+delta_in <- function(res, meta_tab, genes) {
+  zs   <- res$z_secondary
+  keep <- intersect(genes, rownames(zs))
+  st   <- meta_tab$State[match(colnames(zs), meta_tab$SampleID)]
+  mean(zs[keep, st == "TEX"], na.rm = TRUE) -
+    mean(zs[keep, st == "TN"],  na.rm = TRUE)
+}
+
+round(c(H3K27ac  = delta_in(d_ac,  ac$meta,  tex_genes),
+        H3K27me3 = delta_in(d_me3, me3$meta, tex_genes)), 3)
+```
+
+```
+#>  H3K27ac H3K27me3
+#>    1.350   -0.032
+```
+
+The activating mark is gained at exhaustion-induced genes; the repressive mark
+is flat to slightly lost. Chromatin accessibility tracks the expression
+modules, which is exactly the claim the original study makes.
+
+## 13. Reproducing Everything
+
+The complete script, with 114 assertions covering data integrity, clustering
+correctness, palette behaviour, marker-gene placement, and cross-omics
+concordance, ships with the package:
+
+```{r reproduce, eval=FALSE}
+# from the package root
+system("Rscript examples/validate_real_data.R")
+```
+
+It caches the downloads under `examples/outputs/geo_cache/`, so re-runs are
+offline and fast.
+
+## 14. Adapting This To Your Own Data
+
+The only project-specific parts are steps 2 to 4. Everything from step 5 onward
+is generic. To reuse the workflow you need:
+
+1. A numeric feature-by-sample matrix with feature IDs as rownames.
+2. A metadata table with a sample ID column matching the matrix columns, and a
+   **numeric** ordering column for `time_col` (real time, or an ordinal stage
+   as here).
+3. Optionally, a `group_col` for a second factor such as genotype or treatment
+   arm, which splits the heatmap columns and facets the line plot.
+4. Optionally, a secondary matrix whose rownames end in `_<GeneSymbol>`, or a
+   custom `gene_of_secondary` function.
+
+## Citation
+
+Cite the original study and the GEO accessions alongside `ModuleViz`:
+
+```{r citation}
+citation("ModuleViz")
+```
+
+- GSE285248 — RNA-seq, memory and exhausted CD8 T cells.
+- GSE285245 — CUT&Run, histone modifications in the same cells.
+- PubMed [40389726](https://pubmed.ncbi.nlm.nih.gov/40389726/).
+
+## Session Information
+
+```{r session-info, eval=TRUE}
+sessionInfo()
+```

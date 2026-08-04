@@ -19,6 +19,12 @@ dir.create(preview_dir, recursive = TRUE, showWarnings = FALSE)
 mat <- heatmap_example$mat
 meta <- heatmap_example$meta
 
+## House style for this example dataset: the untreated arm is neutral grey, the
+## treated arm is red.  Passing the colours explicitly via `annotation_colors`
+## (heatmaps) and `group_colors` (line plots) overrides the palette defaults for
+## exactly these levels, so the two conditions read the same way in every panel.
+COND_COLS <- c(Control = "grey70", Stimulated = "#C1272D")
+
 ## ---- 1. longitudinal heatmap by clustered temporal pattern ------------------
 obj <- longitudinal_cluster(
   mat,
@@ -36,6 +42,7 @@ obj <- longitudinal_cluster(
 longitudinal_heatmap(
   obj,
   annotation_cols = c("Condition", "TimeHr"),
+  annotation_colors = list(Condition = COND_COLS),
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   top_n_label = 2,
   cluster_palette = "spectral",
@@ -48,6 +55,7 @@ longitudinal_heatmap(
 longitudinal_heatmap(
   obj,
   annotation_cols = c("Condition", "TimeHr"),
+  annotation_colors = list(Condition = COND_COLS),
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   top_n_label = 2,
   cluster_palette = "spectral",
@@ -62,7 +70,7 @@ longitudinal_heatmap(
 p_lines <- pattern_lineplot(
   obj,
   file = file.path(out_dir, "02_module_line_patterns.pdf"),
-  palette = "nature",
+  group_colors = COND_COLS,
   base_size = 13,
   width = 7,
   height = 6
