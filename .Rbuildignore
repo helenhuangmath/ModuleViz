@@ -4,6 +4,7 @@
 ^.*\\.Rproj$
 ^results$
 ^examples/outputs$
+^docs$
 ^ModuleViz_[0-9.]+\\.tar\\.gz$
 ^ModuleViz\\.Rcheck$
 ^\\.\\.Rcheck$

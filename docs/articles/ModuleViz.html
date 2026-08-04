@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10.1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ModuleViz: Temporal Modules from Longitudinal Omics</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    div.abstract {
+      margin: 2em 2em 2em 2em;
+      text-align: left;
+      font-size: 85%;
+    }
+    div.abstract-title {
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      margin-bottom: 0.5em;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">ModuleViz: Temporal Modules from Longitudinal
+Omics</h1>
+<p class="author">true</p>
+<p class="date"><code>r Sys.Date()</code></p>
+<div class="abstract">
+<div class="abstract-title">Abstract</div>
+<p>ModuleViz turns a feature-by-sample matrix with an ordered sample
+axis into interpretable temporal modules: groups of genes or peaks that
+rise and fall together. It clusters trajectories, orders the modules
+from earliest-peaking to latest-peaking, measures how reproducible each
+module is, and renders the result as publication-ready heatmaps,
+trajectory plots, and per-module correlation maps. Paired omics layers
+such as RNA and CUT&amp;Run can be aligned by gene and shown side by
+side. This vignette is the complete user guide.</p>
+</div>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span
+class="toc-section-number">1</span> Introduction</a>
+<ul>
+<li><a href="#what-problem-does-this-solve"
+id="toc-what-problem-does-this-solve"><span
+class="toc-section-number">1.1</span> What Problem Does This
+Solve?</a></li>
+<li><a href="#when-to-use-it" id="toc-when-to-use-it"><span
+class="toc-section-number">1.2</span> When To Use It</a></li>
+<li><a href="#package-vignettes" id="toc-package-vignettes"><span
+class="toc-section-number">1.3</span> Package Vignettes</a></li>
+</ul></li>
+<li><a href="#installation" id="toc-installation"><span
+class="toc-section-number">2</span> Installation</a></li>
+<li><a href="#then-install-moduleviz-itself-e.g."
+id="toc-then-install-moduleviz-itself-e.g."><span
+class="toc-section-number">3</span> then install ModuleViz itself,
+e.g.</a></li>
+<li><a href="#remotesinstall_githubhelenhuangmathmoduleviz"
+id="toc-remotesinstall_githubhelenhuangmathmoduleviz"><span
+class="toc-section-number">4</span>
+remotes::install_github(“helenhuangmath/ModuleViz”)</a></li>
+<li><a href="#quick-example" id="toc-quick-example"><span
+class="toc-section-number">5</span> Quick Example</a>
+<ul>
+<li><a href="#feature-level-preprocessing"
+id="toc-feature-level-preprocessing"><span
+class="toc-section-number">5.1</span> Feature-Level
+Preprocessing</a></li>
+</ul></li>
+<li><a href="#core-workflow" id="toc-core-workflow"><span
+class="toc-section-number">6</span> Core Workflow</a>
+<ul>
+<li><a href="#z-scoring" id="toc-z-scoring"><span
+class="toc-section-number">6.1</span> Z-scoring</a></li>
+<li><a href="#choosing-the-number-of-modules"
+id="toc-choosing-the-number-of-modules"><span
+class="toc-section-number">6.2</span> Choosing The Number Of
+Modules</a></li>
+<li><a href="#clustering" id="toc-clustering"><span
+class="toc-section-number">6.3</span> Clustering</a>
+<ul>
+<li><a href="#clustering-methods" id="toc-clustering-methods"><span
+class="toc-section-number">6.3.1</span> Clustering methods</a></li>
+<li><a href="#replicate-aggregation"
+id="toc-replicate-aggregation"><span
+class="toc-section-number">6.3.2</span> Replicate aggregation</a></li>
+</ul></li>
+<li><a href="#what-you-get-back" id="toc-what-you-get-back"><span
+class="toc-section-number">6.4</span> What You Get Back</a></li>
+<li><a href="#ordering" id="toc-ordering"><span
+class="toc-section-number">6.5</span> How Modules Get Ordered</a></li>
+<li><a href="#cluster-stability" id="toc-cluster-stability"><span
+class="toc-section-number">6.6</span> Cluster stability</a></li>
+</ul></li>
+<li><a href="#visualization" id="toc-visualization"><span
+class="toc-section-number">7</span> Visualization</a>
+<ul>
+<li><a href="#the-heatmap" id="toc-the-heatmap"><span
+class="toc-section-number">7.1</span> The heatmap</a>
+<ul>
+<li><a href="#labeling-features" id="toc-labeling-features"><span
+class="toc-section-number">7.1.1</span> Labeling Features</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#top-n-per-module-by-signal-strength"
+id="toc-top-n-per-module-by-signal-strength"><span
+class="toc-section-number">8</span> 2. top N per module by signal
+strength</a></li>
+<li><a
+href="#top-n-per-module-by-your-statistic-e.g.--log10-padj-from-deseq2"
+id="toc-top-n-per-module-by-your-statistic-e.g.--log10-padj-from-deseq2"><span
+class="toc-section-number">9</span> 3. top N per module by YOUR
+statistic (e.g. -log10 padj from DESeq2)</a>
+<ul>
+<li><a href="#palettes" id="toc-palettes"><span
+class="toc-section-number">9.1</span> Palettes</a></li>
+<li><a href="#module-trajectories" id="toc-module-trajectories"><span
+class="toc-section-number">9.2</span> Module Trajectories</a></li>
+<li><a href="#module-coherence" id="toc-module-coherence"><span
+class="toc-section-number">9.3</span> Module coherence</a></li>
+</ul></li>
+<li><a href="#paired-omics" id="toc-paired-omics"><span
+class="toc-section-number">10</span> Paired Omics</a></li>
+<li><a href="#exporting-results" id="toc-exporting-results"><span
+class="toc-section-number">11</span> Exporting Results</a></li>
+<li><a href="#one-call-wrapper" id="toc-one-call-wrapper"><span
+class="toc-section-number">12</span> One-Call Wrapper</a></li>
+<li><a href="#working-with-published-data"
+id="toc-working-with-published-data"><span
+class="toc-section-number">13</span> Working With Published
+Data</a></li>
+<li><a href="#frequently-asked-questions"
+id="toc-frequently-asked-questions"><span
+class="toc-section-number">14</span> Frequently Asked Questions</a></li>
+<li><a href="#session-information" id="toc-session-information"><span
+class="toc-section-number">15</span> Session Information</a></li>
+</ul>
+</nav>
+<p><code>{r setup, include = FALSE} knitr::opts_chunk$set(   collapse = TRUE,   comment = "#&gt;",   dev = "png",   dpi = 110,   fig.align = "center" ) set.seed(1)</code></p>
+<h1 data-number="1" id="introduction"><span
+class="header-section-number">1</span> Introduction</h1>
+<p><code>r Biocpkg("ModuleViz")</code> clusters feature trajectories
+from longitudinal omics experiments and visualizes the resulting
+temporal modules.</p>
+<h2 data-number="1.1" id="what-problem-does-this-solve"><span
+class="header-section-number">1.1</span> What Problem Does This
+Solve?</h2>
+<p>A longitudinal omics experiment produces a matrix of features (genes,
+peaks, proteins) measured across samples that have a meaningful
+<strong>order</strong>: time points, doses, disease grades, or
+differentiation stages. The interesting signal is rarely in any single
+feature. It is in the <em>shapes</em>: which features rise early and
+fall, which come up late and stay up, which respond only in the treated
+arm.</p>
+<p><code>ModuleViz</code> finds those shapes and makes them legible. The
+workflow is:</p>
+<ol type="1">
+<li><strong>z-score</strong> each feature so shape matters, not absolute
+abundance;</li>
+<li><strong>cluster</strong> features into temporal modules;</li>
+<li><strong>order</strong> the modules from earliest-peaking to
+latest-peaking, so the heatmap reads like a timeline from top to
+bottom;</li>
+<li><strong>assess</strong> how reproducible each module is under
+resampling;</li>
+<li><strong>visualise</strong> modules as heatmaps, mean-trajectory line
+plots, and gene-gene correlation maps;</li>
+<li>optionally <strong>align a second omics layer</strong> by gene.</li>
+</ol>
+<h2 data-number="1.2" id="when-to-use-it"><span
+class="header-section-number">1.2</span> When To Use It</h2>
+<p><code>ModuleViz</code> fits any experiment where the columns have an
+order and the rows are features:</p>
+<ul>
+<li>bulk RNA-seq / ATAC-seq / CUT&amp;Run time courses;</li>
+<li>drug or stimulation time courses, with or without a control
+arm;</li>
+<li>differentiation or disease-stage series (the axis need not be clock
+time);</li>
+<li>pseudobulk profiles derived from single-cell data.</li>
+</ul>
+<p>It deliberately does <em>not</em> do feature selection or
+differential testing. Choose which features are interesting upstream —
+with <code>r Biocpkg("DESeq2")</code>, <code>r Biocpkg("edgeR")</code>,
+<code>r Biocpkg("limma")</code>, or a variance filter — and pass in the
+matrix you want to see.</p>
+<h2 data-number="1.3" id="package-vignettes"><span
+class="header-section-number">1.3</span> Package Vignettes</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Vignette</th>
+<th>Data</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>This one</strong></td>
+<td>Bundled synthetic dataset</td>
+<td>Complete API reference, runs offline</td>
+</tr>
+<tr>
+<td><code>vignette("cd8-exhaustion-published-data")</code></td>
+<td>GEO GSE285248 + GSE285245</td>
+<td>Real published RNA-seq + CUT&amp;Run walkthrough</td>
+</tr>
+</tbody>
+</table>
+<h1 data-number="2" id="installation"><span
+class="header-section-number">2</span> Installation</h1>
+<p>```{r install, eval = FALSE} if (!requireNamespace(“BiocManager”,
+quietly = TRUE)) install.packages(“BiocManager”)
+BiocManager::install(“ComplexHeatmap”)</p>
+<h1 data-number="3" id="then-install-moduleviz-itself-e.g."><span
+class="header-section-number">3</span> then install ModuleViz itself,
+e.g.</h1>
+<h1 data-number="4"
+id="remotesinstall_githubhelenhuangmathmoduleviz"><span
+class="header-section-number">4</span>
+remotes::install_github(“helenhuangmath/ModuleViz”)</h1>
+<pre><code>
+```{r load-pkg, message = FALSE}
+library(ModuleViz)</code></pre>
+<h1 data-number="5" id="quick-example"><span
+class="header-section-number">5</span> Quick Example</h1>
+<p>Five lines from data to figure. Everything after this section
+explains what these calls are doing and how to control them.</p>
+<p>```{r quickstart, fig.width = 8, fig.height = 7, fig.cap =
+“Quick-start heatmap. Rows are split into four temporal modules ordered
+early-peaking to late-peaking; columns are split by condition and
+ordered by time.”} data(“heatmap_example”)</p>
+<p>obj &lt;- longitudinal_cluster( heatmap_example<span
+class="math inline"><em>m</em><em>a</em><em>t</em>, <em>h</em><em>e</em><em>a</em><em>t</em><em>m</em><em>a</em><em>p</em><sub><em>e</em></sub><em>x</em><em>a</em><em>m</em><em>p</em><em>l</em><em>e</em></span>meta,
+sample_col = “SampleID”, time_col = “TimeHr”, group_col = “Condition”, k
+= 4, aggregate_replicates = TRUE )</p>
+<p>longitudinal_heatmap(obj, top_n_label = 3, title = “Quick start”)</p>
+<pre><code>
+# Input Data
+
+## The Two Objects You Supply
+
+`ModuleViz` needs exactly two things.
+
+**A numeric matrix**, features in rows, samples in columns, with feature IDs as
+`rownames()`:
+
+```{r input-mat}
+mat &lt;- heatmap_example$mat
+dim(mat)
+mat[1:4, 1:4]</code></pre>
+<p><strong>A metadata table</strong>, one row per sample:</p>
+<p><code>{r input-meta} meta &lt;- heatmap_example$meta head(meta, 4)</code></p>
+<p>Three columns in the metadata have special meaning, named via
+arguments:</p>
+<p><code>{r input-args, echo = FALSE} knitr::kable(data.frame(   Argument = c("`sample_col`", "`time_col`", "`group_col`"),   Required = c("yes", "yes", "no"),   Meaning = c(     "Sample IDs; must match the matrix column names.",     "**Numeric** ordering variable. Sorted ascending to order the columns.",     "Optional second factor. Splits heatmap columns and colours the line plot."   ) ))</code></p>
+<p>The critical constraint is that <code>time_col</code> must be
+<strong>numeric</strong>. It is what orders the columns and what defines
+a module’s peak. If your axis is categorical but ordered —
+<code>"naive" &lt; "memory" &lt; "exhausted"</code>, or
+<code>"low" &lt; "mid" &lt; "high"</code> — encode it as an integer
+rank:</p>
+<p><code>{r ordinal, eval = FALSE} meta$StageOrder &lt;- c(naive = 1, memory = 2, exhausted = 3)[meta$Stage]</code></p>
+<p>Samples present in the metadata but missing from the matrix (or vice
+versa) are silently dropped, so the two only need to overlap.</p>
+<h2 data-number="5.1" id="feature-level-preprocessing"><span
+class="header-section-number">5.1</span> Feature-Level
+Preprocessing</h2>
+<p>Cluster on a <strong>log or variance-stabilised scale</strong> for
+count data. Z-scoring raw counts lets a handful of very high-count
+features dominate the distance metric:</p>
+<p><code>{r preprocess, eval = FALSE} mat &lt;- log2(counts + 1)                       # or DESeq2::vst(dds) mat &lt;- mat[rowMeans(counts) &gt;= 10, ]          # drop low-expressed features</code></p>
+<h1 data-number="6" id="core-workflow"><span
+class="header-section-number">6</span> Core Workflow</h1>
+<h2 data-number="6.1" id="z-scoring"><span
+class="header-section-number">6.1</span> Z-scoring</h2>
+<p><code>zscore_rows()</code> centres and scales each feature across its
+samples, so that a gene expressed at 10 counts and one at 10,000 counts
+contribute equally if they have the same shape. Zero-variance rows
+become <code>0</code> rather than <code>NaN</code>, so they survive
+clustering instead of breaking it.</p>
+<p><code>{r zscore} z &lt;- zscore_rows(mat) round(rowMeans(z)[1:3], 12)     # centred round(apply(z, 1, sd)[1:3], 12) # scaled</code></p>
+<p><code>longitudinal_cluster()</code> calls this internally. Pass
+<code>is_zscore = TRUE</code> if your matrix is already z-scored.</p>
+<h2 data-number="6.2" id="choosing-the-number-of-modules"><span
+class="header-section-number">6.2</span> Choosing The Number Of
+Modules</h2>
+<p><code>choose_k()</code> scans a range of <code>k</code> and reports
+two diagnostics: the total within-cluster sum of squares (an elbow
+curve) and the mean silhouette width.</p>
+<p><code>{r choose-k, fig.width = 5.5, fig.height = 4} diag &lt;- choose_k(z, k_range = 2:8, method = "kmeans") diag attr(diag, "suggested_k")</code></p>
+<p>When you settle on a <code>k</code> that differs from the elbow, pass
+it back as <code>chosen_k</code>: the diagnostic figure then draws your
+<code>k</code> as a solid line beside the dashed elbow, so it stays
+consistent with the module count in the rest of your figures.</p>
+<p><code>{r choose-k-marked, eval = FALSE} choose_k(z, k_range = 2:8, chosen_k = 4, file = "elbow.pdf")   # mark it choose_k(z, k_range = 2:8, annotate_k = FALSE, file = "elbow.pdf")  # bare curve</code></p>
+<p>The suggested <code>k</code> is the point furthest from the straight
+line joining the first and last elbow points. <strong>Treat it as a
+starting point, not an answer.</strong> The right <code>k</code> is the
+one that separates programmes you can interpret. Over-splitting is
+usually more informative than under-splitting: two near-identical
+modules are easy to merge mentally, whereas one module hiding two
+anti-correlated programmes is actively misleading (see Section
+@ref(module-coherence)). The real-data vignette works through a concrete
+case where the elbow k merges two biologically distinct programmes and
+the reported k is deliberately one higher.</p>
+<h2 data-number="6.3" id="clustering"><span
+class="header-section-number">6.3</span> Clustering</h2>
+<p><code>longitudinal_cluster()</code> is the workhorse.</p>
+<p><code>{r cluster} obj &lt;- longitudinal_cluster(     mat, meta,     sample_col = "SampleID",     time_col   = "TimeHr",     group_col  = "Condition",     k          = 4,     method     = "kmeans",     aggregate_replicates = TRUE,     stability  = TRUE,     n_resample = 20,     seed       = 1 ) obj</code></p>
+<h3 data-number="6.3.1" id="clustering-methods"><span
+class="header-section-number">6.3.1</span> Clustering methods</h3>
+<p><code>{r methods-table, echo = FALSE} knitr::kable(data.frame(   `method` = c("`\"kmeans\"`", "`\"hierarchical\"`", "`\"pam\"`"),   Notes = c(     "Default. Fast, Hartigan-Wong, `nstart = 50` random starts.",     "Ward.D2 linkage by default via `hclust_method`. Deterministic.",     "Partitioning around medoids; more robust to outliers than k-means."   ),   check.names = FALSE ))</code></p>
+<p><code>dist_method</code> accepts any <code>stats::dist()</code>
+metric plus <code>"correlation"</code> (<code>1 - Pearson r</code>),
+which is often the better choice for trajectory shape because it ignores
+amplitude entirely:</p>
+<p><code>{r alt-method} obj_corr &lt;- longitudinal_cluster(     mat, meta, sample_col = "SampleID", time_col = "TimeHr",     k = 4, method = "hierarchical", dist_method = "correlation",     stability = FALSE ) table(obj_corr$cluster)</code></p>
+<h3 data-number="6.3.2" id="replicate-aggregation"><span
+class="header-section-number">6.3.2</span> Replicate aggregation</h3>
+<p><code>aggregate_replicates = TRUE</code> averages replicate columns
+within each <code>group_col</code> × <code>time_col</code> cell before
+clustering. This gives cleaner modules and a much narrower heatmap, at
+the cost of no longer seeing replicate variability. Keep it
+<code>FALSE</code> when you want to inspect reproducibility across
+replicates.</p>
+<h2 data-number="6.4" id="what-you-get-back"><span
+class="header-section-number">6.4</span> What You Get Back</h2>
+<p>The result is a <code>longi</code> object — a plain list, so
+everything is inspectable:</p>
+<p><code>{r longi-structure} names(obj)</code></p>
+<p><code>{r longi-table, echo = FALSE} knitr::kable(data.frame(   Element = c("`z`", "`cluster`", "`membership`", "`centroids`", "`stability`",               "`meta`", "`params`"),   Contents = c(     "z-scored matrix, rows reordered by module then signal strength.",     "Ordered factor giving each row's module.",     "`data.table` of feature ID, module, and max |z|.",     "Mean z per module per (group x) time point.",     "Mean Jaccard per module, or `NULL`.",     "Sample metadata, reordered to match the matrix columns.",     "The settings used, for reproducibility."   ) ))</code></p>
+<p><code>{r membership} head(obj$membership, 4)</code></p>
+<h2 data-number="6.5" id="ordering"><span
+class="header-section-number">6.5</span> How Modules Get Ordered</h2>
+<p>This is the feature that makes the heatmap readable, so it is worth
+stating explicitly. After clustering, each module’s centroid is computed
+across the ordered time points. Modules are then ranked by <strong>where
+that centroid peaks</strong> (its arg-max), with ties broken by overall
+slope so that, among modules peaking at the same time, rising ones come
+before falling ones.</p>
+<p>The consequence: <code>Cluster1</code> always peaks earliest and
+<code>ClusterK</code> latest.</p>
+<p><code>{r centroids} cent &lt;- as.matrix(obj$centroids[, -1]) rownames(cent) &lt;- obj$centroids$Cluster round(cent, 2)</code></p>
+<p>Within a module, rows are sorted by max |z|, so the strongest
+features sit at the top of each block.</p>
+<h2 data-number="6.6" id="cluster-stability"><span
+class="header-section-number">6.6</span> Cluster stability</h2>
+<p>A module you cannot reproduce is not a finding.
+<code>cluster_stability()</code> — run automatically when
+<code>stability = TRUE</code> — repeatedly subsamples the features,
+re-clusters, and records how well each original module is recovered, as
+a mean maximum Jaccard similarity.</p>
+<p><code>{r stability} obj$stability</code></p>
+<p><code>{r stability-guide, echo = FALSE} knitr::kable(data.frame(   `Mean Jaccard` = c("&gt; 0.85", "0.6 - 0.85", "&lt; 0.6"),   Interpretation = c("Highly reproducible; report with confidence.",                      "A real pattern, but boundaries are fuzzy.",                      "Unstable. Do not interpret as a discrete module."),   check.names = FALSE ))</code></p>
+<p>Stability is shown twice in the heatmap: as a grey
+<code>Stability</code> bar down the left edge, and as <code>J=</code> in
+each row title.</p>
+<h1 data-number="7" id="visualization"><span
+class="header-section-number">7</span> Visualization</h1>
+<h2 data-number="7.1" id="the-heatmap"><span
+class="header-section-number">7.1</span> The heatmap</h2>
+<p><code>{r heatmap-main, fig.width = 8.5, fig.height = 7.5, fig.cap = "Modules ordered early to late, columns split by condition, top three features labelled per module."} longitudinal_heatmap(     obj,     annotation_cols = c("Condition", "TimeHr"),     top_n_label     = 3,     title           = "Stimulation time course" )</code></p>
+<p>Reading the figure: rows are split by module and never re-ordered by
+the heatmap itself (<code>cluster_rows = FALSE</code>), because the
+ordering from Section @ref(ordering) is the point. Columns are split by
+<code>group_col</code> and ordered by time. Metadata columns become
+annotation bars along the top.</p>
+<h3 data-number="7.1.1" id="labeling-features"><span
+class="header-section-number">7.1.1</span> Labeling Features</h3>
+<p>Three ways to choose which features get labelled, combinable:</p>
+<p>```{r labels, eval = FALSE} # 1. an explicit list
+longitudinal_heatmap(obj, label_features = c(“Gene001”, “Gene016”))</p>
+<h1 data-number="8" id="top-n-per-module-by-signal-strength"><span
+class="header-section-number">8</span> 2. top N per module by signal
+strength</h1>
+<p>longitudinal_heatmap(obj, top_n_label = 5)</p>
+<h1 data-number="9"
+id="top-n-per-module-by-your-statistic-e.g.--log10-padj-from-deseq2"><span
+class="header-section-number">9</span> 3. top N per module by YOUR
+statistic (e.g. -log10 padj from DESeq2)</h1>
+<p>rank_tab &lt;- data.frame(ID = rownames(obj<span
+class="math inline"><em>z</em>), <em>v</em><em>a</em><em>l</em><em>u</em><em>e</em> = <em>r</em><em>u</em><em>n</em><em>i</em><em>f</em>(<em>n</em><em>r</em><em>o</em><em>w</em>(<em>o</em><em>b</em><em>j</em></span>z)))
+longitudinal_heatmap(obj, top_n_label = 5, rank_table = rank_tab,
+id_field = “ID”, value_field = “value”)</p>
+<pre><code>
+Option 3 is usually what you want for a paper: it labels the features that are
+most *significant*, not merely the most variable.
+
+### Saving
+
+Pass `file` to write directly. The extension picks the device — `.pdf` for
+vector output, `.png` for a raster at 300 dpi.
+
+```{r save, eval = FALSE}
+longitudinal_heatmap(obj, file = &quot;modules.pdf&quot;, width = 9, height = 12)</code></pre>
+<h2 data-number="9.1" id="palettes"><span
+class="header-section-number">9.1</span> Palettes</h2>
+<p>Three independent palette slots, each with its own job:</p>
+<p><code>{r palette-table, echo = FALSE} knitr::kable(data.frame(   Argument = c("`cluster_palette`", "`annotation_palette`", "`zscore_palette`"),   Colours = c("module identity bar", "categorical metadata bars", "the matrix body"),   Default = c("`\"paired\"`", "`\"set2\"`", "`\"rdbu\"`"),   Options = c("any qualitative or ramp palette below",               "any qualitative palette below",               "`\"rdbu\"`, `\"viridis\"`") ))</code></p>
+<p>The registry distinguishes two kinds of palette, and this distinction
+matters:</p>
+<ul>
+<li><strong>Qualitative</strong> — <code>"paired"</code>,
+<code>"set2"</code>, <code>"set3"</code>, <code>"okabe_ito"</code>,
+<code>"nature"</code>, <code>"science"</code>. Hand-picked, maximally
+distinguishable colours. For <code>n</code> at or below the palette
+size, the first <code>n</code> are used <strong>verbatim</strong>.
+Interpolating them would invent blended colours that are not in the
+palette and can be nearly identical to each other.</li>
+<li><strong>Continuous ramps</strong> — <code>"spectral"</code>,
+<code>"viridis"</code>. Genuine colour scales, interpolated across the
+full range for any <code>n</code>.</li>
+</ul>
+<p><code>{r palette-demo, fig.width = 7, fig.height = 3.2, fig.cap = "Qualitative palettes keep their colours verbatim; ramps interpolate across the full range."} pals &lt;- c("paired", "set2", "set3", "okabe_ito", "spectral", "viridis") op &lt;- par(mar = c(1, 6, 1, 1)) plot(NA, xlim = c(0, 6), ylim = c(0, length(pals)), axes = FALSE,      xlab = "", ylab = "") for (i in seq_along(pals)) {     cols &lt;- ModuleViz:::.moduleviz_discrete_palette(6, pals[i])     rect(0:5, length(pals) - i, 1:6, length(pals) - i + 0.8,          col = cols, border = "white", lwd = 2) } axis(2, at = seq(length(pals) - 0.6, by = -1, length.out = length(pals)),      labels = pals, las = 1, tick = FALSE, cex.axis = 0.85) par(op)</code></p>
+<p>Use <code>viridis</code> when the figure must survive greyscale
+printing or colour-vision deficiency; use <code>rdbu</code> when the
+zero point is meaningful and you want direction to read at a glance.</p>
+<p><code>{r heatmap-viridis, fig.width = 8, fig.height = 7, fig.cap = "The same modules with a viridis body, Spectral module bar, and Set3 metadata bars."} longitudinal_heatmap(     obj,     zscore_palette     = "viridis",     cluster_palette    = "spectral",     annotation_palette = "set3",     top_n_label        = 2,     title              = "Viridis variant" )</code></p>
+<p><code>zscore_limits</code> controls where the scale saturates; widen
+it if <code>±2</code> clips too much of your data.</p>
+<h2 data-number="9.2" id="module-trajectories"><span
+class="header-section-number">9.2</span> Module Trajectories</h2>
+<p>The heatmap shows every feature; the line plot shows each module’s
+average shape, which is what you actually describe in the text.</p>
+<p><code>{r lineplot, fig.width = 6, fig.height = 7, fig.cap = "Mean z-score trajectory per module. With a group column, each group is a separate coloured line."} pattern_lineplot(obj, palette = "set2", base_size = 12)</code></p>
+<p>Returns a <code>ggplot</code>, so it composes with the rest of the
+ggplot ecosystem:</p>
+<p><code>{r lineplot-custom, eval = FALSE} library(ggplot2) pattern_lineplot(obj) + labs(subtitle = "Stimulated vs control")</code></p>
+<h2 data-number="9.3" id="module-coherence"><span
+class="header-section-number">9.3</span> Module coherence</h2>
+<p>Clustering guarantees that a module’s members are <em>closer to each
+other than to other modules</em>. It does not guarantee they actually
+agree. A module can look clean in the main heatmap while being the
+average of two anti-correlated sub-programmes.</p>
+<p><code>module_correlation_summary()</code> gives the one-number
+version:</p>
+<p><code>{r cor-summary} module_correlation_summary(obj)</code></p>
+<p><code>{r cor-heatmap, fig.width = 6.5, fig.height = 6, fig.cap = "Gene-gene correlation within one module. A coherent module is a solid high-correlation block; visible sub-blocks mean the module contains more than one programme."} cors &lt;- module_correlation_heatmap(obj, clusters = "Cluster1", max_genes = 40) cors$Cluster1$mean_cor</code></p>
+<p>Interpretation: high mean <code>r</code> (roughly &gt; 0.7) means a
+tight, coherent module. A low value with visible blocks in the heatmap
+means you should raise <code>k</code> and re-cluster. A low value with
+no structure means the module is mostly noise.</p>
+<p>Large modules are subsampled to <code>max_genes</code> for legibility
+— <code>select = "top"</code> keeps the strongest-signal features,
+<code>select = "random"</code> gives an unbiased view. To write every
+module at once, pass a <code>.pdf</code> path and get one page per
+module:</p>
+<p><code>{r cor-save, eval = FALSE} module_correlation_heatmap(obj, file = "module_correlations.pdf",                            max_genes = 60)</code></p>
+<h1 data-number="10" id="paired-omics"><span
+class="header-section-number">10</span> Paired Omics</h1>
+<p><code>dual_omics_heatmap()</code> puts two layers side by side,
+linked by gene: RNA next to ATAC, or RNA next to CUT&amp;Run. The
+<strong>primary</strong> layer drives the clustering and the row order;
+the secondary is displayed in that same order, so each row is one gene
+across both assays.</p>
+<p>Because one gene often maps to several peaks, the secondary layer is
+collapsed to one row per gene — <code>aggregate = "mean"</code> averages
+a gene’s peaks, <code>aggregate = "top"</code> takes the strongest.</p>
+<p>Genes are recovered from secondary row IDs by
+<code>gene_of_secondary</code>, whose default
+<code>sub("^.*_", "", id)</code> takes everything after the last
+underscore. So row names of the form <code>peak1243_Pdcd1</code> work
+out of the box.</p>
+<p>```{r dual-omics, fig.width = 10, fig.height = 7, fig.cap = “Paired
+layers linked by gene. The primary layer sets the module structure and
+row order; the secondary is shown in the same order.”} # simulate a
+second layer: two peaks per gene, with noise genes &lt;- rownames(mat)
+atac &lt;- mat[rep(seq_along(genes), each = 2), ] rownames(atac) &lt;-
+paste0(“Peak”, sprintf(“%03d”, seq_len(nrow(atac))), “_“, rep(genes,
+each = 2)) atac &lt;- atac + matrix(rnorm(length(atac), sd = 0.35), nrow
+= nrow(atac))</p>
+<p>res &lt;- dual_omics_heatmap( primary = obj, secondary = atac,
+primary_name = “RNA”, secondary_name = “ATAC”, aggregate = “mean”,
+label_features = c(“Gene001”, “Gene016”, “Gene031”) )</p>
+<pre><code>
+The return value carries the aligned matrices for downstream quantification:
+
+```{r dual-return}
+names(res)
+dim(res$z_secondary)</code></pre>
+<p>That makes it straightforward to ask whether the second layer tracks
+the first — for example, comparing mean secondary signal at late versus
+early time points for the late-peaking module.</p>
+<h1 data-number="11" id="exporting-results"><span
+class="header-section-number">11</span> Exporting Results</h1>
+<p><code>{r export} demo_prefix &lt;- file.path(tempdir(), "demo") write_memberships(obj, prefix = demo_prefix) list.files(tempdir(), pattern = "^demo_")</code></p>
+<p><code>_memberships.txt</code> is the file you feed into GO or GSEA
+enrichment, one module at a time. <code>_centroids.txt</code> holds the
+mean trajectories, and <code>_stability.txt</code> the Jaccard
+scores.</p>
+<h1 data-number="12" id="one-call-wrapper"><span
+class="header-section-number">12</span> One-Call Wrapper</h1>
+<p><code>run_longitudinal()</code> runs cluster → heatmap → line plot →
+export in a single call, for when you have settled on parameters and
+just want the outputs:</p>
+<p><code>{r wrapper, eval = FALSE} run_longitudinal(     mat, meta, out_prefix = "results/experiment1",     sample_col = "SampleID", time_col = "TimeHr", group_col = "Condition",     k = 4, top_n_label = 5,     zscore_palette = "rdbu", cluster_palette = "paired" )</code></p>
+<h1 data-number="13" id="working-with-published-data"><span
+class="header-section-number">13</span> Working With Published Data</h1>
+<p><code>vignette("cd8-exhaustion-published-data", package = "ModuleViz")</code>
+applies this workflow end to end to two public GEO series — RNA-seq
+(GSE285248) and paired H3K27ac / H3K27me3 CUT&amp;Run (GSE285245) from a
+CD8 T cell memory-versus-exhaustion study. It covers the parts this
+vignette does not: downloading processed matrices from GEO, ANOVA-based
+DEG selection, mapping CUT&amp;Run peaks to genes, and checking module
+assignments against canonical marker genes.</p>
+<p>The package also ships <code>examples/validate_real_data.R</code>,
+which runs that entire analysis with 114 correctness assertions.</p>
+<p>For a small set of bundled public time courses:</p>
+<p><code>{r real-data} available_real_timecourse_datasets()</code></p>
+<h1 data-number="14" id="frequently-asked-questions"><span
+class="header-section-number">14</span> Frequently Asked Questions</h1>
+<p><strong><code>Error: mat has no rownames</code></strong> — feature
+IDs must be <code>rownames(mat)</code>, or passed via
+<code>id_col</code> if they live in a column of a
+<code>data.frame</code>.</p>
+<p><strong><code>Error: No overlap between meta[[sample_col]] and the matrix columns</code></strong>
+— <code>meta[[sample_col]]</code> must contain the literal matrix column
+names. Check for whitespace or a factor that has been coerced to
+integers.</p>
+<p><strong>My modules are dominated by a few features.</strong> You are
+clustering on a raw count scale. Use <code>log2(x + 1)</code> or a
+variance-stabilising transform first.</p>
+<p><strong>Everything lands in one module.</strong> Usually too few
+features, or features that were not selected for variability. Filter to
+differential or high-variance features first.</p>
+<p><strong>A module has low stability.</strong> Lower <code>k</code>,
+switch to <code>dist_method = "correlation"</code>, or accept that the
+module is a continuum rather than a discrete group and describe it that
+way.</p>
+<p><strong>Can the axis be non-numeric?</strong> No —
+<code>time_col</code> must be numeric. Encode ordered categories as
+integer ranks; the spacing does not need to be even.</p>
+<p><strong>Can I use my own colours?</strong> Yes.
+<code>annotation_colors</code> takes a named list of colour vectors, and
+<code>col_fun</code> takes any <code>circlize::colorRamp2()</code>
+function, overriding <code>zscore_palette</code>.</p>
+<h1 data-number="15" id="session-information"><span
+class="header-section-number">15</span> Session Information</h1>
+<p><code>{r session-info} sessionInfo()</code></p>
+</body>
+</html>
