@@ -1,11 +1,5 @@
 # ModuleViz: an R package for temporal module discovery and visualization in longitudinal omics data
 
-Hua Huang
-
-* Correspondence: helenhuang.math@gmail.com
-
-## Abstract
-
 ### Summary
 
 Longitudinal transcriptomic and epigenomic studies are increasingly used to
