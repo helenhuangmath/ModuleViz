@@ -6,11 +6,6 @@
 
 Source: `vignettes/ModuleViz.Rmd`
 
-## Manuscript
-
-The manuscript draft for this package is available at
-[docs/paper/ModuleViz_manuscript.md](docs/paper/ModuleViz_manuscript.md).
-
 ## Introduction
 
 `ModuleViz` is an R package for clustering and visualizing longitudinal
