@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc 3.10.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>filebf1d7018d343</title>
+  <title>ModuleViz</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -167,25 +167,38 @@ class="toc-section-number">1.5.8</span>
 id="toc-module_correlation_heatmap"><span
 class="toc-section-number">1.5.9</span>
 <code>module_correlation_heatmap()</code></a></li>
-<li><a href="#dual_omics_heatmap" id="toc-dual_omics_heatmap"><span
+<li><a href="#dual_heatmap" id="toc-dual_heatmap"><span
 class="toc-section-number">1.5.10</span>
-<code>dual_omics_heatmap()</code></a></li>
+<code>dual_heatmap()</code></a></li>
+<li><a href="#multi_cluster-multi_heatmap-multi_lineplot"
+id="toc-multi_cluster-multi_heatmap-multi_lineplot"><span
+class="toc-section-number">1.5.11</span> <code>multi_cluster()</code>,
+<code>multi_heatmap()</code>, <code>multi_lineplot()</code></a></li>
 <li><a href="#write_memberships" id="toc-write_memberships"><span
-class="toc-section-number">1.5.11</span>
+class="toc-section-number">1.5.12</span>
 <code>write_memberships()</code></a></li>
 <li><a href="#run_longitudinal" id="toc-run_longitudinal"><span
-class="toc-section-number">1.5.12</span>
+class="toc-section-number">1.5.13</span>
 <code>run_longitudinal()</code></a></li>
 <li><a
 href="#available_real_timecourse_datasets-and-load_real_timecourse_example"
 id="toc-available_real_timecourse_datasets-and-load_real_timecourse_example"><span
-class="toc-section-number">1.5.13</span>
+class="toc-section-number">1.5.14</span>
 <code>available_real_timecourse_datasets()</code> and
 <code>load_real_timecourse_example()</code></a></li>
 </ul></li>
-<li><a href="#paired-omics-analysis"
-id="toc-paired-omics-analysis"><span
-class="toc-section-number">1.6</span> Paired Omics Analysis</a></li>
+<li><a href="#multi-omics-analysis" id="toc-multi-omics-analysis"><span
+class="toc-section-number">1.6</span> Multi-Omics Analysis</a>
+<ul>
+<li><a href="#two-layers-dual_heatmap"
+id="toc-two-layers-dual_heatmap"><span
+class="toc-section-number">1.6.1</span> Two layers:
+<code>dual_heatmap()</code></a></li>
+<li><a href="#any-number-of-layers-multi_heatmap-and-multi_lineplot"
+id="toc-any-number-of-layers-multi_heatmap-and-multi_lineplot"><span
+class="toc-section-number">1.6.2</span> Any number of layers:
+<code>multi_heatmap()</code> and <code>multi_lineplot()</code></a></li>
+</ul></li>
 <li><a href="#module-coherence" id="toc-module-coherence"><span
 class="toc-section-number">1.7</span> Module Coherence</a></li>
 <li><a href="#published-data-example"
@@ -216,17 +229,6 @@ temporal module discovery and visualization in longitudinal omics
 data</h1>
 <h4 data-number="1.0.0.1" id="hua-huang"><span
 class="header-section-number">1.0.0.1</span> Hua Huang</h4>
-<p>Department of Systems Pharmacology and Translational Therapeutics,
-University of Pennsylvania Perelman School of Medicine, Philadelphia, PA,
-19104, USA</p>
-<p>Institute for Immunology and Immune Health, University of
-Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104,
-USA</p>
-<p>Epigenetics Institute, University of Pennsylvania Perelman School of
-Medicine, Philadelphia, PA, 19104, USA</p>
-<p>Department of Cell and Developmental Biology, University of
-Pennsylvania Perelman School of Medicine, Philadelphia, PA, 19104,
-USA</p>
 <h4 data-number="1.0.0.2" id="section"><span
 class="header-section-number">1.0.0.2</span> 2026-05-01</h4>
 <p>Source: <code>vignettes/ModuleViz.Rmd</code></p>
@@ -245,10 +247,10 @@ numeric ordering supplied by the user.</p>
 <p><code>ModuleViz</code> takes a numeric matrix and sample metadata
 table, z-scores features by row, clusters features into temporal
 modules, orders modules from early-peaking to late-peaking patterns, and
-renders the result as heatmaps, module trajectory plots, paired-omics
-heatmaps, and module coherence diagnostics. Heatmaps are drawn with <a
-href="https://bioconductor.org/packages/ComplexHeatmap/"><code>ComplexHeatmap</code></a>,
-so the package fits naturally into Bioconductor workflows.</p>
+renders the result as heatmaps, module trajectory plots, multi-omics
+heatmaps, and module coherence diagnostics. Heatmaps are drawn with
+<code>ComplexHeatmap</code>, so the package fits naturally into
+Bioconductor workflows.</p>
 <p>The main functions are:</p>
 <ul>
 <li><code>longitudinal_cluster()</code>: cluster features into ordered
@@ -256,8 +258,14 @@ temporal modules.</li>
 <li><code>longitudinal_heatmap()</code>: draw annotated module
 heatmaps.</li>
 <li><code>pattern_lineplot()</code>: plot mean module trajectories.</li>
-<li><code>dual_omics_heatmap()</code>: align a second omics layer, such
-as ATAC or CUT&amp;RUN, to RNA-defined modules.</li>
+<li><code>multi_cluster()</code> / <code>multi_heatmap()</code>: align
+any number of omics layers by gene, such as RNA + ATAC + H3K27ac +
+H3K27me3, and cluster them from one reference layer or jointly across
+all layers.</li>
+<li><code>multi_lineplot()</code>: plot each module’s trajectory in
+every layer.</li>
+<li><code>dual_heatmap()</code>: the two-layer shortcut that aligns ATAC
+or CUT&amp;RUN to RNA-defined modules.</li>
 <li><code>module_correlation_heatmap()</code>: inspect gene-gene
 correlation within modules.</li>
 <li><code>module_correlation_summary()</code>: summarize within-module
@@ -597,11 +605,12 @@ correlation heatmaps within one or more modules.</p>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>A <code>.pdf</code> file collects multiple modules as pages. Other
 extensions write one file per module.</p>
-<h3 data-number="1.5.10" id="dual_omics_heatmap"><span
+<h3 data-number="1.5.10" id="dual_heatmap"><span
 class="header-section-number">1.5.10</span>
-<code>dual_omics_heatmap()</code></h3>
-<p><code>dual_omics_heatmap()</code> aligns a secondary assay to the
-primary module order by gene. The primary layer defines the modules; the
+<code>dual_heatmap()</code></h3>
+<p><code>dual_heatmap()</code> is the two-layer case of
+<code>multi_heatmap()</code>. It aligns a secondary assay to the primary
+module order by gene: the primary layer defines the modules, and the
 secondary layer is displayed in the same gene order.</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> mat[<span class="fu">rep</span>(<span class="fu">seq_along</span>(genes), <span class="at">each =</span> <span class="dv">2</span>), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
@@ -612,7 +621,7 @@ secondary layer is displayed in the same gene order.</p>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rep</span>(genes, <span class="at">each =</span> <span class="dv">2</span>)</span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dual_omics_heatmap</span>(</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dual_heatmap</span>(</span>
 <span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary =</span> obj,</span>
 <span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">secondary =</span> atac,</span>
 <span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary_name =</span> <span class="st">&quot;RNA&quot;</span>,</span>
@@ -624,74 +633,116 @@ secondary layer is displayed in the same gene order.</p>
 <span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>Use <code>aggregate = "top"</code> when the strongest secondary
 feature per gene is more appropriate than the mean.</p>
-<h3 data-number="1.5.11" id="write_memberships"><span
+<h3 data-number="1.5.11"
+id="multi_cluster-multi_heatmap-multi_lineplot"><span
 class="header-section-number">1.5.11</span>
+<code>multi_cluster()</code>, <code>multi_heatmap()</code>,
+<code>multi_lineplot()</code></h3>
+<p>These functions extend the paired view to any number of layers, such
+as RNA + ATAC + H3K27ac + H3K27me3. Each layer is z-scored within itself
+and collapsed to one row per gene, then shown as its own panel. All
+panels share the module split, the row order, and one z-score legend.
+<code>multi_cluster()</code> builds the aligned object,
+<code>multi_heatmap()</code> draws it (and accepts the list of layers
+directly), and <code>multi_lineplot()</code> plots each module’s
+trajectory in every layer.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>layers <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">RNA =</span> obj, <span class="at">ATAC =</span> atac, <span class="at">H3K27ac =</span> h3k27ac, <span class="at">H3K27me3 =</span> h3k27me3)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">multi_heatmap</span>(</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    layers,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">meta =</span> meta, <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">cluster_by =</span> <span class="st">&quot;RNA&quot;</span>,          <span class="co"># or &quot;joint&quot; to cluster all layers together</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene031&quot;</span>),</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;multi_heatmap.pdf&quot;</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="fu">multi_lineplot</span>(res, <span class="at">file =</span> <span class="st">&quot;multi_lineplot.pdf&quot;</span>)</span></code></pre></div>
+<p>Each layer can be a <code>longi</code> object or a raw matrix. Raw
+matrices take their sample metadata from <code>meta</code>, either one
+shared table or a named list with one table per layer. See <a
+href="#multi-omics-analysis">Multi-Omics Analysis</a> for the resulting
+figures.</p>
+<p><code>cluster_by</code> names the layer that defines the modules.
+With <code>cluster_by = "joint"</code>, the per-gene profiles of every
+layer are concatenated and clustered together, so a module groups genes
+whose expression and chromatin trajectories agree. By default the first
+layer’s row IDs are used as gene symbols and the other layers take the
+text after the last underscore (<code>peak12_Pdcd1</code> maps to
+<code>Pdcd1</code>). Use <code>gene_of</code> to override this.
+<code>gene_set = "intersect"</code> keeps genes present in every layer,
+and <code>gene_set = "reference"</code> keeps all genes of the reference
+layer, drawing missing layers in grey.</p>
+<h3 data-number="1.5.12" id="write_memberships"><span
+class="header-section-number">1.5.12</span>
 <code>write_memberships()</code></h3>
 <p><code>write_memberships()</code> exports module assignments and, by
 default, module centroids and stability estimates.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_memberships</span>(obj, <span class="at">prefix =</span> <span class="st">&quot;moduleviz&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_memberships</span>(obj, <span class="at">prefix =</span> <span class="st">&quot;moduleviz&quot;</span>)</span></code></pre></div>
 <p>The exported membership table is the usual input for downstream gene
 set, pathway, or motif enrichment analyses.</p>
-<h3 data-number="1.5.12" id="run_longitudinal"><span
-class="header-section-number">1.5.12</span>
+<h3 data-number="1.5.13" id="run_longitudinal"><span
+class="header-section-number">1.5.13</span>
 <code>run_longitudinal()</code></h3>
 <p><code>run_longitudinal()</code> is a convenience wrapper for a
 finalized workflow. It runs clustering, writes the heatmap, writes the
 trajectory plot, and exports membership tables.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_longitudinal</span>(</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    mat,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    meta,</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">out_prefix =</span> <span class="st">&quot;moduleviz&quot;</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">4</span>,</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_label =</span> <span class="dv">3</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">run_longitudinal</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    mat,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    meta,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">out_prefix =</span> <span class="st">&quot;moduleviz&quot;</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">4</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_label =</span> <span class="dv">3</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>Use the lower-level functions during exploration, then switch to
 <code>run_longitudinal()</code> when parameters are settled.</p>
-<h3 data-number="1.5.13"
+<h3 data-number="1.5.14"
 id="available_real_timecourse_datasets-and-load_real_timecourse_example"><span
-class="header-section-number">1.5.13</span>
+class="header-section-number">1.5.14</span>
 <code>available_real_timecourse_datasets()</code> and
 <code>load_real_timecourse_example()</code></h3>
 <p>These helpers expose optional public datasets from the Bioconductor
 <code>timecoursedata</code> package.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>example <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset =</span> <span class="st">&quot;sorghum_leaf&quot;</span>,</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">genotype =</span> <span class="st">&quot;BT642&quot;</span>,</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">min_week =</span> <span class="dv">3</span>,</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>example <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset =</span> <span class="st">&quot;sorghum_leaf&quot;</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">genotype =</span> <span class="st">&quot;BT642&quot;</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">min_week =</span> <span class="dv">3</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>The returned object contains <code>mat</code>, <code>meta</code>, and
 the column names to pass to <code>longitudinal_cluster()</code>.</p>
-<h2 data-number="1.6" id="paired-omics-analysis"><span
-class="header-section-number">1.6</span> Paired Omics Analysis</h2>
-<p><code>dual_omics_heatmap()</code> compares two assays in a shared row
+<h2 data-number="1.6" id="multi-omics-analysis"><span
+class="header-section-number">1.6</span> Multi-Omics Analysis</h2>
+<h3 data-number="1.6.1" id="two-layers-dual_heatmap"><span
+class="header-section-number">1.6.1</span> Two layers:
+<code>dual_heatmap()</code></h3>
+<p><code>dual_heatmap()</code> compares two assays in a shared row
 order. The primary layer, often RNA, defines the module structure. The
 secondary layer, such as ATAC or CUT&amp;RUN, is aligned by gene and
 shown beside the primary layer.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rna_obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    rna,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    meta,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> <span class="st">&quot;Genotype&quot;</span>,</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">10</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dual_omics_heatmap</span>(</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary =</span> rna_obj,</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">secondary =</span> atac,</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary_name =</span> <span class="st">&quot;RNA&quot;</span>,</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">secondary_name =</span> <span class="st">&quot;ATAC&quot;</span>,</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">gene_of_secondary =</span> <span class="cf">function</span>(id) <span class="fu">sub</span>(<span class="st">&quot;^.*_&quot;</span>, <span class="st">&quot;&quot;</span>, id),</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">aggregate =</span> <span class="st">&quot;mean&quot;</span>,</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Sox2&quot;</span>, <span class="st">&quot;Pax6&quot;</span>),</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;rna_atac_heatmap.pdf&quot;</span></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>rna_obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    rna,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    meta,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> <span class="st">&quot;Genotype&quot;</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">10</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="fu">dual_heatmap</span>(</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary =</span> rna_obj,</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">secondary =</span> atac,</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">primary_name =</span> <span class="st">&quot;RNA&quot;</span>,</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">secondary_name =</span> <span class="st">&quot;ATAC&quot;</span>,</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">gene_of_secondary =</span> <span class="cf">function</span>(id) <span class="fu">sub</span>(<span class="st">&quot;^.*_&quot;</span>, <span class="st">&quot;&quot;</span>, id),</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">aggregate =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Sox2&quot;</span>, <span class="st">&quot;Pax6&quot;</span>),</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;rna_atac_heatmap.pdf&quot;</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
 <img src="assets/results/03_rna_atac_side_by_side_heatmap.png"
 alt="RNA ATAC side-by-side heatmap" />
@@ -701,20 +752,82 @@ heatmap</figcaption>
 <p>When multiple secondary features map to one gene,
 <code>aggregate = "mean"</code> averages them and
 <code>aggregate = "top"</code> keeps the strongest feature.</p>
+<h3 data-number="1.6.2"
+id="any-number-of-layers-multi_heatmap-and-multi_lineplot"><span
+class="header-section-number">1.6.2</span> Any number of layers:
+<code>multi_heatmap()</code> and <code>multi_lineplot()</code></h3>
+<p>For more than two assays, pass a named list of layers to
+<code>multi_heatmap()</code>. The example below adds two simulated
+histone layers to the RNA and ATAC data above: an activating mark
+(H3K27ac) that follows expression and a repressive mark (H3K27me3) that
+mirrors it. The figures are produced by
+<code>examples/example_moduleviz_gallery.R</code>.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>as_regions <span class="ot">&lt;-</span> <span class="cf">function</span>(m, <span class="at">sign =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.5</span>) {</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    out <span class="ot">&lt;-</span> sign <span class="sc">*</span> m <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(m), <span class="at">sd =</span> sd), <span class="at">nrow =</span> <span class="fu">nrow</span>(m))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rownames</span>(out) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;region&quot;</span>, <span class="fu">seq_len</span>(<span class="fu">nrow</span>(m)), <span class="st">&quot;_&quot;</span>, <span class="fu">rownames</span>(m))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    out</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>layers <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">RNA      =</span> obj,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ATAC     =</span> atac,</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">H3K27ac  =</span> <span class="fu">as_regions</span>(mat),</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">H3K27me3 =</span> <span class="fu">as_regions</span>(mat, <span class="at">sign =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>multi <span class="ot">&lt;-</span> <span class="fu">multi_cluster</span>(</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    layers,</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">meta =</span> meta, <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="fu">multi_heatmap</span>(</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>    multi,</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene016&quot;</span>, <span class="st">&quot;Gene031&quot;</span>, <span class="st">&quot;Gene046&quot;</span>),</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;multi_heatmap.pdf&quot;</span></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="fu">multi_lineplot</span>(multi, <span class="at">file =</span> <span class="st">&quot;multi_lineplot.pdf&quot;</span>)</span></code></pre></div>
+<figure>
+<img src="assets/results/06_multi_heatmap.png"
+alt="RNA, ATAC, H3K27ac, and H3K27me3 heatmap" />
+<figcaption aria-hidden="true">RNA, ATAC, H3K27ac, and H3K27me3
+heatmap</figcaption>
+</figure>
+<p>Each panel is one data type; every row is one gene across all four
+layers, in the RNA module order. One z-score legend covers every panel,
+and each panel keeps its own sample annotation bars.</p>
+<figure>
+<img src="assets/results/07_multi_lineplot.png"
+alt="Module trajectories in every layer" />
+<figcaption aria-hidden="true">Module trajectories in every
+layer</figcaption>
+</figure>
+<p><code>multi_lineplot()</code> draws one line per layer in each
+module. Here ATAC and H3K27ac follow expression and H3K27me3 runs
+opposite to it, as simulated.</p>
+<p>Useful options:</p>
+<ul>
+<li><code>cluster_by = "joint"</code> clusters the concatenated profiles
+of all layers, so a module groups genes whose expression and chromatin
+trajectories agree.</li>
+<li><code>gene_set = "reference"</code> keeps every gene of the
+reference layer and draws layers without that gene in grey.</li>
+<li><code>layer_gap</code> sets the space between panels (10 mm by
+default).</li>
+</ul>
 <h2 data-number="1.7" id="module-coherence"><span
 class="header-section-number">1.7</span> Module Coherence</h2>
 <p>Temporal clustering can group features with similar average profiles,
 but a module should still be checked for internal coherence. The
 correlation helpers summarize and visualize feature-feature agreement
 within each module.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_summary</span>(obj)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_heatmap</span>(</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    obj,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">clusters =</span> <span class="st">&quot;Cluster1&quot;</span>,</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">max_genes =</span> <span class="dv">60</span>,</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;module_correlation.pdf&quot;</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_summary</span>(obj)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">module_correlation_heatmap</span>(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    obj,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">clusters =</span> <span class="st">&quot;Cluster1&quot;</span>,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">max_genes =</span> <span class="dv">60</span>,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">file =</span> <span class="st">&quot;module_correlation.pdf&quot;</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <figure>
 <img src="assets/figures/cd8_05_module_correlation.png"
 alt="CD8 module correlation heatmap" />
@@ -728,8 +841,8 @@ sub-blocks can indicate that the module should be split by increasing
 class="header-section-number">1.8</span> Published Data Example</h2>
 <p>The vignette <code>vignette("cd8-exhaustion-published-data")</code>
 demonstrates a published-data workflow using RNA-seq and CUT&amp;RUN
-data from memory and exhausted CD8 T cells. RNA-seq defines the modules
-and H3K27ac signal is aligned to those modules by gene.</p>
+data from memory and exhausted CD8 T cells. RNA-seq defines the modules,
+and H3K27ac and H3K27me3 signal is aligned to those modules by gene.</p>
 <figure>
 <img src="assets/figures/cd8_01_module_heatmap.png"
 alt="CD8 module heatmap" />
@@ -746,6 +859,31 @@ alt="CD8 RNA versus H3K27ac heatmap" />
 <figcaption aria-hidden="true">CD8 RNA versus H3K27ac
 heatmap</figcaption>
 </figure>
+<p>All three layers in one figure with <code>multi_heatmap()</code>:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> <span class="fu">multi_heatmap</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">RNA =</span> obj, <span class="at">H3K27ac =</span> ac<span class="sc">$</span>mat, <span class="at">H3K27me3 =</span> me3<span class="sc">$</span>mat),</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">meta =</span> <span class="fu">list</span>(<span class="at">H3K27ac =</span> ac<span class="sc">$</span>meta, <span class="at">H3K27me3 =</span> me3<span class="sc">$</span>meta),</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;StateOrder&quot;</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">annotation_cols =</span> <span class="st">&quot;State&quot;</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">zscore_palette =</span> <span class="st">&quot;viridis&quot;</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">show_column_names =</span> <span class="cn">FALSE</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">multi_lineplot</span>(mh, <span class="at">time_labels =</span> <span class="fu">c</span>(<span class="st">&quot;1&quot;</span> <span class="ot">=</span> <span class="st">&quot;TN&quot;</span>, <span class="st">&quot;2&quot;</span> <span class="ot">=</span> <span class="st">&quot;TMEM&quot;</span>, <span class="st">&quot;3&quot;</span> <span class="ot">=</span> <span class="st">&quot;TEX&quot;</span>))</span></code></pre></div>
+<figure>
+<img src="assets/figures/cd8_06_multi_heatmap.png"
+alt="CD8 RNA, H3K27ac, and H3K27me3 heatmap" />
+<figcaption aria-hidden="true">CD8 RNA, H3K27ac, and H3K27me3
+heatmap</figcaption>
+</figure>
+<figure>
+<img src="assets/figures/cd8_07_multi_patterns.png"
+alt="CD8 module trajectories across RNA and chromatin" />
+<figcaption aria-hidden="true">CD8 module trajectories across RNA and
+chromatin</figcaption>
+</figure>
+<p>H3K27ac rises and falls with expression in every module. H3K27me3 is
+gained as expression falls in the naive-high modules and stays close to
+zero in the memory- and exhaustion-induced modules.</p>
 <h2 data-number="1.9" id="single-cell-pseudobulk-example"><span
 class="header-section-number">1.9</span> Single-Cell Pseudobulk
 Example</h2>
@@ -753,7 +891,7 @@ Example</h2>
 sample, cell type, condition, time point, and replicate. The resulting
 matrix can be analyzed with the same <code>ModuleViz</code>
 functions.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;examples/example_single_cell_pseudobulk.R&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&quot;examples/example_single_cell_pseudobulk.R&quot;</span>)</span></code></pre></div>
 <figure>
 <img src="assets/results/04_single_cell_pseudobulk_heatmap.png"
 alt="Single-cell pseudobulk heatmap" />
@@ -772,25 +910,25 @@ class="header-section-number">1.10</span> Public Time-Course Data</h2>
 supported public datasets from the Bioconductor
 <code>timecoursedata</code> package and returns a matrix and metadata
 table ready for <code>ModuleViz</code>.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>example <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset =</span> <span class="st">&quot;sorghum_leaf&quot;</span>,</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">genotype =</span> <span class="st">&quot;BT642&quot;</span>,</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">min_week =</span> <span class="dv">3</span>,</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
-<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    example<span class="sc">$</span>mat,</span>
-<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    example<span class="sc">$</span>meta,</span>
-<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> example<span class="sc">$</span>sample_col,</span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_col =</span> example<span class="sc">$</span>time_col,</span>
-<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> example<span class="sc">$</span>group_col,</span>
-<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">5</span>,</span>
-<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">stability =</span> <span class="cn">TRUE</span></span>
-<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>example <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset =</span> <span class="st">&quot;sorghum_leaf&quot;</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">genotype =</span> <span class="st">&quot;BT642&quot;</span>,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">min_week =</span> <span class="dv">3</span>,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    example<span class="sc">$</span>mat,</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    example<span class="sc">$</span>meta,</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">sample_col =</span> example<span class="sc">$</span>sample_col,</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">time_col =</span> example<span class="sc">$</span>time_col,</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">group_col =</span> example<span class="sc">$</span>group_col,</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">k =</span> <span class="dv">5</span>,</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">stability =</span> <span class="cn">TRUE</span></span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>See <code>examples/example_real_timecoursedata.R</code> and
 <code>vignettes/longitudinal-heatmap-tutorial.Rmd</code> for a complete
 workflow.</p>
@@ -826,19 +964,19 @@ class="header-section-number">1.12</span> Package Checks</h2>
 <p>Before Bioconductor submission, run checks from a clean
 R/Bioconductor environment with all required and suggested dependencies
 installed:</p>
-<div class="sourceCode" id="cb29"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD build .</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD check <span class="at">--no-manual</span> ModuleViz_<span class="pp">*</span>.tar.gz</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD build .</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD check <span class="at">--no-manual</span> ModuleViz_<span class="pp">*</span>.tar.gz</span></code></pre></div>
 <p>Run Bioconductor-specific checks:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;BiocCheck&quot;</span>)</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>BiocCheck<span class="sc">::</span><span class="fu">BiocCheck</span>(<span class="st">&quot;.&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;BiocCheck&quot;</span>)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>BiocCheck<span class="sc">::</span><span class="fu">BiocCheck</span>(<span class="st">&quot;.&quot;</span>)</span></code></pre></div>
 <h2 data-number="1.13" id="citation"><span
 class="header-section-number">1.13</span> Citation</h2>
 <p>After installation, cite <code>ModuleViz</code> from R with:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;ModuleViz&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">&quot;ModuleViz&quot;</span>)</span></code></pre></div>
 <h2 data-number="1.14" id="license"><span
 class="header-section-number">1.14</span> License</h2>
 <p><code>ModuleViz</code> is distributed under the MIT license.</p>

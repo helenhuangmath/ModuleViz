@@ -12,12 +12,12 @@ longitudinal_heatmap(obj, annotation_cols = NULL, annotation_colors = NULL,
   id_field = "ID", value_field = "value", bigger_is_better = TRUE,
   col_fun = NULL, zscore_palette = c("rdbu", "viridis"),
   zscore_limits = c(-2, 2), cluster_palette = "paired",
-  annotation_palette = "set2", label_fontsize = 10,
-  row_title_fontsize = 10, column_name_fontsize = 9,
-  annotation_name_fontsize = 10, legend_fontsize = 10,
-  title_fontsize = 13, show_column_names = TRUE,
+  annotation_palette = "set2", label_fontsize = 15,
+  row_title_fontsize = 16, column_name_fontsize = 13,
+  annotation_name_fontsize = 14, legend_fontsize = 14,
+  title_fontsize = 17, show_column_names = TRUE,
   show_stability = TRUE, file = NULL,
-  width = 9, height = 13, title = NULL)
+  width = 8, height = 13, title = NULL)
 
 resolve_labels(obj, features = NULL, top_n = 0, rank_table = NULL,
   id_field = "ID", value_field = "value", bigger_is_better = TRUE)
@@ -46,7 +46,7 @@ labels) and for the heatmap title.}
 \item{show_column_names}{Show sample names along the bottom. Set \code{FALSE}
 when sample IDs are long or uninformative and the annotation bars already
 identify each column.}
-\item{show_stability}{Show module stability annotation when available.}
+\item{show_stability}{Show the module stability bar when available.}
 \item{file}{Optional PDF or PNG output path.}
 \item{width, height}{PDF dimensions in inches.}
 \item{title}{Optional heatmap title.}

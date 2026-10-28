@@ -27,7 +27,7 @@ Core user-facing functions include:
 - `longitudinal_heatmap()`: draw ordered module heatmaps using
   `ComplexHeatmap`
 - `pattern_lineplot()`: summarize module trajectories as line plots
-- `dual_omics_heatmap()`: align and compare two omics layers by gene
+- `dual_heatmap()`: align and compare two omics layers by gene
 - `module_correlation_heatmap()`: inspect within-module correlation structure
 - `module_correlation_summary()`: summarize within-module correlations
 - `choose_k()`: help choose the number of clusters
@@ -247,7 +247,7 @@ Major functionality:
 - longitudinal_cluster(): cluster features into temporal modules
 - longitudinal_heatmap(): draw ordered module heatmaps
 - pattern_lineplot(): plot mean module trajectories
-- dual_omics_heatmap(): compare paired omics layers by gene
+- dual_heatmap(): compare paired omics layers by gene
 - module_correlation_heatmap(): inspect within-module correlation structure
 - choose_k(): generate clustering diagnostics
 - write_memberships(): export module assignments and summaries

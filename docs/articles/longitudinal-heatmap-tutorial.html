@@ -107,8 +107,8 @@
 <p>This tutorial introduces the main ModuleViz workflow with the bundled
 heatmap_example dataset. It covers module-number diagnostics,
 longitudinal clustering, heatmap rendering, module trajectory plots,
-paired omics visualization, pseudobulk summaries, and exportable result
-tables.</p>
+paired omics and multi-omics visualization, pseudobulk summaries, and
+exportable result tables.</p>
 </div>
 </header>
 <nav id="TOC" role="doc-toc">
@@ -135,16 +135,20 @@ class="toc-section-number">6</span> Plot Module Trajectories</a></li>
 id="toc-draw-side-by-side-rna-and-atac-patterns"><span
 class="toc-section-number">7</span> Draw Side-By-Side RNA And ATAC
 Patterns</a></li>
+<li><a href="#draw-several-data-types-together"
+id="toc-draw-several-data-types-together"><span
+class="toc-section-number">8</span> Draw Several Data Types
+Together</a></li>
 <li><a href="#single-cell-pseudobulk-example"
 id="toc-single-cell-pseudobulk-example"><span
-class="toc-section-number">8</span> Single-Cell Pseudobulk
+class="toc-section-number">9</span> Single-Cell Pseudobulk
 Example</a></li>
 <li><a href="#export-tables" id="toc-export-tables"><span
-class="toc-section-number">9</span> Export Tables</a></li>
+class="toc-section-number">10</span> Export Tables</a></li>
 <li><a href="#real-public-data" id="toc-real-public-data"><span
-class="toc-section-number">10</span> Real Public Data</a></li>
+class="toc-section-number">11</span> Real Public Data</a></li>
 <li><a href="#session-information" id="toc-session-information"><span
-class="toc-section-number">11</span> Session Information</a></li>
+class="toc-section-number">12</span> Session Information</a></li>
 </ul>
 </nav>
 <h1 data-number="1" id="introduction"><span
@@ -166,7 +170,15 @@ class="header-section-number">2</span> Load The Example Time-Course</h1>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> heatmap_example<span class="sc">$</span>meta</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(mat)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(meta)</span></code></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 60 16</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(meta)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          SampleID Condition TimeHr Replicate</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1  Control_00h_R1   Control      0         1</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 9  Control_00h_R2   Control      0         2</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2  Control_06h_R1   Control      6         1</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10 Control_06h_R2   Control      6         2</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3  Control_24h_R1   Control     24         1</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 11 Control_24h_R2   Control     24         2</span></span></code></pre></div>
 <p>The returned object is plain R data:</p>
 <ul>
 <li><code>mat</code>: numeric feature-by-sample matrix.</li>
@@ -178,187 +190,341 @@ class="header-section-number">3</span> Choose The Number Of Modules</h1>
 <p><code>choose_k()</code> calculates a simple
 within-cluster-sum-of-squares elbow diagnostic. Use it as a first pass,
 then choose a biologically interpretable value.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>diag <span class="ot">&lt;-</span> <span class="fu">choose_k</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">zscore_rows</span>(mat),</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">k_range =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>diag</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(diag, <span class="st">&quot;suggested_k&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>diag <span class="ot">&lt;-</span> <span class="fu">choose_k</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">zscore_rows</span>(mat),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">k_range =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>diag</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        k tot_withinss mean_silhouette elbow_k</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    &lt;int&gt;        &lt;num&gt;           &lt;num&gt;   &lt;int&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1:     2     487.3139       0.4278328       3</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2:     3     304.4957       0.4936076       3</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3:     4     238.8972       0.5400721       3</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 4:     5     203.9076       0.5493611       3</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(diag, <span class="st">&quot;suggested_k&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span></code></pre></div>
 <h1 data-number="4" id="cluster-temporal-patterns"><span
 class="header-section-number">4</span> Cluster Temporal Patterns</h1>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  mat,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  meta,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">4</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">stability =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_resample =</span> <span class="dv">10</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>obj</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  mat,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  meta,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">4</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">stability =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_resample =</span> <span class="dv">10</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>obj</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;longi&gt;  60 features x 8 samples,  4 modules (kmeans)</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   stability (mean Jaccard): 0.75 - 0.99</span></span></code></pre></div>
 <p>Clusters are reordered by their temporal peak, so early-high modules
 appear before late-high modules.</p>
 <h1 data-number="5" id="draw-the-heatmap"><span
 class="header-section-number">5</span> Draw The Heatmap</h1>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_cols =</span> <span class="fu">c</span>(<span class="st">&quot;Condition&quot;</span>, <span class="st">&quot;TimeHr&quot;</span>),</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_label =</span> <span class="dv">3</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize =</span> <span class="dv">11</span>,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Example longitudinal heatmap&quot;</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_cols =</span> <span class="fu">c</span>(<span class="st">&quot;Condition&quot;</span>, <span class="st">&quot;TimeHr&quot;</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_label =</span> <span class="dv">3</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize =</span> <span class="dv">11</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Example longitudinal heatmap&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<figure>
+<img
+src="../assets/articles/longitudinal-heatmap-tutorial/heatmap-1.png"
+alt="plot of chunk heatmap" />
+<figcaption aria-hidden="true">plot of chunk heatmap</figcaption>
+</figure>
 <p>To save a PDF:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_cols =</span> <span class="fu">c</span>(<span class="st">&quot;Condition&quot;</span>, <span class="st">&quot;TimeHr&quot;</span>),</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_label =</span> <span class="dv">3</span>,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;example_heatmap.pdf&quot;</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">9</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">12</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">longitudinal_heatmap</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  obj,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_cols =</span> <span class="fu">c</span>(<span class="st">&quot;Condition&quot;</span>, <span class="st">&quot;TimeHr&quot;</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_label =</span> <span class="dv">3</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">&quot;example_heatmap.pdf&quot;</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">9</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">12</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <h1 data-number="6" id="plot-module-trajectories"><span
 class="header-section-number">6</span> Plot Module Trajectories</h1>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(obj, <span class="at">palette =</span> <span class="st">&quot;nature&quot;</span>, <span class="at">base_size =</span> <span class="dv">12</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(obj, <span class="at">palette =</span> <span class="st">&quot;nature&quot;</span>, <span class="at">base_size =</span> <span class="dv">12</span>)</span></code></pre></div>
+<figure>
+<img
+src="../assets/articles/longitudinal-heatmap-tutorial/lineplot-1.png"
+alt="plot of chunk lineplot" />
+<figcaption aria-hidden="true">plot of chunk lineplot</figcaption>
+</figure>
 <h1 data-number="7" id="draw-side-by-side-rna-and-atac-patterns"><span
 class="header-section-number">7</span> Draw Side-By-Side RNA And ATAC
 Patterns</h1>
+<p><code>dual_heatmap()</code> is the two-layer case of
+<code>multi_heatmap()</code> (next section).</p>
 <p>The primary matrix drives clustering and row order. The secondary
 matrix is aligned by gene and displayed next to it. This example
 simulates two ATAC peaks per gene using the bundled expression data so
 the code is fully runnable.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">99</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> mat[<span class="fu">rep</span>(<span class="fu">seq_along</span>(genes), <span class="at">each =</span> <span class="dv">2</span>), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(atac) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Peak&quot;</span>,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="fu">seq_len</span>(<span class="fu">nrow</span>(atac))),</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;_&quot;</span>,</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rep</span>(genes, <span class="at">each =</span> <span class="dv">2</span>)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> atac <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(atac), <span class="at">sd =</span> <span class="fl">0.35</span>), <span class="at">nrow =</span> <span class="fu">nrow</span>(atac))</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">dual_omics_heatmap</span>(</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary =</span> obj,</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary =</span> atac,</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary_name =</span> <span class="st">&quot;RNA&quot;</span>,</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary_name =</span> <span class="st">&quot;ATAC&quot;</span>,</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_of_primary =</span> <span class="cf">function</span>(id) id,</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_of_secondary =</span> <span class="cf">function</span>(id) <span class="fu">sub</span>(<span class="st">&quot;^.*_&quot;</span>, <span class="st">&quot;&quot;</span>, id),</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate =</span> <span class="st">&quot;mean&quot;</span>,</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene016&quot;</span>, <span class="st">&quot;Gene031&quot;</span>, <span class="st">&quot;Gene046&quot;</span>),</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_fontsize =</span> <span class="dv">11</span>,</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<h1 data-number="8" id="single-cell-pseudobulk-example"><span
-class="header-section-number">8</span> Single-Cell Pseudobulk
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">99</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> mat[<span class="fu">rep</span>(<span class="fu">seq_along</span>(genes), <span class="at">each =</span> <span class="dv">2</span>), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(atac) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Peak&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="fu">seq_len</span>(<span class="fu">nrow</span>(atac))),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;_&quot;</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rep</span>(genes, <span class="at">each =</span> <span class="dv">2</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>atac <span class="ot">&lt;-</span> atac <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(atac), <span class="at">sd =</span> <span class="fl">0.35</span>), <span class="at">nrow =</span> <span class="fu">nrow</span>(atac))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">dual_heatmap</span>(</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary =</span> obj,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary =</span> atac,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">primary_name =</span> <span class="st">&quot;RNA&quot;</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">secondary_name =</span> <span class="st">&quot;ATAC&quot;</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_of_primary =</span> <span class="cf">function</span>(id) id,</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_of_secondary =</span> <span class="cf">function</span>(id) <span class="fu">sub</span>(<span class="st">&quot;^.*_&quot;</span>, <span class="st">&quot;&quot;</span>, id),</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate =</span> <span class="st">&quot;mean&quot;</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene016&quot;</span>, <span class="st">&quot;Gene031&quot;</span>, <span class="st">&quot;Gene046&quot;</span>),</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<figure>
+<img
+src="../assets/articles/longitudinal-heatmap-tutorial/dual-omics-1.png"
+alt="plot of chunk dual-omics" />
+<figcaption aria-hidden="true">plot of chunk dual-omics</figcaption>
+</figure>
+<h1 data-number="8" id="draw-several-data-types-together"><span
+class="header-section-number">8</span> Draw Several Data Types
+Together</h1>
+<p><code>multi_heatmap()</code> takes a named list of any number of
+layers (here RNA, ATAC, H3K27ac, and H3K27me3) and draws one panel per
+layer. Every panel shares the RNA module split and row order, and one
+z-score legend covers all of them. Each layer is z-scored within itself
+and collapsed to one row per gene, so peaks and genes line up row for
+row.</p>
+<p>The two histone layers are simulated: an activating mark that follows
+expression and a repressive mark that mirrors it.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>as_regions <span class="ot">&lt;-</span> <span class="cf">function</span>(m, <span class="at">sign =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="fl">0.5</span>) {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> sign <span class="sc">*</span> m <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(m), <span class="at">sd =</span> sd), <span class="at">nrow =</span> <span class="fu">nrow</span>(m))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames</span>(out) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;region&quot;</span>, <span class="fu">seq_len</span>(<span class="fu">nrow</span>(m)), <span class="st">&quot;_&quot;</span>, <span class="fu">rownames</span>(m))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  out</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>layers <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">RNA      =</span> obj,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ATAC     =</span> atac,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">H3K27ac  =</span> <span class="fu">as_regions</span>(mat),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">H3K27me3 =</span> <span class="fu">as_regions</span>(mat, <span class="at">sign =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>multi <span class="ot">&lt;-</span> <span class="fu">multi_heatmap</span>(</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  layers,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">meta =</span> meta, <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">label_features =</span> <span class="fu">c</span>(<span class="st">&quot;Gene001&quot;</span>, <span class="st">&quot;Gene016&quot;</span>, <span class="st">&quot;Gene031&quot;</span>, <span class="st">&quot;Gene046&quot;</span>),</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span>,</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_column_names =</span> <span class="cn">FALSE</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<figure>
+<img
+src="../assets/articles/longitudinal-heatmap-tutorial/multi-heatmap-1.png"
+alt="plot of chunk multi-heatmap" />
+<figcaption aria-hidden="true">plot of chunk multi-heatmap</figcaption>
+</figure>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>multi</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; &lt;multi_longi&gt;  60 genes x 4 layers (RNA + ATAC + H3K27ac + H3K27me3),  4 modules</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   clustered by: RNA</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   stability (mean Jaccard): 0.75 - 0.99</span></span></code></pre></div>
+<p><code>multi_lineplot()</code> draws each module’s mean trajectory in
+every layer, which shows at a glance which marks follow expression and
+which oppose it:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">multi_lineplot</span>(multi)</span></code></pre></div>
+<figure>
+<img
+src="../assets/articles/longitudinal-heatmap-tutorial/multi-lineplot-1.png"
+alt="plot of chunk multi-lineplot" />
+<figcaption aria-hidden="true">plot of chunk multi-lineplot</figcaption>
+</figure>
+<p>To cluster on all layers together instead of on RNA alone, use
+<code>cluster_by = "joint"</code>. <code>gene_set = "reference"</code>
+keeps every RNA gene and draws layers without that gene in grey.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">multi_heatmap</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  layers,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">meta =</span> meta, <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>, <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Condition&quot;</span>, <span class="at">cluster_by =</span> <span class="st">&quot;joint&quot;</span>, <span class="at">k =</span> <span class="dv">4</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_palette =</span> <span class="st">&quot;spectral&quot;</span>, <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Modules clustered on all four layers&quot;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<figure>
+<img
+src="../assets/articles/longitudinal-heatmap-tutorial/multi-joint-1.png"
+alt="plot of chunk multi-joint" />
+<figcaption aria-hidden="true">plot of chunk multi-joint</figcaption>
+</figure>
+<h1 data-number="9" id="single-cell-pseudobulk-example"><span
+class="header-section-number">9</span> Single-Cell Pseudobulk
 Example</h1>
 <p>Single-cell data can be summarized into pseudobulk profiles by cell
 type, condition, time point, and replicate. The resulting
 feature-by-pseudobulk matrix uses the same ModuleViz functions.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cell_types <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;T_cell&quot;</span>, <span class="st">&quot;Monocyte&quot;</span>, <span class="st">&quot;B_cell&quot;</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>cells_per_sample_type <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>cell_meta <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(meta)), <span class="cf">function</span>(i) {</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(cell_types, <span class="cf">function</span>(ct) {</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">CellID =</span> <span class="fu">sprintf</span>(<span class="st">&quot;%s_%s_Cell%03d&quot;</span>, meta<span class="sc">$</span>SampleID[i], ct,</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">seq_len</span>(cells_per_sample_type)),</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">SampleID =</span> meta<span class="sc">$</span>SampleID[i],</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Condition =</span> meta<span class="sc">$</span>Condition[i],</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">TimeHr =</span> meta<span class="sc">$</span>TimeHr[i],</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">Replicate =</span> meta<span class="sc">$</span>Replicate[i],</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">CellType =</span> ct,</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  }))</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>cell_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA_real_</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(mat), <span class="at">ncol =</span> <span class="fu">nrow</span>(cell_meta),</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>                   <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">rownames</span>(mat), cell_meta<span class="sc">$</span>CellID))</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>cell_type_effect <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">T_cell =</span> <span class="fl">0.35</span>, <span class="at">Monocyte =</span> <span class="sc">-</span><span class="fl">0.15</span>, <span class="at">B_cell =</span> <span class="fl">0.05</span>)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(cell_meta))) {</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> mat[, cell_meta<span class="sc">$</span>SampleID[j]] <span class="sc">+</span> cell_type_effect[[cell_meta<span class="sc">$</span>CellType[j]]]</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  cell_mat[, j] <span class="ot">&lt;-</span> mu <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(mu), <span class="at">sd =</span> <span class="fl">0.55</span>)</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>pseudobulk_group <span class="ot">&lt;-</span> <span class="fu">paste</span>(cell_meta<span class="sc">$</span>CellType, cell_meta<span class="sc">$</span>Condition,</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                          cell_meta<span class="sc">$</span>TimeHr, cell_meta<span class="sc">$</span>Replicate, <span class="at">sep =</span> <span class="st">&quot;|&quot;</span>)</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>pseudobulk_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(pseudobulk_group)</span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>pseudobulk_mat <span class="ot">&lt;-</span> <span class="fu">sapply</span>(pseudobulk_ids, <span class="cf">function</span>(id) {</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowMeans</span>(cell_mat[, pseudobulk_group <span class="sc">==</span> id, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(pseudobulk_mat) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(pseudobulk_mat) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;PB&quot;</span>, <span class="fu">seq_along</span>(pseudobulk_ids))</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>parts <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(pseudobulk_ids, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">|&quot;</span>)</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>pseudobulk_meta <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">SampleID =</span> <span class="fu">colnames</span>(pseudobulk_mat),</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">CellType =</span> <span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">1</span>),</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">Condition =</span> <span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">2</span>),</span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">TimeHr =</span> <span class="fu">as.numeric</span>(<span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">3</span>)),</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">Replicate =</span> <span class="fu">as.integer</span>(<span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">4</span>)),</span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>pseudobulk_meta<span class="sc">$</span>Group <span class="ot">&lt;-</span> <span class="fu">paste</span>(pseudobulk_meta<span class="sc">$</span>CellType,</span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>                               pseudobulk_meta<span class="sc">$</span>Condition, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>)</span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>sc_obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>  pseudobulk_mat,</span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>  pseudobulk_meta,</span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
-<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
-<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Group&quot;</span>,</span>
-<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">5</span>,</span>
-<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">stability =</span> <span class="cn">FALSE</span></span>
-<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(sc_obj, <span class="at">palette =</span> <span class="st">&quot;science&quot;</span>, <span class="at">base_size =</span> <span class="dv">11</span>)</span></code></pre></div>
-<h1 data-number="9" id="export-tables"><span
-class="header-section-number">9</span> Export Tables</h1>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>out_dir <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_memberships</span>(obj, <span class="at">prefix =</span> <span class="fu">file.path</span>(out_dir, <span class="st">&quot;heatmap_example&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>cell_types <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;T_cell&quot;</span>, <span class="st">&quot;Monocyte&quot;</span>, <span class="st">&quot;B_cell&quot;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>cells_per_sample_type <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>cell_meta <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(meta)), <span class="cf">function</span>(i) {</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(cell_types, <span class="cf">function</span>(ct) {</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">CellID =</span> <span class="fu">sprintf</span>(<span class="st">&quot;%s_%s_Cell%03d&quot;</span>, meta<span class="sc">$</span>SampleID[i], ct,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">seq_len</span>(cells_per_sample_type)),</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">SampleID =</span> meta<span class="sc">$</span>SampleID[i],</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">Condition =</span> meta<span class="sc">$</span>Condition[i],</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">TimeHr =</span> meta<span class="sc">$</span>TimeHr[i],</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">Replicate =</span> meta<span class="sc">$</span>Replicate[i],</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">CellType =</span> ct,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>cell_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA_real_</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(mat), <span class="at">ncol =</span> <span class="fu">nrow</span>(cell_meta),</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>                   <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">rownames</span>(mat), cell_meta<span class="sc">$</span>CellID))</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>cell_type_effect <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">T_cell =</span> <span class="fl">0.35</span>, <span class="at">Monocyte =</span> <span class="sc">-</span><span class="fl">0.15</span>, <span class="at">B_cell =</span> <span class="fl">0.05</span>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(cell_meta))) {</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> mat[, cell_meta<span class="sc">$</span>SampleID[j]] <span class="sc">+</span> cell_type_effect[[cell_meta<span class="sc">$</span>CellType[j]]]</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  cell_mat[, j] <span class="ot">&lt;-</span> mu <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(mu), <span class="at">sd =</span> <span class="fl">0.55</span>)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>pseudobulk_group <span class="ot">&lt;-</span> <span class="fu">paste</span>(cell_meta<span class="sc">$</span>CellType, cell_meta<span class="sc">$</span>Condition,</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>                          cell_meta<span class="sc">$</span>TimeHr, cell_meta<span class="sc">$</span>Replicate, <span class="at">sep =</span> <span class="st">&quot;|&quot;</span>)</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>pseudobulk_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(pseudobulk_group)</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>pseudobulk_mat <span class="ot">&lt;-</span> <span class="fu">sapply</span>(pseudobulk_ids, <span class="cf">function</span>(id) {</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowMeans</span>(cell_mat[, pseudobulk_group <span class="sc">==</span> id, <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(pseudobulk_mat) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(pseudobulk_mat) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;PB&quot;</span>, <span class="fu">seq_along</span>(pseudobulk_ids))</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>parts <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(pseudobulk_ids, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">|&quot;</span>)</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>pseudobulk_meta <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">SampleID =</span> <span class="fu">colnames</span>(pseudobulk_mat),</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">CellType =</span> <span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">1</span>),</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">Condition =</span> <span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">2</span>),</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">TimeHr =</span> <span class="fu">as.numeric</span>(<span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">3</span>)),</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  <span class="at">Replicate =</span> <span class="fu">as.integer</span>(<span class="fu">vapply</span>(parts, <span class="st">`</span><span class="at">[</span><span class="st">`</span>, <span class="fu">character</span>(<span class="dv">1</span>), <span class="dv">4</span>)),</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>pseudobulk_meta<span class="sc">$</span>Group <span class="ot">&lt;-</span> <span class="fu">paste</span>(pseudobulk_meta<span class="sc">$</span>CellType,</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>                               pseudobulk_meta<span class="sc">$</span>Condition, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>)</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>sc_obj <span class="ot">&lt;-</span> <span class="fu">longitudinal_cluster</span>(</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>  pseudobulk_mat,</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  pseudobulk_meta,</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_col =</span> <span class="st">&quot;SampleID&quot;</span>,</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_col =</span> <span class="st">&quot;TimeHr&quot;</span>,</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">group_col =</span> <span class="st">&quot;Group&quot;</span>,</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">5</span>,</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">aggregate_replicates =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">stability =</span> <span class="cn">FALSE</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a><span class="fu">pattern_lineplot</span>(sc_obj, <span class="at">palette =</span> <span class="st">&quot;science&quot;</span>, <span class="at">base_size =</span> <span class="dv">11</span>)</span></code></pre></div>
+<figure>
+<img
+src="../assets/articles/longitudinal-heatmap-tutorial/single-cell-pseudobulk-1.png"
+alt="plot of chunk single-cell-pseudobulk" />
+<figcaption aria-hidden="true">plot of chunk
+single-cell-pseudobulk</figcaption>
+</figure>
+<h1 data-number="10" id="export-tables"><span
+class="header-section-number">10</span> Export Tables</h1>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>out_dir <span class="ot">&lt;-</span> <span class="fu">tempdir</span>()</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_memberships</span>(obj, <span class="at">prefix =</span> <span class="fu">file.path</span>(out_dir, <span class="st">&quot;heatmap_example&quot;</span>))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; wrote /var/folders/y_/xw9_7jr539n3gxm864xyvb_80000gp/T//Rtmpmr7WSV/heatmap_example_memberships.txt</span></span></code></pre></div>
 <p>This writes:</p>
 <ul>
 <li><code>heatmap_example_memberships.txt</code></li>
 <li><code>heatmap_example_centroids.txt</code></li>
 <li><code>heatmap_example_stability.txt</code></li>
 </ul>
-<h1 data-number="10" id="real-public-data"><span
-class="header-section-number">10</span> Real Public Data</h1>
+<h1 data-number="11" id="real-public-data"><span
+class="header-section-number">11</span> Real Public Data</h1>
 <p>The package also includes a helper for public datasets in
 Bioconductor <code>timecoursedata</code>. These examples are optional
 because they require installing the experiment-data package.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">available_real_timecourse_datasets</span>()</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;            dataset    package_object      assay</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;             &lt;char&gt;            &lt;char&gt;     &lt;char&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1:    sorghum_leaf varoquaux2019leaf    RNA-seq</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2:    sorghum_root varoquaux2019root    RNA-seq</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3: influenza_mouse     shoemaker2015 microarray</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                         description</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                              &lt;char&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 1: Sorghum leaf samples across weekly drought/control time courses.</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 2: Sorghum root samples across weekly drought/control time courses.</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 3:       Mouse lung samples across influenza infection time points.</span></span></code></pre></div>
 <p>Install the optional data package before running the real-data
 workflow:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;timecoursedata&quot;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sorghum <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset =</span> <span class="st">&quot;sorghum_leaf&quot;</span>,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="st">&quot;BT642&quot;</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_week =</span> <span class="dv">3</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;BiocManager&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;BiocManager&quot;</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;timecoursedata&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sorghum <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset =</span> <span class="st">&quot;sorghum_leaf&quot;</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">genotype =</span> <span class="st">&quot;BT642&quot;</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_week =</span> <span class="dv">3</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>For the mouse influenza microarray dataset:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>flu <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset =</span> <span class="st">&quot;influenza_mouse&quot;</span>,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;C&quot;</span>, <span class="st">&quot;K&quot;</span>, <span class="st">&quot;M&quot;</span>),</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<h1 data-number="11" id="session-information"><span
-class="header-section-number">11</span> Session Information</h1>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>flu <span class="ot">&lt;-</span> <span class="fu">load_real_timecourse_example</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset =</span> <span class="st">&quot;influenza_mouse&quot;</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">group =</span> <span class="fu">c</span>(<span class="st">&quot;C&quot;</span>, <span class="st">&quot;K&quot;</span>, <span class="st">&quot;M&quot;</span>),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_n_features =</span> <span class="dv">1000</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<h1 data-number="12" id="session-information"><span
+class="header-section-number">12</span> Session Information</h1>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; R version 4.3.2 (2023-10-31)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Platform: aarch64-apple-darwin20 (64-bit)</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Running under: macOS 26.7.1</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; BLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRblas.0.dylib </span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; time zone: America/New_York</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] ModuleViz_0.1.0</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [1] utf8_1.2.4            generics_0.1.3        shape_1.4.6.1        </span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [4] digest_0.6.35         magrittr_2.0.3        evaluate_0.24.0      </span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  [7] grid_4.3.2            RColorBrewer_1.1-3    iterators_1.0.14     </span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [10] circlize_0.4.16       fastmap_1.2.0         foreach_1.5.2        </span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [13] doParallel_1.0.17     GlobalOptions_0.1.2   ComplexHeatmap_2.18.0</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [16] fansi_1.0.6           scales_1.4.0          codetools_0.2-20     </span></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [19] cli_3.6.3             rlang_1.1.4           crayon_1.5.3         </span></span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [22] withr_3.0.2           yaml_2.3.8            tools_4.3.2          </span></span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [25] parallel_4.3.2        dplyr_1.1.4           colorspace_2.1-1     </span></span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [28] ggplot2_3.5.2         GetoptLong_1.0.5      BiocGenerics_0.48.1  </span></span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [31] vctrs_0.6.5           R6_2.5.1              png_0.1-8            </span></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [34] matrixStats_1.3.0     stats4_4.3.2          lifecycle_1.0.4      </span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [37] magick_2.8.7          S4Vectors_0.40.2      IRanges_2.36.0       </span></span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [40] clue_0.3-65           cluster_2.1.6         pkgconfig_2.0.3      </span></span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [43] pillar_1.9.0          gtable_0.3.6          data.table_1.15.4    </span></span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [46] glue_1.8.0            Rcpp_1.0.13-1         highr_0.11           </span></span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [49] xfun_0.50             tibble_3.2.1          tidyselect_1.2.1     </span></span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [52] knitr_1.47            dichromat_2.0-0.1     farver_2.1.2         </span></span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [55] rjson_0.2.21          htmltools_0.5.8.1     labeling_0.4.3       </span></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [58] rmarkdown_2.27        Cairo_1.6-2           compiler_4.3.2</span></span></code></pre></div>
 </body>
 </html>

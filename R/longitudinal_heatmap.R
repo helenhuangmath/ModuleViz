@@ -670,7 +670,7 @@ resolve_labels <- function(obj, features = NULL, top_n = 0,
 #' @param show_column_names show sample names along the bottom.  Set FALSE when
 #'   sample IDs are long or uninformative and the annotation bars already say
 #'   what each column is.
-#' @param show_stability if TRUE and available, annotate module stability.
+#' @param show_stability if TRUE and available, add a module stability bar.
 #' @param file optional PDF or PNG path; if set the heatmap is written there.
 #' @param width,height PDF size in inches.
 #' @param title optional heatmap title.
@@ -688,15 +688,15 @@ longitudinal_heatmap <- function(obj,
                                  zscore_limits = c(-2, 2),
                                  cluster_palette = "paired",
                                  annotation_palette = "set2",
-                                 label_fontsize = 10,
-                                 row_title_fontsize = 10,
-                                 column_name_fontsize = 9,
-                                 annotation_name_fontsize = 10,
-                                 legend_fontsize = 10,
-                                 title_fontsize = 13,
+                                 label_fontsize = 15,
+                                 row_title_fontsize = 16,
+                                 column_name_fontsize = 13,
+                                 annotation_name_fontsize = 14,
+                                 legend_fontsize = 14,
+                                 title_fontsize = 17,
                                  show_column_names = TRUE,
                                  show_stability = TRUE,
-                                 file = NULL, width = 9, height = 13,
+                                 file = NULL, width = 8, height = 13,
                                  title = NULL) {
   stopifnot(inherits(obj, "longi"))
   if (is.null(col_fun))
@@ -767,15 +767,9 @@ longitudinal_heatmap <- function(obj,
   }
   left_anno <- do.call(rowAnnotation, left_args)
 
-  ## ---- row titles with module size (and stability if present) -------------
+  ## ---- row titles with module size ----------------------------------------
   cn <- table(cluster)
-  if (!is.null(obj$stability)) {
-    stab_map  <- setNames(obj$stability$MeanJaccard, obj$stability$Cluster)
-    row_title <- sprintf("%s\n(n=%d, J=%.2f)", levels(cluster),
-                         as.integer(cn), stab_map[levels(cluster)])
-  } else {
-    row_title <- sprintf("%s\n(n=%d)", levels(cluster), as.integer(cn))
-  }
+  row_title <- sprintf("%s\n(n=%d)", levels(cluster), as.integer(cn))
 
   ## ---- right annotation: feature labels -----------------------------------
   lab <- resolve_labels(obj, features = label_features, top_n = top_n_label,
@@ -800,6 +794,9 @@ longitudinal_heatmap <- function(obj,
     column_gap = unit(1.5, "mm"),
     show_column_names = show_column_names,
     column_names_gp = gpar(fontsize = column_name_fontsize),
+    ## the 6 cm default clips long sample names at larger font sizes
+    column_names_max_height = max_text_width(
+      colnames(z), gp = gpar(fontsize = column_name_fontsize)),
     column_title = title,
     column_title_gp = gpar(fontsize = title_fontsize),
     top_annotation = top_anno, left_annotation = left_anno,
@@ -948,7 +945,7 @@ pattern_lineplot <- function(obj, file = NULL, width = NULL, height = NULL,
 
 #' Write the cluster memberships (and, optionally, centroids + stability).
 #'
-#' @param obj a "longi" object.
+#' @param obj a "longi" or "multi_longi" object.
 #' @param file path for the membership table (tab-separated).
 #' @param prefix if given (and file is NULL), files are written as
 #'   <prefix>_memberships.txt / _centroids.txt / _stability.txt.
@@ -956,7 +953,7 @@ pattern_lineplot <- function(obj, file = NULL, width = NULL, height = NULL,
 #' @return invisibly, the membership data.table.
 write_memberships <- function(obj, file = NULL, prefix = NULL,
                               write_extras = TRUE) {
-  stopifnot(inherits(obj, "longi"))
+  stopifnot(inherits(obj, c("longi", "multi_longi")))
   if (is.null(file)) {
     if (is.null(prefix)) stop("Supply either `file` or `prefix`.")
     file <- paste0(prefix, "_memberships.txt")
@@ -966,11 +963,627 @@ write_memberships <- function(obj, file = NULL, prefix = NULL,
 
   if (write_extras) {
     base <- if (!is.null(prefix)) prefix else sub("\\.[^.]*$", "", file)
-    fwrite(obj$centroids, paste0(base, "_centroids.txt"), sep = "\t", quote = FALSE)
+    if (!is.null(obj$centroids))
+      fwrite(obj$centroids, paste0(base, "_centroids.txt"), sep = "\t", quote = FALSE)
     if (!is.null(obj$stability))
       fwrite(obj$stability, paste0(base, "_stability.txt"), sep = "\t", quote = FALSE)
   }
   invisible(obj$membership)
+}
+
+## =============================================================================
+## Multi-omics heatmap
+## =============================================================================
+
+#' Collapse a feature x sample matrix to one row per gene.
+#'
+#'   - aggregate = "mean": average across that gene's features (NAs ignored);
+#'   - aggregate = "top" : keep the single feature with the strongest |z|.
+#'
+#' @param z numeric matrix, rows = features.
+#' @param genes gene key of each row.
+#' @param aggregate "mean" or "top".
+#' @return matrix with one row per gene, rownames = gene keys.
+#' @noRd
+.moduleviz_collapse_by_gene <- function(z, genes, aggregate = "mean") {
+  keep  <- !is.na(genes) & nzchar(genes)
+  z     <- z[keep, , drop = FALSE]
+  genes <- genes[keep]
+  if (aggregate == "mean") {
+    ok  <- !is.na(z)
+    out <- rowsum(ifelse(ok, z, 0), genes, reorder = FALSE) /
+           rowsum(ok * 1, genes, reorder = FALSE)
+  } else {
+    score <- suppressWarnings(apply(abs(z), 1, max, na.rm = TRUE))
+    o     <- order(genes, -score)
+    o     <- o[!duplicated(genes[o])]
+    out   <- z[o, , drop = FALSE]
+    rownames(out) <- genes[o]
+  }
+  out
+}
+
+#' Normalise one entry of `layers` into a common internal description.
+#'
+#' A "longi" layer keeps its own z-scores, metadata, and column settings.  A raw
+#' matrix is matched to its metadata (if any), its columns are ordered by group
+#' then time, and it is z-scored later, once its final columns are known.
+#' @noRd
+.moduleviz_layer_spec <- function(x, name, meta, sample_col, time_col,
+                                  group_col) {
+  if (inherits(x, "longi")) {
+    p <- x$params
+    return(list(obj = x, mat = NULL, z = x$z, meta = x$meta,
+                sample_col = p$sample_col, time_col = p$time_col,
+                group_col = p$group_col))
+  }
+  m <- as.matrix(x)
+  if (is.null(rownames(m)))
+    stop(sprintf("layer '%s' has no rownames; supply feature IDs as rownames.",
+                 name), call. = FALSE)
+  lm <- if (is.null(meta) || is.data.frame(meta)) meta else meta[[name]]
+  spec <- list(obj = NULL, mat = m, z = NULL, meta = NULL, raw_meta = lm,
+               sample_col = sample_col, time_col = time_col,
+               group_col = group_col)
+  if (!is.null(lm)) {
+    lm <- as.data.table(lm)
+    if (!sample_col %in% names(lm))
+      stop(sprintf("metadata for layer '%s' has no '%s' column.", name,
+                   sample_col), call. = FALSE)
+    lm <- lm[as.character(lm[[sample_col]]) %in% colnames(m)]
+    if (nrow(lm)) {
+      ord_cols <- intersect(c(group_col, time_col), names(lm))
+      if (length(ord_cols))
+        lm <- lm[do.call(order, c(as.list(lm[, ord_cols, with = FALSE]),
+                                  list(seq_len(nrow(lm)))))]
+      spec$mat  <- m[, as.character(lm[[sample_col]]), drop = FALSE]
+      spec$meta <- lm
+    }
+  }
+  if (!is.null(group_col) && !group_col %in% names(spec$meta))
+    spec$group_col <- NULL
+  spec
+}
+
+#' Cluster several omics layers into shared temporal modules, linked by gene.
+#'
+#' Generalises the paired RNA + ATAC view to any number of layers, e.g.
+#' RNA + ATAC + H3K27ac + H3K27me3.  Every layer is z-scored within itself and
+#' collapsed to one row per gene, so layers with very different feature types
+#' (genes, peaks, CUT&RUN regions) line up row for row.
+#'
+#' Two clustering strategies:
+#'   - `cluster_by = <layer>` (default: the first layer): that layer alone
+#'     defines the modules and row order, exactly like `dual_heatmap()`;
+#'     the other layers are shown in the same order.
+#'   - `cluster_by = "joint"`: the per-gene z-scores of all layers are
+#'     concatenated and clustered together, so a module groups genes whose
+#'     expression AND chromatin trajectories agree.
+#'
+#' @param layers named list of layers.  Each entry is a "longi" object or a raw
+#'   features x samples matrix.  Names become panel titles.
+#' @param meta sample metadata for raw-matrix layers: one data.frame shared by
+#'   all layers, or a named list with one data.frame per layer.  Ignored for
+#'   "longi" layers, which carry their own.
+#' @param sample_col,time_col,group_col metadata columns for raw-matrix layers
+#'   (see longitudinal_cluster()).
+#' @param cluster_by name or index of the layer that defines the modules, or
+#'   "joint" to cluster all layers together.
+#' @param gene_of function mapping row IDs to gene symbols, either one function
+#'   for every layer or a list with one per layer (by name or position).  The
+#'   default uses the first layer's IDs as-is and takes the text after the last
+#'   "_" for every other layer ("PeakID_SYMBOL" -> "SYMBOL").
+#' @param aggregate how to collapse several features per gene ("mean" or "top").
+#' @param gene_set "intersect" keeps genes present in every layer; "reference"
+#'   keeps every row of the `cluster_by` layer and leaves missing layers NA.
+#' @param balance_layers joint clustering only: weight each layer's columns by
+#'   1/sqrt(number of columns) so a layer with many samples does not dominate.
+#' @param ... passed to longitudinal_cluster() (k, method, stability, ...) when
+#'   the clustering layer is a raw matrix, or always for "joint".
+#' @return object of class "multi_longi": a list with layers (per-layer aligned
+#'   z matrix and metadata), cluster, genes, membership, stability, reference
+#'   (the "longi" object the modules came from), params.
+multi_cluster <- function(layers, meta = NULL,
+                                sample_col = "SampleID",
+                                time_col   = "TimeHr",
+                                group_col  = NULL,
+                                cluster_by = 1,
+                                gene_of = NULL,
+                                aggregate = c("mean", "top"),
+                                gene_set = c("intersect", "reference"),
+                                balance_layers = TRUE,
+                                ...) {
+  aggregate <- match.arg(aggregate)
+  gene_set  <- match.arg(gene_set)
+  if (inherits(layers, "longi") || !is.list(layers) || length(layers) < 2)
+    stop("`layers` must be a list of at least two layers.", call. = FALSE)
+  nms <- names(layers)
+  if (is.null(nms)) nms <- rep("", length(layers))
+  nms[!nzchar(nms)] <- paste0("Layer", which(!nzchar(nms)))
+  nms <- make.unique(nms)
+  names(layers) <- nms
+  n_layer <- length(layers)
+
+  ## ---- which layer drives the modules -------------------------------------
+  joint <- identical(cluster_by, "joint")
+  if (!joint) {
+    ref_i <- if (is.character(cluster_by)) match(cluster_by, nms) else as.integer(cluster_by)
+    if (length(ref_i) != 1 || is.na(ref_i) || ref_i < 1 || ref_i > n_layer)
+      stop("`cluster_by` must be a layer name, a layer index, or \"joint\".",
+           call. = FALSE)
+  } else if (gene_set == "reference") {
+    stop("gene_set = \"reference\" needs a reference layer; joint clustering ",
+         "uses the genes shared by every layer.", call. = FALSE)
+  }
+
+  ## ---- gene mappers: one per layer ----------------------------------------
+  default_gene_of <- function(i) if (i == 1) function(id) id
+                                 else function(id) sub("^.*_", "", id)
+  if (is.function(gene_of)) gene_of <- rep(list(gene_of), n_layer)
+  if (is.null(gene_of)) gene_of <- list()
+  gene_of <- lapply(seq_len(n_layer), function(i) {
+    f <- if (!is.null(names(gene_of)) && nms[i] %in% names(gene_of)) gene_of[[nms[i]]]
+         else if (is.null(names(gene_of)) && i <= length(gene_of)) gene_of[[i]]
+         else NULL
+    if (is.null(f)) default_gene_of(i) else f
+  })
+
+  specs <- Map(.moduleviz_layer_spec, layers, nms,
+               MoreArgs = list(meta = meta, sample_col = sample_col,
+                               time_col = time_col, group_col = group_col))
+
+  if (!joint) {
+    ## ---- reference mode: one layer clusters, the rest follow ---------------
+    ref <- specs[[ref_i]]
+    if (is.null(ref$obj)) {
+      if (is.null(ref$raw_meta))
+        stop(sprintf("layer '%s' is a raw matrix; supply `meta` so it can be clustered.",
+                     nms[ref_i]), call. = FALSE)
+      ref$obj <- longitudinal_cluster(layers[[ref_i]], ref$raw_meta,
+                                      sample_col = sample_col,
+                                      time_col = time_col,
+                                      group_col = group_col, ...)
+      specs[[ref_i]] <- .moduleviz_layer_spec(ref$obj, nms[ref_i])
+    } else if (length(list(...))) {
+      warning("clustering arguments in `...` are ignored: layer '", nms[ref_i],
+              "' is already clustered.", call. = FALSE)
+    }
+    ref_obj <- ref$obj
+    ref_z   <- ref_obj$z
+    g_ref   <- gene_of[[ref_i]](rownames(ref_z))
+  }
+
+  ## Raw layers without metadata follow the clustering layer's sample order
+  ## where the column names overlap.
+  anchor_cols <- if (!joint) colnames(ref_z) else NULL
+  for (i in seq_len(n_layer)) {
+    s <- specs[[i]]
+    if (!is.null(s$z)) next
+    if (is.null(s$meta) && !is.null(anchor_cols)) {
+      common <- intersect(anchor_cols, colnames(s$mat))
+      if (length(common) >= 2) s$mat <- s$mat[, common, drop = FALSE]
+    }
+    s$z <- zscore_rows(s$mat)
+    specs[[i]] <- s
+  }
+
+  collapse_layer <- function(i)
+    .moduleviz_collapse_by_gene(specs[[i]]$z,
+                                gene_of[[i]](rownames(specs[[i]]$z)),
+                                aggregate)
+
+  if (!joint) {
+    others    <- setdiff(seq_len(n_layer), ref_i)
+    collapsed <- setNames(vector("list", n_layer), nms)
+    for (i in others) collapsed[[i]] <- collapse_layer(i)
+    in_layer  <- vapply(others, function(i) g_ref %in% rownames(collapsed[[i]]),
+                        logical(length(g_ref)))
+    in_layer  <- matrix(in_layer, nrow = length(g_ref))
+    keep_rows <- if (gene_set == "intersect") which(rowSums(in_layer) == length(others))
+                 else seq_along(g_ref)
+    if (!length(keep_rows))
+      stop("No genes shared between the layers; check the `gene_of` mappers.",
+           call. = FALSE)
+
+    row_ids <- rownames(ref_z)[keep_rows]
+    genes   <- g_ref[keep_rows]
+    cluster <- droplevels(ref_obj$cluster[keep_rows])
+    layer_z <- setNames(vector("list", n_layer), nms)
+    layer_z[[ref_i]] <- ref_z[keep_rows, , drop = FALSE]
+    for (i in others) {
+      zi <- collapsed[[i]][match(genes, rownames(collapsed[[i]])), , drop = FALSE]
+      rownames(zi) <- row_ids
+      layer_z[[i]] <- zi
+    }
+  } else {
+    ## ---- joint mode: cluster the concatenated per-gene profiles ------------
+    if (isTRUE(list(...)$aggregate_replicates))
+      stop("aggregate_replicates is not supported for joint clustering; pass ",
+           "per-layer longitudinal_cluster(..., aggregate_replicates = TRUE) ",
+           "objects instead.", call. = FALSE)
+    no_time <- nms[vapply(specs, function(s)
+      is.null(s$meta) || !s$time_col %in% names(s$meta), logical(1))]
+    if (length(no_time))
+      stop("joint clustering needs sample metadata with a time column for every ",
+           "layer; missing for: ", paste(no_time, collapse = ", "), call. = FALSE)
+
+    collapsed <- setNames(lapply(seq_len(n_layer), collapse_layer), nms)
+    genes <- Reduce(intersect, lapply(collapsed, rownames))
+    if (length(genes) < 2)
+      stop("Fewer than 2 genes shared by every layer; check the `gene_of` mappers.",
+           call. = FALSE)
+
+    ## Shared time / group column names come from the first layer; the group
+    ## is used only when every layer has one.
+    tc <- specs[[1]]$time_col
+    gc <- if (all(vapply(specs, function(s) !is.null(s$group_col), logical(1))))
+            specs[[1]]$group_col else NULL
+    blocks <- lapply(seq_len(n_layer), function(i) {
+      zi <- collapsed[[i]][genes, , drop = FALSE]
+      w  <- if (balance_layers) 1 / sqrt(ncol(zi)) else 1
+      colnames(zi) <- paste0(nms[i], "::", colnames(zi))
+      zi * w
+    })
+    joint_meta <- rbindlist(lapply(seq_len(n_layer), function(i) {
+      s  <- specs[[i]]
+      m  <- s$meta[match(colnames(s$z), as.character(s$meta[[s$sample_col]]))]
+      dt <- data.table(LayerSample = paste0(nms[i], "::", colnames(s$z)),
+                       Layer = nms[i])
+      dt[[tc]] <- m[[s$time_col]]
+      if (!is.null(gc)) dt[[gc]] <- as.character(m[[s$group_col]])
+      dt
+    }))
+    ref_obj <- longitudinal_cluster(do.call(cbind, blocks), joint_meta,
+                                    sample_col = "LayerSample", time_col = tc,
+                                    group_col = gc, is_zscore = TRUE, ...)
+
+    ## Order rows within each module by the unweighted signal.
+    genes   <- rownames(ref_obj$z)
+    layer_z <- lapply(collapsed, function(zi) zi[genes, , drop = FALSE])
+    score   <- suppressWarnings(apply(abs(do.call(cbind, layer_z)), 1, max,
+                                      na.rm = TRUE))
+    o       <- order(ref_obj$cluster, -score)
+    genes   <- genes[o]
+    layer_z <- lapply(layer_z, function(zi) zi[o, , drop = FALSE])
+    cluster <- ref_obj$cluster[o]
+    row_ids <- genes
+    ref_i   <- NA_integer_
+  }
+
+  out_layers <- setNames(lapply(seq_len(n_layer), function(i) {
+    s <- specs[[i]]
+    list(z = layer_z[[i]], meta = s$meta, sample_col = s$sample_col,
+         time_col = s$time_col, group_col = s$group_col)
+  }), nms)
+
+  score <- suppressWarnings(apply(abs(do.call(cbind, layer_z)), 1, max,
+                                  na.rm = TRUE))
+  membership <- data.table(ID = row_ids, Gene = genes,
+                           Cluster = as.character(cluster),
+                           MaxAbsZ = round(score, 3))
+
+  structure(list(
+    layers     = out_layers,
+    cluster    = cluster,
+    genes      = genes,
+    membership = membership,
+    stability  = ref_obj$stability,
+    reference  = ref_obj,
+    params     = list(cluster_by = if (joint) "joint" else nms[ref_i],
+                      layer_names = nms, aggregate = aggregate,
+                      gene_set = gene_set, balance_layers = balance_layers)
+  ), class = "multi_longi")
+}
+
+print.multi_longi <- function(x, ...) {
+  p <- x$params
+  cat(sprintf("<multi_longi>  %d genes x %d layers (%s),  %d modules\n",
+              length(x$genes), length(x$layers),
+              paste(p$layer_names, collapse = " + "), nlevels(x$cluster)))
+  cat(sprintf("  clustered by: %s\n", p$cluster_by))
+  if (!is.null(x$stability))
+    cat(sprintf("  stability (mean Jaccard): %.2f - %.2f\n",
+                min(x$stability$MeanJaccard), max(x$stability$MeanJaccard)))
+  invisible(x)
+}
+
+#' Draw several omics layers side by side, linked by gene.
+#'
+#' One panel per layer (e.g. RNA | ATAC | H3K27ac | H3K27me3), all sharing the
+#' module split and row order from multi_cluster().  The layers share one
+#' z-score colour scale, so a single legend covers every panel.  Each panel gets
+#' its own metadata annotation bars, coloured consistently across layers.
+#'
+#' @param x a "multi_longi" object, or a named list of layers; a list is passed
+#'   to multi_cluster() together with `...`.
+#' @param annotation_cols metadata columns to show as top bars on each layer.
+#'   Defaults to each layer's group_col and time_col; `character(0)` for none.
+#' @param annotation_colors optional named list mapping annotation -> colours.
+#' @param label_features genes / IDs to label on the right of the last panel.
+#' @param top_n_label per-module automatic labels, ranked by the largest |z|
+#'   across all layers (0 = none).
+#' @param col_fun z-score colour map.  Overrides `zscore_palette` when supplied.
+#' @param zscore_palette "rdbu" (default) or "viridis", shared by every layer.
+#' @param zscore_limits numeric length-2 z-score saturation range.
+#' @param cluster_palette discrete palette for the module annotation bar.
+#' @param annotation_palette discrete palette for categorical metadata bars.
+#' @param na_col colour for genes missing from a layer (gene_set = "reference").
+#' @param label_fontsize,row_title_fontsize,column_name_fontsize text sizes.
+#' @param annotation_name_fontsize,legend_fontsize,title_fontsize text sizes for
+#'   the annotation names, legends, and panel / figure titles.
+#' @param show_column_names show sample names along the bottom of every layer.
+#' @param layer_gap gap between the layer panels, in mm.
+#' @param title overall title; NULL gives "A + B + C (linked by gene)", FALSE
+#'   drops it.
+#' @param file optional PDF or PNG path.
+#' @param width,height size in inches; width defaults to 3.5 + 3.5 per layer.
+#' @param ... passed to multi_cluster() when `x` is a list of layers.
+#' @return invisibly, the "multi_longi" object with the drawn HeatmapList in
+#'   `$heatmap`.
+multi_heatmap <- function(x,
+                                annotation_cols = NULL,
+                                annotation_colors = NULL,
+                                label_features = NULL,
+                                top_n_label = 0,
+                                col_fun = NULL,
+                                zscore_palette = c("rdbu", "viridis"),
+                                zscore_limits = c(-2, 2),
+                                cluster_palette = "paired",
+                                annotation_palette = "set2",
+                                na_col = "grey85",
+                                label_fontsize = 15,
+                                row_title_fontsize = 16,
+                                column_name_fontsize = 13,
+                                annotation_name_fontsize = 14,
+                                legend_fontsize = 14,
+                                title_fontsize = 17,
+                                show_column_names = TRUE,
+                                layer_gap = 10,
+                                title = NULL,
+                                file = NULL, width = NULL, height = 13, ...) {
+  if (!inherits(x, "multi_longi")) x <- multi_cluster(x, ...)
+  if (is.null(col_fun))
+    col_fun <- .moduleviz_zscore_col_fun(zscore_palette, zscore_limits)
+  layers  <- x$layers
+  nms     <- names(layers)
+  n_layer <- length(layers)
+  cluster <- x$cluster
+  if (is.null(width)) width <- 3.5 + 3.5 * n_layer
+  if (is.null(title))
+    title <- sprintf("%s (linked by gene)", paste(nms, collapse = " + "))
+  if (isFALSE(title)) title <- NULL
+
+  ## ---- annotation bars, coloured consistently across layers ---------------
+  ann_by_layer <- lapply(layers, function(L) {
+    cols <- if (is.null(annotation_cols)) c(L$group_col, L$time_col) else annotation_cols
+    intersect(cols, names(L$meta))
+  })
+  all_ann <- unique(unlist(ann_by_layer))
+  missing_anno <- setdiff(annotation_cols, all_ann)
+  if (length(missing_anno))
+    warning("annotation_cols not found in any layer's metadata and skipped: ",
+            paste(missing_anno, collapse = ", "), call. = FALSE)
+  col_list <- if (is.null(annotation_colors)) list() else annotation_colors
+  for (a in all_ann) {
+    if (!is.null(col_list[[a]])) next
+    vals <- lapply(layers[vapply(ann_by_layer, function(s) a %in% s, logical(1))],
+                   function(L) L$meta[[a]])
+    if (all(vapply(vals, is.numeric, logical(1)))) {
+      col_list[[a]] <- circlize::colorRamp2(range(unlist(vals), na.rm = TRUE),
+                                            c("#deebf7", "#08519c"))
+    } else {
+      lv <- unique(unlist(lapply(vals, function(v)
+        if (is.factor(v)) intersect(levels(v), as.character(v))
+        else unique(as.character(v)))))
+      col_list[[a]] <- setNames(
+        .moduleviz_discrete_palette(length(lv), annotation_palette), lv)
+    }
+  }
+  ## each legend once (first layer that has it), each name once (last layer)
+  has_ann    <- lapply(all_ann, function(a)
+    which(vapply(ann_by_layer, function(s) a %in% s, logical(1))))
+  first_with <- setNames(vapply(has_ann, min, numeric(1)), all_ann)
+  last_with  <- setNames(vapply(has_ann, max, numeric(1)), all_ann)
+
+  ## ---- row titles, module bar, labels --------------------------------------
+  cn <- table(cluster)
+  row_title <- sprintf("%s\n(n=%d)", levels(cluster), as.integer(cn))
+  cluster_cols <- .moduleviz_cluster_cols(levels(cluster), cluster_palette)
+  left_anno <- rowAnnotation(
+    Cluster = cluster, col = list(Cluster = cluster_cols),
+    show_annotation_name = FALSE,
+    annotation_legend_param = .moduleviz_legend_gp(legend_fontsize),
+    width = unit(4, "mm"))
+
+  at <- integer(0)
+  if (length(label_features))
+    at <- which(x$genes %in% label_features | x$membership$ID %in% label_features)
+  if (top_n_label > 0) {
+    dt <- data.table(idx = seq_along(x$genes), Cluster = x$membership$Cluster,
+                     value = x$membership$MaxAbsZ)
+    setorder(dt, -value)
+    at <- c(at, dt[, head(.SD, top_n_label), by = Cluster]$idx)
+  }
+  at <- sort(unique(at))
+  right_anno <- NULL
+  if (length(at))
+    right_anno <- rowAnnotation(mark = anno_mark(
+      at = at, labels = x$genes[at],
+      labels_gp = gpar(fontsize = label_fontsize, fontface = "italic"),
+      link_width = unit(6, "mm")))
+
+  ## ---- one panel per layer -------------------------------------------------
+  panel <- function(i) {
+    L <- layers[[i]]
+    top_anno <- NULL
+    a <- ann_by_layer[[i]]
+    if (length(a)) {
+      top_anno <- HeatmapAnnotation(
+        df = as.data.frame(L$meta[, a, with = FALSE]), col = col_list[a],
+        show_legend = unname(first_with[a] == i),
+        show_annotation_name = unname(last_with[a] == i),
+        annotation_name_gp = gpar(fontsize = annotation_name_fontsize),
+        annotation_legend_param = .moduleviz_legend_gp(legend_fontsize))
+    }
+    col_split <- if (!is.null(L$group_col) && L$group_col %in% names(L$meta))
+      factor(L$meta[[L$group_col]], levels = unique(L$meta[[L$group_col]]))
+    first <- i == 1
+    Heatmap(
+      L$z, name = nms[i], col = col_fun, na_col = na_col,
+      row_split = if (first) cluster, cluster_rows = FALSE,
+      cluster_row_slices = FALSE,
+      row_title = if (first) row_title, row_title_rot = 0,
+      row_title_gp = gpar(fontsize = row_title_fontsize),
+      row_gap = unit(1.5, "mm"), show_row_names = FALSE,
+      column_split = col_split, cluster_columns = FALSE,
+      column_title = nms[i], column_gap = unit(1.5, "mm"),
+      column_title_gp = gpar(fontsize = title_fontsize),
+      show_column_names = show_column_names,
+      column_names_gp = gpar(fontsize = column_name_fontsize),
+      column_names_max_height = max_text_width(
+        colnames(L$z), gp = gpar(fontsize = column_name_fontsize)),
+      top_annotation = top_anno,
+      left_annotation = if (first) left_anno,
+      right_annotation = if (i == n_layer) right_anno,
+      ## the layers share one colour scale, so one legend covers them all
+      show_heatmap_legend = first,
+      use_raster = TRUE, raster_quality = 2,
+      heatmap_legend_param = c(list(title = "z-score", direction = "horizontal",
+                                    title_position = "topcenter",
+                                    legend_width = unit(4, "cm")),
+                               .moduleviz_legend_gp(legend_fontsize)))
+  }
+  combined <- Reduce(`+`, lapply(seq_len(n_layer), panel))
+
+  draw_it <- function() draw(combined, heatmap_legend_side = "bottom",
+                             annotation_legend_side = "bottom",
+                             merge_legend = TRUE, ht_gap = unit(layer_gap, "mm"),
+                             column_title = title,
+                             column_title_gp = gpar(fontsize = title_fontsize))
+  if (!is.null(file)) {
+    .moduleviz_write_plot(file, width, height, draw_it)
+  } else {
+    draw_it()
+  }
+  x$heatmap <- combined
+  invisible(x)
+}
+
+#' Module trajectories across layers: one line per layer, one facet per module.
+#'
+#' For each layer, every sample contributes its mean z-score over the module's
+#' genes; points are the mean of those values at each time point and the error
+#' bars their SD across replicates.  Answers "does the chromatin mark rise and
+#' fall with expression in this module?" at a glance.
+#'
+#' @param x a "multi_longi" object (or the value of multi_heatmap()).
+#' @param file optional output path (any ggsave() format).
+#' @param width,height size in inches; auto-scaled when NULL.
+#' @param ncol facet columns when the layers have no group_col.
+#' @param palette discrete palette for the layer lines (default "okabe_ito").
+#' @param layer_colors optional named vector of explicit layer colours;
+#'   overrides `palette` for the layers it names.
+#' @param error_bars draw +/- SD across replicates where there are replicates.
+#' @param base_size,title,title_fontsize,xlab,time_labels,x_angle,line_width,point_size
+#'   as in pattern_lineplot().
+#' @return a ggplot object (also saved if `file` is given).
+multi_lineplot <- function(x, file = NULL, width = NULL, height = NULL,
+                                 ncol = NULL,
+                                 palette = "okabe_ito",
+                                 layer_colors = NULL,
+                                 error_bars = TRUE,
+                                 base_size = 12,
+                                 title = "Module patterns across layers",
+                                 title_fontsize = NULL,
+                                 xlab = NULL,
+                                 time_labels = NULL,
+                                 x_angle = 45,
+                                 line_width = 1.1,
+                                 point_size = 2.2) {
+  stopifnot(inherits(x, "multi_longi"))
+  if (is.null(title_fontsize)) title_fontsize <- base_size
+  cl_levels <- levels(x$cluster)
+
+  ## per-sample module means, one row per layer x module x sample
+  skipped <- character(0)
+  per <- rbindlist(lapply(names(x$layers), function(nm) {
+    L <- x$layers[[nm]]
+    if (is.null(L$meta) || !L$time_col %in% names(L$meta)) {
+      skipped <<- c(skipped, nm)
+      return(NULL)
+    }
+    m   <- L$meta[match(colnames(L$z), as.character(L$meta[[L$sample_col]]))]
+    grp <- if (!is.null(L$group_col) && L$group_col %in% names(m))
+             as.character(m[[L$group_col]]) else NA_character_
+    rbindlist(lapply(cl_levels, function(cl)
+      data.table(Layer = nm, Cluster = cl, Group = grp, Time = m[[L$time_col]],
+                 z = colMeans(L$z[x$cluster == cl, , drop = FALSE], na.rm = TRUE))))
+  }))
+  if (length(skipped))
+    warning("layers without a time column in their metadata are left out: ",
+            paste(skipped, collapse = ", "), call. = FALSE)
+  if (!nrow(per)) stop("No layer has sample metadata with a time column.")
+
+  summ <- per[, .(z = mean(z, na.rm = TRUE), zsd = sd(z, na.rm = TRUE)),
+              by = .(Layer, Cluster, Group, Time)]
+  time_levels <- if (is.numeric(summ$Time)) as.character(sort(unique(summ$Time)))
+                 else unique(as.character(summ$Time))
+  summ[, Time := factor(as.character(Time), levels = time_levels)]
+  summ[, Layer := factor(Layer, levels = intersect(names(x$layers), Layer))]
+  cn <- table(x$cluster)
+  facet_lab <- setNames(sprintf("%s (n=%d)", cl_levels, as.integer(cn)), cl_levels)
+  summ[, ClusterF := factor(facet_lab[Cluster], levels = facet_lab)]
+
+  layer_cols <- setNames(.moduleviz_discrete_palette(nlevels(summ$Layer), palette),
+                         levels(summ$Layer))
+  if (!is.null(layer_colors)) {
+    named <- intersect(names(layer_colors), names(layer_cols))
+    layer_cols[named] <- layer_colors[named]
+  }
+
+  pd <- position_dodge(width = 0.25)
+  gg <- ggplot(summ, aes(Time, z, group = Layer, color = Layer)) +
+    geom_hline(yintercept = 0, linetype = 2, color = "grey70") +
+    geom_line(linewidth = line_width, position = pd)
+  if (error_bars && any(!is.na(summ$zsd)))
+    gg <- gg + geom_errorbar(data = summ[!is.na(zsd)],
+                             aes(ymin = z - zsd, ymax = z + zsd),
+                             width = 0.15, linewidth = 0.6, position = pd)
+  gg <- gg + geom_point(size = point_size, position = pd) +
+    scale_color_manual(values = layer_cols)
+
+  grouped <- any(!is.na(summ$Group))
+  if (grouped) {
+    gg <- gg + facet_grid(rows = vars(ClusterF), cols = vars(Group))
+    n_col <- length(unique(summ$Group))
+    n_row <- length(cl_levels)
+  } else {
+    if (is.null(ncol)) ncol <- min(3, length(cl_levels))
+    gg <- gg + facet_wrap(~ ClusterF, ncol = ncol)
+    n_col <- ncol
+    n_row <- ceiling(length(cl_levels) / ncol)
+  }
+
+  gg <- gg +
+    theme_bw(base_size = base_size) +
+    theme(panel.grid.minor = element_blank(), legend.position = "top",
+          legend.title = element_blank(),
+          strip.text.y.right = element_text(angle = 0),
+          plot.title = element_text(size = title_fontsize),
+          axis.text.x = element_text(angle = x_angle,
+                                     hjust = if (x_angle == 0) 0.5 else 1)) +
+    labs(x = if (is.null(xlab)) x$layers[[1]]$time_col else xlab,
+         y = "mean z-score", title = title)
+  if (!is.null(time_labels))
+    gg <- gg + scale_x_discrete(labels = time_labels)
+
+  if (!is.null(file)) {
+    if (is.null(width))  width  <- 3.2 * n_col + if (grouped) 1.8 else 0.8
+    if (is.null(height)) height <- 2.3 * n_row + 1.2
+    ggsave(file, gg, width = width, height = height, limitsize = FALSE)
+    message("wrote ", file)
+  }
+  gg
 }
 
 ## =============================================================================
@@ -979,9 +1592,9 @@ write_memberships <- function(obj, file = NULL, prefix = NULL,
 
 #' Draw two omics layers side by side, linked by gene.
 #'
-#' Puts a primary layer (e.g. RNA, one row per gene) next to a secondary layer
-#' (e.g. ATAC / CUT&RUN peaks) in a single figure, sharing a common set of genes
-#' and row order so gene expression and chromatin signal line up per gene.
+#' The two-layer case of multi_heatmap(), kept for its simpler arguments:
+#' a primary layer (e.g. RNA, one row per gene) next to a secondary layer (e.g.
+#' ATAC / CUT&RUN peaks), sharing a common set of genes and row order.
 #'
 #' Because one gene can map to several peaks, the secondary layer is collapsed to
 #' one value per gene:
@@ -1015,7 +1628,7 @@ write_memberships <- function(obj, file = NULL, prefix = NULL,
 #' @param ... passed through to longitudinal_cluster when raw matrices are given.
 #' @return invisibly, a list(primary_obj, secondary_matrix, genes) plus the drawn
 #'   combined heatmap.
-dual_omics_heatmap <- function(primary, secondary,
+dual_heatmap <- function(primary, secondary,
                                primary_name = "RNA", secondary_name = "ATAC",
                                gene_of_primary   = function(id) id,
                                gene_of_secondary = function(id) sub("^.*_", "", id),
@@ -1025,144 +1638,45 @@ dual_omics_heatmap <- function(primary, secondary,
                                zscore_palette = c("rdbu", "viridis"),
                                zscore_limits = c(-2, 2),
                                cluster_palette = "paired",
-                               label_fontsize = 10,
-                               row_title_fontsize = 10,
-                               column_name_fontsize = 9,
-                               legend_fontsize = 10,
-                               title_fontsize = 13,
+                               label_fontsize = 15,
+                               row_title_fontsize = 16,
+                               column_name_fontsize = 13,
+                               legend_fontsize = 14,
+                               title_fontsize = 17,
                                show_column_names = TRUE,
-                               file = NULL, width = 12, height = 13, ...) {
+                               file = NULL, width = 10.5, height = 13, ...) {
   aggregate <- match.arg(aggregate)
-  if (is.null(col_fun))
-    col_fun <- .moduleviz_zscore_col_fun(zscore_palette, zscore_limits)
 
   ## Allow raw matrices: cluster the primary here.
   if (!inherits(primary, "longi")) {
     primary <- longitudinal_cluster(primary, ...)
   }
-  p <- primary$params
 
-  ## Secondary z-matrix (either from a longi object, or z-scored raw matrix).
-  if (inherits(secondary, "longi")) {
-    zsec <- secondary$z
-  } else {
-    sm <- as.matrix(secondary)
-    ## align secondary columns to the primary sample order where possible
-    common <- intersect(colnames(primary$z), colnames(sm))
-    if (length(common) >= 2) sm <- sm[, common, drop = FALSE]
-    zsec <- zscore_rows(sm)
-  }
-
-  ## Gene keys.
-  gp <- gene_of_primary(rownames(primary$z))
-  gs <- gene_of_secondary(rownames(zsec))
-
-  ## Collapse the secondary layer to one row per gene.
-  sec_by_gene <- function(g) {
-    rows <- which(gs == g)
-    if (!length(rows)) return(NULL)
-    if (aggregate == "mean") {
-      colMeans(zsec[rows, , drop = FALSE], na.rm = TRUE)
-    } else {
-      strongest <- rows[which.max(apply(abs(zsec[rows, , drop = FALSE]), 1, max))]
-      zsec[strongest, ]
-    }
-  }
-
-  ## Genes present in BOTH layers, kept in the primary's (clustered) row order.
-  genes_primary <- gp
-  shared        <- genes_primary[genes_primary %in% gs]
-  if (!length(shared))
-    stop("No genes shared between the two layers; check the gene_of_* mappers.")
-
-  ## Build aligned matrices in primary row order, one row per primary feature
-  ## that has a secondary match.
-  keep_rows <- which(gp %in% gs)
-  z_primary <- primary$z[keep_rows, , drop = FALSE]
-  cluster   <- droplevels(primary$cluster[keep_rows])
-  g_keep    <- gp[keep_rows]
-
-  z_secondary <- t(vapply(g_keep, function(g) {
-    v <- sec_by_gene(g)
-    if (is.null(v)) rep(NA_real_, ncol(zsec)) else v
-  }, numeric(ncol(zsec))))
-  rownames(z_secondary) <- rownames(z_primary)
-
-  ## Column splits (reuse each layer's own sample time ordering).
-  make_split <- function(obj_or_mat, zmat) {
-    if (inherits(obj_or_mat, "longi") && !is.null(obj_or_mat$params$group_col)) {
-      m <- obj_or_mat$meta
-      factor(m[[obj_or_mat$params$group_col]], levels = unique(m[[obj_or_mat$params$group_col]]))
-    } else NULL
-  }
-  split_primary   <- make_split(primary, z_primary)
-  split_secondary <- if (inherits(secondary, "longi")) make_split(secondary, z_secondary) else NULL
-
-  ## Optional labels down the primary side.
-  right_anno <- NULL
-  if (!is.null(label_features) && length(label_features)) {
-    at <- which(g_keep %in% label_features | rownames(z_primary) %in% label_features)
-    if (length(at))
-      right_anno <- rowAnnotation(mark = anno_mark(
-        at = at, labels = g_keep[at],
-        labels_gp = gpar(fontsize = label_fontsize, fontface = "italic"),
-        link_width = unit(6, "mm")))
-  }
-
-  cluster_cols <- .moduleviz_cluster_cols(levels(cluster), cluster_palette)
-  cn <- table(cluster)
-  row_title <- sprintf("%s\n(n=%d)", levels(cluster), as.integer(cn))
-
-  ht_primary <- Heatmap(
-    z_primary, name = paste0(primary_name, "\nz-score"), col = col_fun,
-    row_split = cluster, cluster_rows = FALSE, cluster_row_slices = FALSE,
-    row_title = row_title, row_title_rot = 0,
-    row_title_gp = gpar(fontsize = row_title_fontsize),
-    row_gap = unit(1.5, "mm"), show_row_names = FALSE,
-    column_split = split_primary, cluster_columns = FALSE,
-    column_title = primary_name, column_gap = unit(1.5, "mm"),
-    column_title_gp = gpar(fontsize = title_fontsize),
+  x <- multi_cluster(
+    setNames(list(primary, secondary), c(primary_name, secondary_name)),
+    gene_of = list(gene_of_primary, gene_of_secondary), aggregate = aggregate)
+  x <- multi_heatmap(
+    x, annotation_cols = character(0), label_features = label_features,
+    col_fun = col_fun, zscore_palette = zscore_palette,
+    zscore_limits = zscore_limits, cluster_palette = cluster_palette,
+    label_fontsize = label_fontsize, row_title_fontsize = row_title_fontsize,
+    column_name_fontsize = column_name_fontsize,
+    legend_fontsize = legend_fontsize, title_fontsize = title_fontsize,
     show_column_names = show_column_names,
-    column_names_gp = gpar(fontsize = column_name_fontsize),
-    left_annotation = rowAnnotation(
-      Cluster = cluster, col = list(Cluster = cluster_cols),
-      show_annotation_name = FALSE,
-      annotation_legend_param = .moduleviz_legend_gp(legend_fontsize),
-      width = unit(4, "mm")),
-    use_raster = TRUE, raster_quality = 2,
-    heatmap_legend_param = c(list(direction = "horizontal",
-                                  title_position = "topcenter"),
-                             .moduleviz_legend_gp(legend_fontsize)))
-
-  ht_secondary <- Heatmap(
-    z_secondary, name = paste0(secondary_name, "\nz-score"), col = col_fun,
-    cluster_rows = FALSE, show_row_names = FALSE,
-    column_split = split_secondary, cluster_columns = FALSE,
-    column_title = secondary_name, column_gap = unit(1.5, "mm"),
-    column_title_gp = gpar(fontsize = title_fontsize),
-    show_column_names = show_column_names,
-    column_names_gp = gpar(fontsize = column_name_fontsize),
-    right_annotation = right_anno,
-    use_raster = TRUE, raster_quality = 2,
-    heatmap_legend_param = c(list(direction = "horizontal",
-                                  title_position = "topcenter"),
-                             .moduleviz_legend_gp(legend_fontsize)))
-
-  combined <- ht_primary + ht_secondary
-  draw_it <- function() draw(combined, heatmap_legend_side = "bottom",
-                             annotation_legend_side = "bottom", merge_legend = TRUE,
-                             column_title = sprintf("%s + %s (linked by gene)",
-                                                    primary_name, secondary_name))
-  if (!is.null(file)) {
-    .moduleviz_write_plot(file, width, height, draw_it)
-  } else {
-    draw_it()
-  }
+    title = sprintf("%s + %s (linked by gene)", primary_name, secondary_name),
+    file = file, width = width, height = height)
 
   invisible(list(primary = primary,
-                 z_secondary = z_secondary,
-                 genes = g_keep,
-                 heatmap = combined))
+                 z_secondary = x$layers[[2]]$z,
+                 genes = x$genes,
+                 heatmap = x$heatmap))
+}
+
+#' Deprecated: use dual_heatmap().
+#' @param ... passed to dual_heatmap().
+dual_omics_heatmap <- function(...) {
+  .Deprecated("dual_heatmap", package = "ModuleViz")
+  dual_heatmap(...)
 }
 
 ## =============================================================================
@@ -1184,7 +1698,7 @@ run_longitudinal <- function(mat, meta, out_prefix,
                              zscore_palette = "rdbu",
                              cluster_palette = "paired",
                              annotation_palette = "set2",
-                             heatmap_width = 9, heatmap_height = 13, ...) {
+                             heatmap_width = 8, heatmap_height = 13, ...) {
   obj <- longitudinal_cluster(mat, meta, ...)
   longitudinal_heatmap(obj, annotation_cols = annotation_cols,
                        label_features = label_features, top_n_label = top_n_label,

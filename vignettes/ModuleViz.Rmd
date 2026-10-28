@@ -346,8 +346,8 @@ knitr::kable(data.frame(
 ))
 ```
 
-Stability is shown twice in the heatmap: as a grey `Stability` bar down the left
-edge, and as `J=` in each row title.
+Stability is shown in the heatmap as a grey `Stability` bar down the left edge;
+the row titles give each module's size.
 
 # Visualization
 
@@ -502,9 +502,9 @@ module_correlation_heatmap(obj, file = "module_correlations.pdf",
                            max_genes = 60)
 ```
 
-# Paired Omics
+# Multi-Omics
 
-`dual_omics_heatmap()` puts two layers side by side, linked by gene: RNA next to
+`dual_heatmap()` puts two layers side by side, linked by gene: RNA next to
 ATAC, or RNA next to CUT&RUN. The **primary** layer drives the clustering and
 the row order; the secondary is displayed in that same order, so each row is one
 gene across both assays.
@@ -525,7 +525,7 @@ rownames(atac) <- paste0("Peak", sprintf("%03d", seq_len(nrow(atac))),
                          "_", rep(genes, each = 2))
 atac <- atac + matrix(rnorm(length(atac), sd = 0.35), nrow = nrow(atac))
 
-res <- dual_omics_heatmap(
+res <- dual_heatmap(
     primary        = obj,
     secondary      = atac,
     primary_name   = "RNA",
@@ -545,6 +545,47 @@ dim(res$z_secondary)
 That makes it straightforward to ask whether the second layer tracks the first —
 for example, comparing mean secondary signal at late versus early time points
 for the late-peaking module.
+
+## More Than Two Layers
+
+`multi_heatmap()` takes a named list of any number of layers — RNA, ATAC,
+H3K27ac, H3K27me3, and so on — and draws one panel per layer. The panels share
+the module split, the row order, and a single z-score legend. Layers can be
+`longi` objects or raw matrices; raw matrices take their sample metadata from
+`meta`, either one shared table or a named list with one table per layer.
+
+`cluster_by` names the layer that defines the modules. `cluster_by = "joint"`
+instead clusters the concatenated per-gene profiles of every layer, so a module
+groups genes whose expression and chromatin trajectories agree.
+
+```{r multi-omics, fig.width = 14, fig.height = 7, fig.cap = "Four layers linked by gene. H3K27me3 is simulated as anti-correlated with expression."}
+# simulate two histone layers: an activating mark that follows expression,
+# and a repressive mark that mirrors it
+as_regions <- function(m, sign = 1, sd = 0.5) {
+    out <- sign * m + matrix(rnorm(length(m), sd = sd), nrow = nrow(m))
+    rownames(out) <- paste0("region", seq_len(nrow(m)), "_", rownames(m))
+    out
+}
+layers <- list(RNA      = obj,
+               ATAC     = atac,
+               H3K27ac  = as_regions(mat),
+               H3K27me3 = as_regions(mat, sign = -1))
+
+multi <- multi_heatmap(
+    layers, meta = meta,
+    sample_col = "SampleID", time_col = "TimeHr", group_col = "Condition",
+    show_column_names = FALSE,
+    label_features = c("Gene001", "Gene016", "Gene031")
+)
+multi
+```
+
+`multi_lineplot()` puts every layer of a module on the same axes, which
+makes concordant and opposing marks easy to spot:
+
+```{r multi-lines, fig.width = 8, fig.height = 7}
+multi_lineplot(multi)
+```
 
 # Exporting Results
 

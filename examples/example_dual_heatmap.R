@@ -41,7 +41,7 @@ rna_obj <- longitudinal_cluster(
   k = 10, method = "kmeans", stability = TRUE
 )
 
-dual_omics_heatmap(
+dual_heatmap(
   primary        = rna_obj,
   secondary      = atac,
   primary_name   = "RNA",
@@ -57,7 +57,7 @@ dual_omics_heatmap(
 
 ## ---- Option B: pass raw matrices and let the function cluster the primary ----
 ## (clustering args are forwarded to longitudinal_cluster via ...)
-# dual_omics_heatmap(
+# dual_heatmap(
 #   primary = rna, secondary = atac,
 #   primary_name = "RNA", secondary_name = "CutRun",
 #   meta = meta, sample_col = "SampleID", time_col = "TimeHr",

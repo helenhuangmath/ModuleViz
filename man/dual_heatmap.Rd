@@ -1,20 +1,21 @@
-\name{dual_omics_heatmap}
-\alias{dual_omics_heatmap}
+\name{dual_heatmap}
+\alias{dual_heatmap}
 \title{Draw paired omics heatmaps aligned by gene}
 \description{
-Place a primary clustered omics layer next to a secondary layer collapsed and
+The two-layer case of \code{multi_heatmap()}: place a primary clustered
+omics layer next to a secondary layer collapsed and
 aligned by gene, so paired trajectories can be compared in one figure.
 }
 \usage{
-dual_omics_heatmap(primary, secondary, primary_name = "RNA",
+dual_heatmap(primary, secondary, primary_name = "RNA",
   secondary_name = "ATAC", gene_of_primary = function(id) id,
   gene_of_secondary = function(id) sub("^.*_", "", id),
   aggregate = c("mean", "top"), label_features = NULL, col_fun = NULL,
   zscore_palette = c("rdbu", "viridis"), zscore_limits = c(-2, 2),
-  cluster_palette = "paired", label_fontsize = 10,
-  row_title_fontsize = 10, column_name_fontsize = 9,
-  legend_fontsize = 10, title_fontsize = 13, show_column_names = TRUE,
-  file = NULL, width = 12, height = 13, ...)
+  cluster_palette = "paired", label_fontsize = 15,
+  row_title_fontsize = 16, column_name_fontsize = 13,
+  legend_fontsize = 14, title_fontsize = 17, show_column_names = TRUE,
+  file = NULL, width = 10.5, height = 13, ...)
 }
 \arguments{
 \item{primary, secondary}{\code{longi} objects or raw matrices.}

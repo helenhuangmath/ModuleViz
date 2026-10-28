@@ -14,7 +14,8 @@ abstract: |
   This tutorial introduces the main ModuleViz workflow with the bundled
   heatmap_example dataset. It covers module-number diagnostics, longitudinal
   clustering, heatmap rendering, module trajectory plots, paired omics
-  visualization, pseudobulk summaries, and exportable result tables.
+  and multi-omics visualization, pseudobulk summaries, and exportable result
+  tables.
 vignette: >
   %\VignetteIndexEntry{ModuleViz: Longitudinal Heatmap Tutorial}
   %\VignetteEngine{knitr::rmarkdown}
@@ -130,6 +131,8 @@ pattern_lineplot(obj, palette = "nature", base_size = 12)
 
 # Draw Side-By-Side RNA And ATAC Patterns
 
+`dual_heatmap()` is the two-layer case of `multi_heatmap()` (next section).
+
 The primary matrix drives clustering and row order. The secondary matrix is
 aligned by gene and displayed next to it. This example simulates two ATAC peaks
 per gene using the bundled expression data so the code is fully runnable.
@@ -146,7 +149,7 @@ rownames(atac) <- paste0(
 )
 atac <- atac + matrix(rnorm(length(atac), sd = 0.35), nrow = nrow(atac))
 
-dual_omics_heatmap(
+dual_heatmap(
   primary = obj,
   secondary = atac,
   primary_name = "RNA",
@@ -155,8 +158,63 @@ dual_omics_heatmap(
   gene_of_secondary = function(id) sub("^.*_", "", id),
   aggregate = "mean",
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
-  label_fontsize = 11,
   cluster_palette = "spectral"
+)
+```
+
+# Draw Several Data Types Together
+
+`multi_heatmap()` takes a named list of any number of layers (here RNA, ATAC,
+H3K27ac, and H3K27me3) and draws one panel per layer. Every panel shares the RNA
+module split and row order, and one z-score legend covers all of them. Each
+layer is z-scored within itself and collapsed to one row per gene, so peaks and
+genes line up row for row.
+
+The two histone layers are simulated: an activating mark that follows
+expression and a repressive mark that mirrors it.
+
+```{r multi-heatmap, fig.width=15, fig.height=9}
+as_regions <- function(m, sign = 1, sd = 0.5) {
+  out <- sign * m + matrix(rnorm(length(m), sd = sd), nrow = nrow(m))
+  rownames(out) <- paste0("region", seq_len(nrow(m)), "_", rownames(m))
+  out
+}
+layers <- list(
+  RNA      = obj,
+  ATAC     = atac,
+  H3K27ac  = as_regions(mat),
+  H3K27me3 = as_regions(mat, sign = -1)
+)
+
+multi <- multi_heatmap(
+  layers,
+  meta = meta, sample_col = "SampleID", time_col = "TimeHr",
+  group_col = "Condition",
+  label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
+  cluster_palette = "spectral",
+  show_column_names = FALSE
+)
+multi
+```
+
+`multi_lineplot()` draws each module's mean trajectory in every layer, which
+shows at a glance which marks follow expression and which oppose it:
+
+```{r multi-lineplot, fig.width=8, fig.height=8}
+multi_lineplot(multi)
+```
+
+To cluster on all layers together instead of on RNA alone, use
+`cluster_by = "joint"`. `gene_set = "reference"` keeps every RNA gene and draws
+layers without that gene in grey.
+
+```{r multi-joint, fig.width=15, fig.height=9}
+multi_heatmap(
+  layers,
+  meta = meta, sample_col = "SampleID", time_col = "TimeHr",
+  group_col = "Condition", cluster_by = "joint", k = 4,
+  cluster_palette = "spectral", show_column_names = FALSE,
+  title = "Modules clustered on all four layers"
 )
 ```
 

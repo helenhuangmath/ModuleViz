@@ -404,16 +404,11 @@ longitudinal_heatmap(
   cluster_palette    = "paired",
   annotation_palette = "set2",
   # the GEO sample IDs are long and the State bar already says what each
-  # column is, so suppress them and scale the remaining text up for print
-  show_column_names        = FALSE,
-  label_fontsize           = 13,
-  row_title_fontsize       = 13,
-  annotation_name_fontsize = 13,
-  legend_fontsize          = 12,
-  title_fontsize           = 16,
-  title  = "CD8 T cell differentiation: DEG modules (GSE285248)",
+  # column is, so suppress them
+  show_column_names  = FALSE,
+  title  = "CD8 T cell DEG modules (GSE285248)",
   file   = "cd8_module_heatmap.png",
-  width  = 10,
+  width  = 8,
   height = 12
 )
 ```
@@ -422,7 +417,7 @@ longitudinal_heatmap(
 
 Rows are split by module and ordered early-peaking to late-peaking; columns run
 naive, memory, exhausted. The `Stability` bar on the left encodes each module's
-Jaccard score, and row titles carry both module size and stability.
+Jaccard score, and each row title gives the module name and size.
 
 Note the two ways of choosing labels. `rank_table` + `top_n_label` labels the
 top *n* genes per module by a statistic you supply, which is usually what you
@@ -479,10 +474,7 @@ module_correlation_heatmap(
   # be unreadable, so only the 30 strongest-signal genes get labelled
   label_top_n     = 30,
   corr_palette    = "rdbu",   # correlations diverge around 0
-  label_fontsize  = 9,
-  legend_fontsize = 12,
-  title_fontsize  = 11,
-  file = "cd8_correlation.png", width = 7.5, height = 7
+  file = "cd8_correlation.png", width = 8.5, height = 7.5
 )
 ```
 
@@ -537,7 +529,7 @@ map_peaks_to_nearest_gene <- function(peaks, genes, max_dist = 25000) {
 }
 ```
 
-`dual_omics_heatmap()` recovers the gene from a secondary row ID using
+`dual_heatmap()` recovers the gene from a secondary row ID using
 `gene_of_secondary`, whose default is `sub("^.*_", "", id)` — everything after
 the last underscore. So we name the rows `peak1243_Pdcd1` and the default just
 works.
@@ -572,7 +564,7 @@ ac_obj <- longitudinal_cluster(ac$mat, ac$meta,
                                time_col   = "StateOrder",
                                k = 4, stability = FALSE)
 
-d_ac <- dual_omics_heatmap(
+d_ac <- dual_heatmap(
   primary        = obj,        # RNA drives the module structure and row order
   secondary      = ac_obj,     # chromatin is shown in that same order
   primary_name   = "RNA",
@@ -582,11 +574,7 @@ d_ac <- dual_omics_heatmap(
   zscore_palette  = "viridis",
   cluster_palette = "paired",
   show_column_names  = FALSE,
-  label_fontsize     = 13,
-  row_title_fontsize = 13,
-  legend_fontsize    = 12,
-  title_fontsize     = 16,
-  file = "cd8_rna_vs_h3k27ac.png", width = 15, height = 12
+  file = "cd8_rna_vs_h3k27ac.png", height = 12
 )
 ```
 
@@ -602,11 +590,11 @@ The repressive mark behaves differently, which is the point of the comparison:
 ```{r repressive}
 me3 <- load_cutrun(paths$h3k27me3, "H3K27me3")
 
-d_me3 <- dual_omics_heatmap(
+d_me3 <- dual_heatmap(
   primary = obj, secondary = me3$mat,     # a raw matrix also works
   primary_name = "RNA", secondary_name = "H3K27me3",
   label_features = TEX_MARKERS,
-  file = "cd8_rna_vs_h3k27me3.png", width = 15, height = 12
+  file = "cd8_rna_vs_h3k27me3.png", height = 12
 )
 ```
 
@@ -637,6 +625,60 @@ The activating mark is gained at exhaustion-induced genes; the repressive mark
 is flat to slightly lost. Chromatin accessibility tracks the expression
 modules, which is exactly the claim the original study makes.
 
+# All Layers In One Figure
+
+`dual_heatmap()` pairs RNA with one mark at a time. `multi_heatmap()` takes a
+named list of any number of layers (RNA, ATAC, H3K27ac, H3K27me3, ...) and
+draws them side by side. Every panel shares the RNA module split and row order,
+and all panels use one z-score legend. Raw matrices get their sample metadata
+from `meta`, here one table per layer. By default only genes present in every
+layer are kept, so each row is one gene across all three assays.
+
+```{r multi-heatmap}
+mh <- multi_heatmap(
+  list(RNA = obj, H3K27ac = ac$mat, H3K27me3 = me3$mat),
+  meta            = list(H3K27ac = ac$meta, H3K27me3 = me3$meta),
+  sample_col      = "SampleID",
+  time_col        = "StateOrder",
+  annotation_cols = "State",
+  label_features  = c(TEX_MARKERS, TN_MARKERS),
+  zscore_palette  = "viridis",
+  show_column_names = FALSE,
+  file = "cd8_multi_heatmap.png", width = 13, height = 12
+)
+mh
+```
+
+```
+#> <multi_longi>  1414 genes x 3 layers (RNA + H3K27ac + H3K27me3),  6 modules
+#>   clustered by: RNA
+#>   stability (mean Jaccard): 0.90 - 0.97
+```
+
+![RNA, H3K27ac, and H3K27me3 linked by gene](figures/cd8_06_multi_heatmap.png)
+
+`multi_lineplot()` puts every layer of a module on the same axes. Points are
+the mean over the module's genes and error bars the spread between replicates:
+
+```{r multi-lineplot}
+multi_lineplot(
+  mh,
+  xlab        = "Differentiation state",
+  time_labels = c("1" = "TN", "2" = "TMEM", "3" = "TEX"),
+  x_angle     = 0, base_size = 14,
+  file = "cd8_multi_patterns.png", width = 10, height = 7
+)
+```
+
+![Module trajectories across RNA and chromatin](figures/cd8_07_multi_patterns.png)
+
+H3K27ac rises and falls with expression in every module. H3K27me3 does not: in
+the naive-high modules (Cluster1, Cluster2) it is gained as expression falls,
+and in the memory- and exhaustion-induced modules (Cluster4 to Cluster6) it
+stays close to zero. To cluster on all layers at once instead of on RNA
+alone, pass `cluster_by = "joint"`; a module then groups genes whose expression
+and chromatin trajectories agree.
+
 # Reproducing Everything
 
 The complete script, with 114 assertions covering data integrity, clustering
@@ -662,8 +704,9 @@ is generic. To reuse the workflow you need:
    as here).
 3. Optionally, a `group_col` for a second factor such as genotype or treatment
    arm, which splits the heatmap columns and facets the line plot.
-4. Optionally, a secondary matrix whose rownames end in `_<GeneSymbol>`, or a
-   custom `gene_of_secondary` function.
+4. Optionally, further layers (ATAC, CUT&RUN, ...) whose rownames end in
+   `_<GeneSymbol>`, or a custom `gene_of` function, for `multi_heatmap()` or
+   `dual_heatmap()`.
 
 # Citation
 

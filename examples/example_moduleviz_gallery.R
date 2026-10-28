@@ -4,7 +4,9 @@
 ## Generates:
 ##   1. longitudinal clustered heatmap
 ##   2. module line/pattern plots
-##   3. side-by-side RNA + ATAC-style heatmap
+##   3. side-by-side RNA + ATAC-style heatmap (dual_heatmap)
+##   4. RNA + ATAC + H3K27ac + H3K27me3 heatmap (multi_heatmap)
+##   5. module trajectories in every layer (multi_lineplot)
 ## =============================================================================
 
 library(ModuleViz)
@@ -46,7 +48,6 @@ longitudinal_heatmap(
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   top_n_label = 2,
   cluster_palette = "spectral",
-  label_fontsize = 11,
   title = "ModuleViz longitudinal heatmap",
   file = file.path(out_dir, "01_longitudinal_clustered_heatmap.pdf"),
   width = 8,
@@ -59,7 +60,6 @@ longitudinal_heatmap(
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   top_n_label = 2,
   cluster_palette = "spectral",
-  label_fontsize = 11,
   title = "ModuleViz longitudinal heatmap",
   file = file.path(preview_dir, "01_longitudinal_clustered_heatmap.png"),
   width = 8,
@@ -103,7 +103,7 @@ rownames(atac) <- paste0(
 )
 atac <- atac + matrix(rnorm(length(atac), sd = 0.35), nrow = nrow(atac))
 
-dual_omics_heatmap(
+dual_heatmap(
   primary = obj,
   secondary = atac,
   primary_name = "RNA",
@@ -113,12 +113,11 @@ dual_omics_heatmap(
   aggregate = "mean",
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   cluster_palette = "spectral",
-  label_fontsize = 11,
   file = file.path(out_dir, "03_rna_atac_side_by_side_heatmap.pdf"),
   width = 11,
   height = 9
 )
-dual_omics_heatmap(
+dual_heatmap(
   primary = obj,
   secondary = atac,
   primary_name = "RNA",
@@ -128,11 +127,46 @@ dual_omics_heatmap(
   aggregate = "mean",
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   cluster_palette = "spectral",
-  label_fontsize = 11,
   file = file.path(preview_dir, "03_rna_atac_side_by_side_heatmap.png"),
   width = 11,
   height = 9
 )
+
+## ---- 4. several layers side by side: RNA + ATAC + H3K27ac + H3K27me3 ------
+## Two simulated histone layers: an activating mark (H3K27ac) that follows
+## expression and a repressive mark (H3K27me3) that mirrors it.  Each layer is
+## z-scored within itself and collapsed to one row per gene, then drawn as its
+## own panel in the RNA module order.
+as_regions <- function(m, sign = 1, sd = 0.5) {
+  out <- sign * m + matrix(rnorm(length(m), sd = sd), nrow = nrow(m))
+  rownames(out) <- paste0("region", seq_len(nrow(m)), "_", rownames(m))
+  out
+}
+layers <- list(RNA      = obj,
+               ATAC     = atac,
+               H3K27ac  = as_regions(mat),
+               H3K27me3 = as_regions(mat, sign = -1))
+
+multi <- multi_cluster(layers, meta = meta, sample_col = "SampleID",
+                       time_col = "TimeHr", group_col = "Condition")
+for (f in c(file.path(out_dir, "06_multi_heatmap.pdf"),
+            file.path(preview_dir, "06_multi_heatmap.png"))) {
+  multi_heatmap(
+    multi,
+    annotation_colors = list(Condition = COND_COLS),
+    label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
+    cluster_palette = "spectral",
+    show_column_names = FALSE,
+    file = f,
+    height = 9
+  )
+}
+
+## ---- 5. module trajectories in every layer ----------------------------------
+for (f in c(file.path(out_dir, "07_multi_lineplot.pdf"),
+            file.path(preview_dir, "07_multi_lineplot.png"))) {
+  multi_lineplot(multi, base_size = 13, file = f, width = 8, height = 8)
+}
 
 message("Example plots written to: ", normalizePath(out_dir))
 message("Preview plots written to: ", normalizePath(preview_dir))

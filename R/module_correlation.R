@@ -42,6 +42,9 @@
 #'   multi-page PDF; any other extension writes one file per module, with the
 #'   module name inserted before the extension.
 #' @param width,height figure size in inches.
+#' @param square if TRUE (default), draw the heatmap body as a square, sized to
+#'   the largest square that fits the figure after the dendrogram, labels,
+#'   title, and legend.
 #' @param title optional title prefix; the module name and its mean correlation
 #'   are appended.
 #' @param seed RNG seed used when `select = "random"`.
@@ -59,10 +62,11 @@ module_correlation_heatmap <- function(obj,
                                        col_fun = NULL,
                                        show_gene_names = NULL,
                                        label_top_n = 30,
-                                       label_fontsize = 8,
-                                       legend_fontsize = 10,
-                                       title_fontsize = 11,
-                                       file = NULL, width = 7, height = 6.5,
+                                       label_fontsize = 12,
+                                       legend_fontsize = 14,
+                                       title_fontsize = 16,
+                                       file = NULL, width = 6.5, height = 6.5,
+                                       square = TRUE,
                                        title = NULL, seed = 1) {
   stopifnot(inherits(obj, "longi"))
   method <- match.arg(method)
@@ -87,6 +91,11 @@ module_correlation_heatmap <- function(obj,
     grDevices::pdf(file, width = width, height = height)
     on.exit(grDevices::dev.off(), add = TRUE)
   }
+
+  ## Figure size the square body has to fit into: the file size, or the open
+  ## device when drawing to screen / knitr.
+  fig_size <- if (is.null(file) && grDevices::dev.cur() > 1)
+    grDevices::dev.size("in") else c(width, height)
 
   cluster_cols <- .moduleviz_cluster_cols(levels(cl), "paired")
   out <- list()
@@ -147,8 +156,31 @@ module_correlation_heatmap <- function(obj,
                         if (n_shown < n_total) sprintf(", showing %d", n_shown) else "",
                         mean_cor)
 
+    body <- NULL
+    if (square) {
+      ## measuring text needs a device; borrow a null one rather than let
+      ## grid open Rplots.pdf in the working directory
+      tmp_dev <- grDevices::dev.cur() == 1
+      if (tmp_dev) grDevices::pdf(NULL)
+      in_of <- function(u) grid::convertUnit(u, "inches", valueOnly = TRUE)
+      mm    <- function(x) x / 25.4
+      pt    <- function(x) x / 72
+      name_w <- if (show_names) {
+        in_of(max_text_width(rownames(cm), gp = gpar(fontsize = label_fontsize)))
+      } else if (length(marked)) {
+        in_of(max_text_width(marked, gp = gpar(fontsize = label_fontsize,
+                                               fontface = "italic"))) + mm(8)
+      } else 0
+      horiz <- (if (cluster_genes) mm(10) else 0) + mm(3) + mm(4) + name_w + mm(6)
+      vert  <- pt(title_fontsize * 1.8) +
+               (if (show_names) name_w + mm(2) else 0) +
+               pt(legend_fontsize * 3.6) + mm(4) + mm(8)
+      body  <- unit(max(1, min(fig_size[1] - horiz, fig_size[2] - vert)), "in")
+      if (tmp_dev) grDevices::dev.off()
+    }
+
     ht <- Heatmap(
-      cm,
+      cm, width = body, height = body,
       name = sprintf("%s r", method),
       col = col_fun,
       column_title = ht_title,
@@ -157,6 +189,10 @@ module_correlation_heatmap <- function(obj,
       show_row_names = show_names, show_column_names = show_names,
       row_names_gp = gpar(fontsize = label_fontsize),
       column_names_gp = gpar(fontsize = label_fontsize),
+      row_names_max_width = max_text_width(
+        rownames(cm), gp = gpar(fontsize = label_fontsize)),
+      column_names_max_height = max_text_width(
+        rownames(cm), gp = gpar(fontsize = label_fontsize)),
       show_row_dend = cluster_genes, show_column_dend = FALSE,
       left_annotation = rowAnnotation(
         Module = rep(lev, n_shown),

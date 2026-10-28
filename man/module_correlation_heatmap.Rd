@@ -15,9 +15,9 @@ module_correlation_heatmap(obj, clusters = NULL,
   method = c("pearson", "spearman"), max_genes = Inf,
   select = c("top", "random"), cluster_genes = TRUE,
   corr_palette = "rdbu", corr_limits = c(-1, 1), col_fun = NULL,
-  show_gene_names = NULL, label_top_n = 30, label_fontsize = 8,
-  legend_fontsize = 10, title_fontsize = 11, file = NULL,
-  width = 7, height = 6.5, title = NULL, seed = 1)
+  show_gene_names = NULL, label_top_n = 30, label_fontsize = 12,
+  legend_fontsize = 14, title_fontsize = 16, file = NULL,
+  width = 6.5, height = 6.5, square = TRUE, title = NULL, seed = 1)
 
 module_correlation_summary(obj, method = c("pearson", "spearman"),
   max_genes = Inf, select = c("top", "random"), seed = 1)
@@ -49,6 +49,8 @@ moving most across the series. Set \code{0} to disable marking.}
 one multi-page PDF; any other extension writes one file per module with the
 module name inserted before the extension.}
 \item{width, height}{Figure size in inches.}
+\item{square}{Draw the heatmap body as a square, sized to the largest square
+that fits the figure after the dendrogram, labels, title, and legend.}
 \item{title}{Optional title prefix; the module name, size, and mean correlation
 are appended.}
 \item{seed}{RNG seed used when \code{select = "random"}.}
