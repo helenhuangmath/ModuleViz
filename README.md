@@ -6,11 +6,6 @@
 
 Source: `vignettes/ModuleViz.Rmd`
 
-## Manuscript
-
-The manuscript draft for this package is available at
-[docs/paper/ModuleViz_manuscript.md](docs/paper/ModuleViz_manuscript.md).
-
 ## Introduction
 
 `ModuleViz` is an R package for clustering and visualizing longitudinal
@@ -26,7 +21,7 @@ stage, exhaustion state, or another numeric ordering supplied by the user.
 `ModuleViz` takes a numeric matrix and sample metadata table, z-scores features
 by row, clusters features into temporal modules, orders modules from
 early-peaking to late-peaking patterns, and renders the result as heatmaps,
-module trajectory plots, paired-omics heatmaps, and module coherence
+module trajectory plots, multi-omics heatmaps, and module coherence
 diagnostics. Heatmaps are drawn with
 `ComplexHeatmap`, so the
 package fits naturally into Bioconductor workflows.
@@ -36,7 +31,11 @@ The main functions are:
 - `longitudinal_cluster()`: cluster features into ordered temporal modules.
 - `longitudinal_heatmap()`: draw annotated module heatmaps.
 - `pattern_lineplot()`: plot mean module trajectories.
-- `dual_omics_heatmap()`: align a second omics layer, such as ATAC or CUT&RUN,
+- `multi_cluster()` / `multi_heatmap()`: align any number of omics
+  layers by gene, such as RNA + ATAC + H3K27ac + H3K27me3, and cluster them
+  from one reference layer or jointly across all layers.
+- `multi_lineplot()`: plot each module's trajectory in every layer.
+- `dual_heatmap()`: the two-layer shortcut that aligns ATAC or CUT&RUN
   to RNA-defined modules.
 - `module_correlation_heatmap()`: inspect gene-gene correlation within modules.
 - `module_correlation_summary()`: summarize within-module coherence.
@@ -432,11 +431,11 @@ module_correlation_heatmap(
 A `.pdf` file collects multiple modules as pages. Other extensions write one
 file per module.
 
-### `dual_omics_heatmap()`
+### `dual_heatmap()`
 
-`dual_omics_heatmap()` aligns a secondary assay to the primary module order by
-gene. The primary layer defines the modules; the secondary layer is displayed
-in the same gene order.
+`dual_heatmap()` is the two-layer case of `multi_heatmap()`. It aligns a
+secondary assay to the primary module order by gene: the primary layer defines
+the modules, and the secondary layer is displayed in the same gene order.
 
 ```r
 genes <- rownames(mat)
@@ -448,7 +447,7 @@ rownames(atac) <- paste0(
     rep(genes, each = 2)
 )
 
-dual_omics_heatmap(
+dual_heatmap(
     primary = obj,
     secondary = atac,
     primary_name = "RNA",
@@ -462,6 +461,45 @@ dual_omics_heatmap(
 
 Use `aggregate = "top"` when the strongest secondary feature per gene is more
 appropriate than the mean.
+
+### `multi_cluster()`, `multi_heatmap()`, `multi_lineplot()`
+
+These functions extend the paired view to any number of layers, such as
+RNA + ATAC + H3K27ac + H3K27me3. Each layer is z-scored within itself and
+collapsed to one row per gene, then shown as its own panel. All panels share
+the module split, the row order, and one z-score legend. `multi_cluster()`
+builds the aligned object, `multi_heatmap()` draws it (and accepts the list of
+layers directly), and `multi_lineplot()` plots each module's trajectory in every
+layer.
+
+```r
+layers <- list(RNA = obj, ATAC = atac, H3K27ac = h3k27ac, H3K27me3 = h3k27me3)
+
+res <- multi_heatmap(
+    layers,
+    meta = meta, sample_col = "SampleID", time_col = "TimeHr",
+    group_col = "Condition",
+    cluster_by = "RNA",          # or "joint" to cluster all layers together
+    label_features = c("Gene001", "Gene031"),
+    file = "multi_heatmap.pdf"
+)
+multi_lineplot(res, file = "multi_lineplot.pdf")
+```
+
+Each layer can be a `longi` object or a raw matrix. Raw matrices take their
+sample metadata from `meta`, either one shared table or a named list with one
+table per layer. See [Multi-Omics Analysis](#multi-omics-analysis) for the
+resulting figures.
+
+`cluster_by` names the layer that defines the modules. With
+`cluster_by = "joint"`, the per-gene profiles of every layer are concatenated
+and clustered together, so a module groups genes whose expression and chromatin
+trajectories agree. By default the first layer's row IDs are used as gene
+symbols and the other layers take the text after the last underscore
+(`peak12_Pdcd1` maps to `Pdcd1`). Use `gene_of` to override this.
+`gene_set = "intersect"` keeps genes present in every layer, and
+`gene_set = "reference"` keeps all genes of the reference layer, drawing
+missing layers in grey.
 
 ### `write_memberships()`
 
@@ -516,9 +554,11 @@ example <- load_real_timecourse_example(
 The returned object contains `mat`, `meta`, and the column names to pass to
 `longitudinal_cluster()`.
 
-## Paired Omics Analysis
+## Multi-Omics Analysis
 
-`dual_omics_heatmap()` compares two assays in a shared row order. The primary
+### Two layers: `dual_heatmap()`
+
+`dual_heatmap()` compares two assays in a shared row order. The primary
 layer, often RNA, defines the module structure. The secondary layer, such as
 ATAC or CUT&RUN, is aligned by gene and shown beside the primary layer.
 
@@ -532,7 +572,7 @@ rna_obj <- longitudinal_cluster(
     k = 10
 )
 
-dual_omics_heatmap(
+dual_heatmap(
     primary = rna_obj,
     secondary = atac,
     primary_name = "RNA",
@@ -548,6 +588,60 @@ dual_omics_heatmap(
 
 When multiple secondary features map to one gene, `aggregate = "mean"` averages
 them and `aggregate = "top"` keeps the strongest feature.
+
+### Any number of layers: `multi_heatmap()` and `multi_lineplot()`
+
+For more than two assays, pass a named list of layers to `multi_heatmap()`.
+The example below adds two simulated histone layers to the RNA and ATAC data
+above: an activating mark (H3K27ac) that follows expression and a repressive
+mark (H3K27me3) that mirrors it. The figures are produced by
+`examples/example_moduleviz_gallery.R`.
+
+```r
+as_regions <- function(m, sign = 1, sd = 0.5) {
+    out <- sign * m + matrix(rnorm(length(m), sd = sd), nrow = nrow(m))
+    rownames(out) <- paste0("region", seq_len(nrow(m)), "_", rownames(m))
+    out
+}
+layers <- list(
+    RNA      = obj,
+    ATAC     = atac,
+    H3K27ac  = as_regions(mat),
+    H3K27me3 = as_regions(mat, sign = -1)
+)
+
+multi <- multi_cluster(
+    layers,
+    meta = meta, sample_col = "SampleID", time_col = "TimeHr",
+    group_col = "Condition"
+)
+multi_heatmap(
+    multi,
+    label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
+    show_column_names = FALSE,
+    file = "multi_heatmap.pdf"
+)
+multi_lineplot(multi, file = "multi_lineplot.pdf")
+```
+
+![RNA, ATAC, H3K27ac, and H3K27me3 heatmap](inst/extdata/results/06_multi_heatmap.png)
+
+Each panel is one data type; every row is one gene across all four layers, in
+the RNA module order. One z-score legend covers every panel, and each panel
+keeps its own sample annotation bars.
+
+![Module trajectories in every layer](inst/extdata/results/07_multi_lineplot.png)
+
+`multi_lineplot()` draws one line per layer in each module. Here ATAC and
+H3K27ac follow expression and H3K27me3 runs opposite to it, as simulated.
+
+Useful options:
+
+- `cluster_by = "joint"` clusters the concatenated profiles of all layers, so a
+  module groups genes whose expression and chromatin trajectories agree.
+- `gene_set = "reference"` keeps every gene of the reference layer and draws
+  layers without that gene in grey.
+- `layer_gap` sets the space between panels (10 mm by default).
 
 ## Module Coherence
 
@@ -575,14 +669,36 @@ indicate that the module should be split by increasing `k`.
 
 The vignette `vignette("cd8-exhaustion-published-data")` demonstrates a
 published-data workflow using RNA-seq and CUT&RUN data from memory and
-exhausted CD8 T cells. RNA-seq defines the modules and H3K27ac signal is
-aligned to those modules by gene.
+exhausted CD8 T cells. RNA-seq defines the modules, and H3K27ac and H3K27me3
+signal is aligned to those modules by gene.
 
 ![CD8 module heatmap](vignettes/figures/cd8_01_module_heatmap.png)
 
 ![CD8 module patterns](vignettes/figures/cd8_03_module_patterns.png)
 
 ![CD8 RNA versus H3K27ac heatmap](vignettes/figures/cd8_04_rna_vs_h3k27ac.png)
+
+All three layers in one figure with `multi_heatmap()`:
+
+```r
+mh <- multi_heatmap(
+    list(RNA = obj, H3K27ac = ac$mat, H3K27me3 = me3$mat),
+    meta = list(H3K27ac = ac$meta, H3K27me3 = me3$meta),
+    sample_col = "SampleID", time_col = "StateOrder",
+    annotation_cols = "State",
+    zscore_palette = "viridis",
+    show_column_names = FALSE
+)
+multi_lineplot(mh, time_labels = c("1" = "TN", "2" = "TMEM", "3" = "TEX"))
+```
+
+![CD8 RNA, H3K27ac, and H3K27me3 heatmap](vignettes/figures/cd8_06_multi_heatmap.png)
+
+![CD8 module trajectories across RNA and chromatin](vignettes/figures/cd8_07_multi_patterns.png)
+
+H3K27ac rises and falls with expression in every module. H3K27me3 is gained as
+expression falls in the naive-high modules and stays close to zero in the
+memory- and exhaustion-induced modules.
 
 ## Single-Cell Pseudobulk Example
 

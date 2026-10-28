@@ -291,6 +291,19 @@ tn_tab  <- data.table(Gene = TN_MARKERS,  Module = module_of[TN_MARKERS],
                       PeakState = peak_of_gene(TN_MARKERS))
 print(tex_tab); print(tn_tab)
 
+## A wider panel of well-known genes to call out on the figures.  The top-N
+## labels are picked purely by statistic, so on their own they rarely name the
+## genes a reader looks for first.  Only genes that are DEGs can be labelled.
+LABEL_GENES <- intersect(
+  c(TN_MARKERS, "Satb1", "Bach2", "Klf2", "S1pr1", "Foxp1",            # naive
+    "Il7r", "Klrg1", "Cx3cr1", "Il18r1", "Cxcr3", "Zeb2", "S1pr5",     # memory
+    TEX_MARKERS, "Tigit", "Ctla4", "Cd244a", "Eomes", "Nr4a2", "Cd38",
+    "Cxcr6", "Gzmk", "Ikzf2"),                                          # exhausted
+  rownames(obj$z))
+cat(sprintf("  %d genes labelled on the figures: %s\n", length(LABEL_GENES),
+            paste(sprintf("%s(%s)", LABEL_GENES, peak_of_gene(LABEL_GENES)),
+                  collapse = ", ")))
+
 chk("every exhaustion marker lands in a TEX-peaking module",
     all(tex_tab$PeakState == "TEX"))
 chk("every naive marker lands in a TN-peaking module",
@@ -318,13 +331,14 @@ CORPAL <- "rdbu"      # correlations diverge around 0, so use a diverging map
 hm_main <- file.path(out_dir, "03_module_heatmap.png")
 ht <- longitudinal_heatmap(
   obj, annotation_cols = c("State", "Day"),
+  label_features = LABEL_GENES,
   rank_table = rank_tab, id_field = "ID", value_field = "value", top_n_label = 3,
   zscore_palette = ZPAL, cluster_palette = "paired", annotation_palette = "set2",
   show_column_names = FALSE,
-  label_fontsize = 13, row_title_fontsize = 13,
-  annotation_name_fontsize = 13, legend_fontsize = 12, title_fontsize = 16,
-  title = "CD8 T cell differentiation: DEG modules (GSE285248)",
-  file = hm_main, width = 10, height = 12)
+  label_fontsize = 14, row_title_fontsize = 16,
+  annotation_name_fontsize = 16, legend_fontsize = 15, title_fontsize = 19,
+  title = "CD8 T cell differentiation\nDEG modules (GSE285248)",
+  file = hm_main, width = 7.5, height = 14)
 chk("main heatmap written", file.exists(hm_main) && file.size(hm_main) > 50000)
 chk("returns a ComplexHeatmap object", inherits(ht, "Heatmap"))
 
@@ -406,8 +420,9 @@ chk("modules are internally coherent (mean r > 0.3 everywhere)",
 
 cor_pdf <- file.path(out_dir, "06_module_correlation_all.pdf")
 cors <- module_correlation_heatmap(obj, corr_palette = CORPAL, file = cor_pdf,
-                                   label_top_n = 30, label_fontsize = 8,
-                                   legend_fontsize = 12, title_fontsize = 11,
+                                   label_top_n = 30, label_fontsize = 11,
+                                   legend_fontsize = 14, title_fontsize = 14,
+                                   width = 8.5, height = 7.5,
                                    title = "CD8 DEG modules")
 chk("multi-page correlation PDF written",
     file.exists(cor_pdf) && file.size(cor_pdf) > 20000)
@@ -503,22 +518,23 @@ chk("module sizes match figure 02 / 03 exactly",
 ah <- file.path(out_dir, "07_collapsed_heatmap.png")
 longitudinal_heatmap(obj_c, annotation_cols = "State", zscore_palette = ZPAL,
                      cluster_palette = "paired", annotation_palette = "set2",
-                     top_n_label = 2, label_fontsize = 13,
-                     row_title_fontsize = 13, annotation_name_fontsize = 13,
-                     legend_fontsize = 12, column_name_fontsize = 13,
-                     file = ah, width = 7, height = 11)
+                     label_features = LABEL_GENES,
+                     top_n_label = 2, label_fontsize = 14,
+                     row_title_fontsize = 16, annotation_name_fontsize = 16,
+                     legend_fontsize = 15, column_name_fontsize = 16,
+                     file = ah, width = 6, height = 13)
 chk("collapsed heatmap written", file.exists(ah) && file.size(ah) > 40000)
 ## (no line plot here: it would be 04_module_patterns.pdf again)
 
 ## ---------------------------------------------------------------------------
 ## 12. CUT&RUN: map peaks to genes, then draw the paired-omics figure
 ## ---------------------------------------------------------------------------
-section("12. dual_omics_heatmap: RNA + H3K27ac CUT&RUN")
+section("12. dual_heatmap: RNA + H3K27ac CUT&RUN")
 
 ## The CUT&RUN tables carry peak coordinates but no gene symbol, so peaks are
 ## assigned to the nearest gene TSS (taken from the RNA annotation) within a
 ## window.  Row IDs are then built as "<peak>_<Symbol>", the PeakID_SYMBOL
-## convention that dual_omics_heatmap()'s default gene_of_secondary expects.
+## convention that dual_heatmap()'s default gene_of_secondary expects.
 gene_tss <- unique(rna_uniq[, .(Chr, TSS = ifelse(Strand == "+", Start, End),
                                 Gene = Gene.Name)])
 
@@ -566,13 +582,13 @@ chk("exhaustion loci have H3K27ac peaks",
 ac_obj <- longitudinal_cluster(ac$mat, ac$meta, sample_col = "SampleID",
                                time_col = "StateOrder", k = 4, stability = FALSE)
 dual_ac <- file.path(out_dir, "08_RNA_vs_H3K27ac.png")
-d_ac <- dual_omics_heatmap(
+d_ac <- dual_heatmap(
   obj, ac_obj, primary_name = "RNA", secondary_name = "H3K27ac",
-  aggregate = "mean", label_features = c(TEX_MARKERS, TN_MARKERS),
+  aggregate = "mean", label_features = LABEL_GENES,
   zscore_palette = ZPAL, cluster_palette = "paired",
-  show_column_names = FALSE, label_fontsize = 13, row_title_fontsize = 13,
-  legend_fontsize = 12, title_fontsize = 16,
-  file = dual_ac, width = 15, height = 12)
+  show_column_names = FALSE, label_fontsize = 15, row_title_fontsize = 16,
+  legend_fontsize = 15, title_fontsize = 19,
+  file = dual_ac, width = 10, height = 12)
 chk("RNA + H3K27ac figure written",
     file.exists(dual_ac) && file.size(dual_ac) > 50000)
 chk("secondary layer aligned row-for-row with the primary",
@@ -582,7 +598,7 @@ chk("secondary layer aligned row-for-row with the primary",
 ## "mean" panel only in how multi-peak genes are collapsed.
 chk("aggregate='top' also runs",
     { f <- tempfile(fileext = ".png")
-      r <- dual_omics_heatmap(obj, ac_obj, primary_name = "RNA",
+      r <- dual_heatmap(obj, ac_obj, primary_name = "RNA",
                               secondary_name = "H3K27ac", aggregate = "top",
                               zscore_palette = ZPAL, show_column_names = FALSE,
                               file = f, width = 15, height = 12)
@@ -597,12 +613,12 @@ me3 <- load_cutrun(paths$h3k27me3, "H3K27me3")
 cat(sprintf("  H3K27me3: %d peaks, %d distinct genes\n",
             nrow(me3$mat), uniqueN(me3$ann$Gene)))
 dual_me3 <- file.path(out_dir, "09_RNA_vs_H3K27me3.png")
-d_me3 <- dual_omics_heatmap(
+d_me3 <- dual_heatmap(
   obj, me3$mat, primary_name = "RNA", secondary_name = "H3K27me3",
   zscore_palette = ZPAL, cluster_palette = "paired",
-  show_column_names = FALSE, label_fontsize = 13, row_title_fontsize = 13,
-  legend_fontsize = 12, title_fontsize = 16,
-  label_features = TEX_MARKERS, file = dual_me3, width = 15, height = 12)
+  show_column_names = FALSE, label_fontsize = 15, row_title_fontsize = 16,
+  legend_fontsize = 15, title_fontsize = 19,
+  label_features = LABEL_GENES, file = dual_me3, width = 10, height = 12)
 chk("RNA + H3K27me3 figure written (raw-matrix secondary path)",
     file.exists(dual_me3) && file.size(dual_me3) > 50000)
 
@@ -624,9 +640,529 @@ chk("activating mark tracks expression more than the repressive mark",
     ac_delta > me3_delta)
 
 ## ---------------------------------------------------------------------------
-## 14. One-call wrapper
+## 14. All three layers in one figure
 ## ---------------------------------------------------------------------------
-section("14. run_longitudinal wrapper")
+## dual_heatmap() pairs the primary with ONE secondary layer.  The two
+## calls above already aligned each chromatin mark to the RNA rows, so a
+## three-panel figure is just those aligned matrices side by side, restricted to
+## the genes that carry a peak of both marks.  Rows keep the RNA module order.
+section("14. RNA + H3K27ac + H3K27me3 together")
+suppressMessages(library(ComplexHeatmap))
+suppressMessages(library(ggplot2))
+
+STATES <- c("TN", "TMEM", "TEX")
+genes3 <- rownames(obj$z)[rownames(obj$z) %in% rownames(d_ac$z_secondary) &
+                            rownames(obj$z) %in% rownames(d_me3$z_secondary)]
+cl3 <- droplevels(obj$cluster[match(genes3, rownames(obj$z))])
+
+## one layer = the shared genes, with samples ordered TN -> TMEM -> TEX
+as_layer <- function(z, meta_tab) {
+  st <- meta_tab$State[match(colnames(z), meta_tab$SampleID)]
+  o  <- order(st)
+  list(z = z[genes3, o, drop = FALSE], state = st[o])
+}
+layers <- list(RNA      = as_layer(obj$z,             obj$meta),
+               H3K27ac  = as_layer(d_ac$z_secondary,  ac$meta),
+               H3K27me3 = as_layer(d_me3$z_secondary, me3$meta))
+cat(sprintf("  %d genes carry RNA, H3K27ac and H3K27me3 signal\n", length(genes3)))
+
+chk("the three layers are aligned row-for-row",
+    all(vapply(layers, function(L) identical(rownames(L$z), genes3), logical(1))))
+chk("every layer has all 16 samples, ordered along the differentiation axis",
+    all(vapply(layers, function(L)
+      ncol(L$z) == 16 && !is.unsorted(as.integer(L$state)), logical(1))))
+chk("all six modules survive the intersection", nlevels(cl3) == K)
+
+tri_file   <- file.path(out_dir, "10_RNA_H3K27ac_H3K27me3.png")
+state_cols <- setNames(ModuleViz:::.moduleviz_discrete_palette(3, "set2"), STATES)
+tri_col    <- ModuleViz:::.moduleviz_zscore_col_fun(ZPAL)
+tri_leg    <- ModuleViz:::.moduleviz_legend_gp(15)
+tri_marks  <- which(genes3 %in% LABEL_GENES)
+
+tri_panel <- function(nm) {
+  L <- layers[[nm]]
+  first <- nm == names(layers)[1]; last <- nm == names(layers)[length(layers)]
+  Heatmap(
+    L$z, name = nm, col = tri_col,
+    row_split = cl3, cluster_rows = FALSE, cluster_row_slices = FALSE,
+    row_title = sprintf("%s\n(n=%d)", levels(cl3), as.integer(table(cl3))),
+    row_title_rot = 0, row_title_gp = grid::gpar(fontsize = 16),
+    row_gap = grid::unit(1.5, "mm"), show_row_names = FALSE,
+    cluster_columns = FALSE, show_column_names = FALSE,
+    column_title = nm, column_title_gp = grid::gpar(fontsize = 19),
+    top_annotation = HeatmapAnnotation(
+      State = L$state, col = list(State = state_cols),
+      show_annotation_name = last, show_legend = first,
+      annotation_name_gp = grid::gpar(fontsize = 16),
+      annotation_legend_param = tri_leg),
+    left_annotation = if (first) rowAnnotation(
+      Cluster = cl3,
+      col = list(Cluster = ModuleViz:::.moduleviz_cluster_cols(levels(cl3), "paired")),
+      show_annotation_name = FALSE, annotation_legend_param = tri_leg,
+      width = grid::unit(4, "mm")),
+    right_annotation = if (last) rowAnnotation(mark = anno_mark(
+      at = tri_marks, labels = genes3[tri_marks],
+      labels_gp = grid::gpar(fontsize = 15, fontface = "italic"),
+      link_width = grid::unit(6, "mm"))),
+    ## the layers share one colour scale, so one legend covers all three
+    show_heatmap_legend = first,
+    use_raster = TRUE, raster_quality = 2,
+    heatmap_legend_param = c(list(title = "z-score", direction = "horizontal",
+                                  title_position = "topcenter",
+                                  legend_width = grid::unit(4, "cm")), tri_leg))
+}
+tri_ht <- Reduce(`+`, lapply(names(layers), tri_panel))
+ModuleViz:::.moduleviz_write_plot(tri_file, 12, 12, function()
+  draw(tri_ht, heatmap_legend_side = "bottom", annotation_legend_side = "bottom",
+       merge_legend = TRUE, ht_gap = grid::unit(3, "mm"),
+       column_title = "RNA + H3K27ac + H3K27me3 (linked by gene)",
+       column_title_gp = grid::gpar(fontsize = 19)))
+chk("three-layer heatmap written",
+    file.exists(tri_file) && file.size(tri_file) > 50000)
+
+## Module trajectories, one line per layer.  Each sample contributes its mean z
+## over the module's genes; points are the mean of those sample values within a
+## state and the bars are their SD, i.e. the spread between replicates.
+traj <- rbindlist(lapply(names(layers), function(nm) {
+  L <- layers[[nm]]
+  rbindlist(lapply(levels(cl3), function(m)
+    data.table(Layer = nm, Cluster = m, State = L$state,
+               z = colMeans(L$z[cl3 == m, , drop = FALSE], na.rm = TRUE))))
+}))
+traj_sum <- traj[, .(z = mean(z), sd = sd(z)), by = .(Layer, Cluster, State)]
+traj_sum[, Layer := factor(Layer, levels = names(layers))]
+traj_sum[, ClusterF := factor(
+  sprintf("%s (n=%d)", Cluster, as.integer(table(cl3))[match(Cluster, levels(cl3))]),
+  levels = sprintf("%s (n=%d)", levels(cl3), as.integer(table(cl3))))]
+
+## does each chromatin mark rise and fall with expression, module by module?
+cent_cor <- dcast(traj_sum, Cluster + State ~ Layer, value.var = "z")[,
+  .(r_H3K27ac = cor(RNA, H3K27ac), r_H3K27me3 = cor(RNA, H3K27me3)), by = Cluster]
+cat("\n  correlation of each mark's module trajectory with RNA:\n")
+print(cent_cor[, lapply(.SD, function(x) if (is.numeric(x)) round(x, 2) else x)])
+chk("H3K27ac trajectory follows RNA in every module",
+    all(cent_cor$r_H3K27ac > 0.5))
+chk("H3K27ac follows RNA more closely than H3K27me3 does",
+    mean(cent_cor$r_H3K27ac) > mean(cent_cor$r_H3K27me3))
+
+layer_cols <- setNames(ModuleViz:::.moduleviz_discrete_palette(3, "okabe_ito"),
+                       names(layers))
+tri_lp <- file.path(out_dir, "11_three_layer_patterns.pdf")
+g3 <- ggplot(traj_sum, aes(State, z, group = Layer, color = Layer)) +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey70") +
+  geom_line(linewidth = 1.1) +
+  geom_errorbar(aes(ymin = z - sd, ymax = z + sd), width = 0.12, linewidth = 0.6) +
+  geom_point(size = 2.6) +
+  scale_color_manual(values = layer_cols) +
+  facet_wrap(~ ClusterF, ncol = 3) +
+  theme_bw(base_size = 16) +
+  theme(panel.grid.minor = element_blank(), legend.position = "top",
+        legend.title = element_blank(), plot.title = element_text(size = 16)) +
+  labs(x = "Differentiation state", y = "mean z-score",
+       title = "Module patterns across RNA and chromatin layers")
+ggsave(tri_lp, g3, width = 10, height = 7)
+message("wrote ", tri_lp)
+chk("three-layer line plot written", file.exists(tri_lp) && file.size(tri_lp) > 5000)
+chk("one point per layer x module x state", nrow(traj_sum) == 3 * K * 3)
+
+## ---------------------------------------------------------------------------
+## 15. Supporting figures
+## ---------------------------------------------------------------------------
+## Figures that back up the claims the heatmaps make by eye.  They are plain
+## ggplot2 built on the objects above; the three that need an extra package or a
+## remote file (16, 18, 19) are skipped with a message when it is unavailable.
+section("15. Supporting figures")
+MOD_COLS  <- ModuleViz:::.moduleviz_cluster_cols(levels(obj$cluster), "paired")
+MARK_COLS <- layer_cols[c("H3K27ac", "H3K27me3")]
+theme_sup <- theme_bw(base_size = 16) +
+  theme(panel.grid.minor = element_blank(), plot.title = element_text(size = 16))
+save_sup <- function(file, plot, width, height) {
+  ggsave(file, plot, width = width, height = height)
+  message("wrote ", file)
+  chk(sprintf("%s written", basename(file)),
+      file.exists(file) && file.size(file) > 4000)
+}
+marks <- list(H3K27ac = list(cr = ac, z = d_ac$z_secondary),
+              H3K27me3 = list(cr = me3, z = d_me3$z_secondary))
+
+## ---- 12. per-gene RNA ~ chromatin correlation ------------------------------
+## The assays were run on separate aliquots, so replicates are paired by their
+## infection / day / replicate label.  Within a state that pairing is arbitrary;
+## the correlation is carried by the differences between states.
+pair_key <- function(ids)
+  sub("_S[0-9]+$", "", sub("_(RNA|H3K27ac|H3K27me3)_", "_", ids))
+row_cor <- function(x, y) {
+  x <- x - rowMeans(x); y <- y - rowMeans(y)
+  rowSums(x * y) / sqrt(rowSums(x^2) * rowSums(y^2))
+}
+gene_cor <- rbindlist(lapply(names(marks), function(nm) {
+  zs <- marks[[nm]]$z
+  i  <- match(pair_key(colnames(obj$z)), pair_key(colnames(zs)))
+  data.table(Gene = rownames(zs), Mark = nm,
+             Cluster = module_of[rownames(zs)],
+             r = row_cor(obj$z[rownames(zs), , drop = FALSE], zs[, i, drop = FALSE]))
+}))
+gene_cor[, Mark := factor(Mark, levels = names(marks))]
+gene_cor[, Cluster := factor(Cluster, levels = levels(obj$cluster))]
+cor_med <- dcast(gene_cor[, .(r = round(median(r, na.rm = TRUE), 2)),
+                          by = .(Cluster, Mark)], Cluster ~ Mark, value.var = "r")
+cat("\n  median per-gene correlation with RNA:\n"); print(cor_med)
+chk("every RNA sample has a paired sample in both marks",
+    all(vapply(marks, function(m) all(pair_key(colnames(obj$z)) %in%
+                                        pair_key(colnames(m$z))), logical(1))))
+chk("H3K27ac is positively correlated with RNA in every module",
+    all(cor_med$H3K27ac > 0))
+chk("H3K27ac tracks RNA more closely than H3K27me3 in every module",
+    all(cor_med$H3K27ac > cor_med$H3K27me3))
+
+g12 <- ggplot(gene_cor[is.finite(r)], aes(Cluster, r, fill = Mark)) +
+  geom_hline(yintercept = 0, linetype = 2, color = "grey60") +
+  geom_violin(position = position_dodge(0.85), width = 0.85, color = NA,
+              alpha = 0.55, scale = "width") +
+  geom_boxplot(position = position_dodge(0.85), width = 0.18,
+               outlier.shape = NA, linewidth = 0.4) +
+  scale_fill_manual(values = MARK_COLS) +
+  theme_sup + theme(legend.position = "top", legend.title = element_blank(),
+                    axis.text.x = element_text(angle = 30, hjust = 1)) +
+  labs(x = NULL, y = "per-gene Pearson r with RNA",
+       title = "Does chromatin follow expression, gene by gene?")
+save_sup(file.path(out_dir, "12_RNA_chromatin_correlation.pdf"), g12, 9, 6)
+
+## ---- 13. fold change: RNA vs chromatin at the same gene --------------------
+peak_lfc <- function(cr, a, b) {
+  st <- cr$meta$State[match(colnames(cr$mat), cr$meta$SampleID)]
+  d  <- rowMeans(cr$mat[, st == a, drop = FALSE]) -
+        rowMeans(cr$mat[, st == b, drop = FALSE])
+  tapply(d, cr$ann$Gene, mean)                  # mean over a gene's peaks
+}
+fc <- rbindlist(lapply(names(marks), function(nm) {
+  l <- peak_lfc(marks[[nm]]$cr, "TEX", "TN")
+  g <- intersect(sig$ID, names(l))
+  data.table(Gene = g, Mark = nm, Cluster = module_of[g],
+             rna = sig$log2FC_TEX_vs_TN[match(g, sig$ID)], chrom = l[g])
+}))
+fc[, Mark := factor(Mark, levels = names(marks))]
+fc[, Cluster := factor(Cluster, levels = levels(obj$cluster))]
+fc_r <- fc[, .(r = cor(rna, chrom), n = .N), by = Mark]
+cat("\n  RNA vs chromatin log2FC (TEX vs TN) across DEGs:\n"); print(fc_r)
+chk("H3K27ac change is positively correlated with the RNA change",
+    fc_r[Mark == "H3K27ac", r] > 0.3)
+chk("H3K27ac change tracks RNA better than H3K27me3 change",
+    fc_r[Mark == "H3K27ac", r] > fc_r[Mark == "H3K27me3", r])
+
+fc_lab <- fc[Gene %in% LABEL_GENES]
+g13 <- ggplot(fc, aes(rna, chrom)) +
+  geom_hline(yintercept = 0, color = "grey75") +
+  geom_vline(xintercept = 0, color = "grey75") +
+  geom_point(aes(color = Cluster), size = 1.3, alpha = 0.65) +
+  geom_text(data = fc_r, aes(x = -Inf, y = Inf,
+                             label = sprintf("r = %.2f  (n = %d)", r, n)),
+            hjust = -0.08, vjust = 1.6, size = 5.5) +
+  scale_color_manual(values = MOD_COLS) +
+  facet_wrap(~ Mark, scales = "free_y") +
+  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1))) +
+  theme_sup + theme(legend.title = element_blank()) +
+  labs(x = "RNA log2 fold change (TEX vs TN)",
+       y = "chromatin log2 fold change (TEX vs TN)",
+       title = "Expression change vs chromatin change at the same gene")
+g13 <- g13 + if (requireNamespace("ggrepel", quietly = TRUE)) {
+  ggrepel::geom_text_repel(data = fc_lab, aes(label = Gene), size = 4.6,
+                           fontface = "italic", max.overlaps = Inf,
+                           min.segment.length = 0, segment.color = "grey40",
+                           seed = 1)
+} else {
+  geom_text(data = fc_lab, aes(label = Gene), size = 4.6, fontface = "italic",
+            vjust = -0.7, check_overlap = TRUE)
+}
+save_sup(file.path(out_dir, "13_foldchange_RNA_vs_chromatin.pdf"), g13, 13, 6.5)
+
+## ---- 14. sample QC: PCA of each layer --------------------------------------
+qc_layers <- list(RNA = log_rna[rowMeans(rna_mat) >= MIN_EXPR, ],
+                  H3K27ac = ac$mat, H3K27me3 = me3$mat)
+pca <- rbindlist(lapply(names(qc_layers), function(nm) {
+  m  <- qc_layers[[nm]]
+  m  <- m[order(apply(m, 1, var), decreasing = TRUE)[seq_len(min(2000, nrow(m)))], ]
+  pc <- stats::prcomp(t(m), center = TRUE, scale. = FALSE)
+  ve <- 100 * pc$sdev^2 / sum(pc$sdev^2)
+  inf <- sub("_P14_.*", "", colnames(m))
+  data.table(Layer = sprintf("%s  (PC1 %.0f%%, PC2 %.0f%%)", nm, ve[1], ve[2]),
+             State = factor(c(Naive = "TN", Arm = "TMEM", Cl13 = "TEX")[inf],
+                            levels = STATES),
+             Cohort = sub(".*_(Day[0-9]+)_.*", "\\1", colnames(m)),
+             PC1 = pc$x[, 1], PC2 = pc$x[, 2], ve1 = ve[1])
+}))
+pca[, Layer := factor(Layer, levels = unique(Layer))]
+chk("PC1 carries most of the variance in every layer",
+    all(pca[, ve1[1], by = Layer]$V1 > 40))
+g14 <- ggplot(pca, aes(PC1, PC2, color = State, shape = Cohort)) +
+  geom_point(size = 4, alpha = 0.9) +
+  scale_color_manual(values = state_cols) +
+  facet_wrap(~ Layer, scales = "free") +
+  theme_sup + theme(legend.position = "top") +
+  labs(title = "Sample PCA per layer (2,000 most variable features)")
+save_sup(file.path(out_dir, "14_sample_PCA.pdf"), g14, 14, 5.8)
+
+## ---- 15. sample QC: signal distribution per sample -------------------------
+## The chromatin layers here are the peaks within 25 kb of a TSS.  For H3K27me3
+## those peaks sit about one log2 unit higher in every TMEM and TEX sample than
+## in TN, whichever module the gene belongs to.  The published normalisation
+## balances the full peak set (the median change over all peaks is 0), so this
+## is signal moving toward promoter-proximal peaks everywhere, not a
+## module-specific change: read the H3K27me3 panels relative to it.
+sig_dist <- rbindlist(lapply(names(qc_layers), function(nm) {
+  m   <- qc_layers[[nm]]
+  inf <- sub("_P14_.*", "", colnames(m))
+  q   <- apply(m, 2, stats::quantile, c(0.05, 0.25, 0.5, 0.75, 0.95))
+  data.table(Layer = nm, Sample = colnames(m),
+             State = factor(c(Naive = "TN", Arm = "TMEM", Cl13 = "TEX")[inf],
+                            levels = STATES),
+             lo = q[1, ], q1 = q[2, ], med = q[3, ], q3 = q[4, ], hi = q[5, ])
+}))
+sig_dist[, Layer := factor(Layer, levels = names(qc_layers))]
+setorder(sig_dist, Layer, State, Sample)
+sig_dist[, idx := seq_len(.N), by = Layer]
+shift <- dcast(sig_dist[, .(med = median(med)), by = .(Layer, State)],
+               Layer ~ State, value.var = "med")
+shift[, `:=`(TMEM_vs_TN = round(TMEM - TN, 2), TEX_vs_TN = round(TEX - TN, 2))]
+cat("\n  median log2 signal per state, and its shift against TN:\n"); print(shift)
+chk("RNA and H3K27ac medians are level across states (|shift| < 0.2)",
+    all(abs(unlist(shift[Layer != "H3K27me3", .(TMEM_vs_TN, TEX_vs_TN)])) < 0.2))
+chk("H3K27me3 carries a global shift in TMEM and TEX (> 0.5 log2)",
+    all(unlist(shift[Layer == "H3K27me3", .(TMEM_vs_TN, TEX_vs_TN)]) > 0.5))
+
+g15 <- ggplot(sig_dist, aes(idx, fill = State)) +
+  geom_boxplot(aes(ymin = lo, lower = q1, middle = med, upper = q3, ymax = hi,
+                   group = idx), stat = "identity", width = 0.7, linewidth = 0.4) +
+  scale_fill_manual(values = state_cols) +
+  facet_wrap(~ Layer, scales = "free_y") +
+  theme_sup + theme(legend.position = "top", axis.text.x = element_blank(),
+                    axis.ticks.x = element_blank(),
+                    panel.grid.major.x = element_blank()) +
+  labs(x = "samples (one box each; whiskers 5-95%)",
+       y = "log2(normalised signal + 1)",
+       title = "Signal distribution per sample",
+       subtitle = "chromatin layers: peaks within 25 kb of a TSS")
+save_sup(file.path(out_dir, "15_sample_signal_distribution.pdf"), g15, 13, 5.8)
+
+## ---- 16. why k = 6 and not the elbow's k = 5 -------------------------------
+if (requireNamespace("ggalluvial", quietly = TRUE)) {
+  o5 <- longitudinal_cluster(deg_mat, rna_meta, sample_col = "SampleID",
+                             time_col = "StateOrder", k = k_sug,
+                             stability = FALSE, seed = 1)
+  c5 <- as.matrix(o5$centroids[, -1])
+  peak5 <- setNames(STATES[apply(c5, 1, which.max)], o5$centroids$Cluster)
+  ## the k = 5 modules get their own names (A-E): "Cluster4" is a different set
+  ## of genes in the two runs, and sharing a label would imply it is the same
+  strat <- function(cl, peak, names_out) {
+    lab <- sprintf("%s\n%s", names_out[as.integer(cl)], peak[as.character(cl)])
+    factor(lab, levels = unique(lab[order(as.integer(cl))]))
+  }
+  k5_of <- o5$cluster[match(rownames(obj$z), rownames(o5$z))]
+  flow <- data.table(k5 = strat(k5_of, peak5, paste("Module", LETTERS[seq_len(k_sug)])),
+                     k6 = strat(obj$cluster, peak_state, levels(obj$cluster)),
+                     Module = obj$cluster)[, .N, by = .(k5, k6, Module)]
+  chk("the flow table accounts for every DEG", sum(flow$N) == nrow(obj$z))
+  g16 <- ggplot(flow, aes(axis1 = k5, axis2 = k6, y = N)) +
+    ggalluvial::geom_alluvium(aes(fill = Module), width = 0.32, alpha = 0.75) +
+    ggalluvial::geom_stratum(width = 0.32, fill = "grey96", color = "grey35") +
+    geom_text(stat = ggalluvial::StatStratum, aes(label = after_stat(stratum)),
+              size = 4.6, lineheight = 0.9) +
+    scale_fill_manual(values = MOD_COLS, guide = "none") +
+    scale_x_continuous(breaks = 1:2, expand = c(0.08, 0.08),
+                       labels = c(sprintf("k = %d (elbow)", k_sug),
+                                  sprintf("k = %d (used)", K))) +
+    theme_sup + theme(panel.grid = element_blank(), panel.border = element_blank(),
+                      axis.ticks.x = element_blank()) +
+    labs(x = NULL, y = "genes",
+         title = "Where the memory module comes from",
+         subtitle = "each module is labelled with the state it peaks in")
+  save_sup(file.path(out_dir, "16_k5_vs_k6_flow.pdf"), g16, 8, 9)
+} else cat("  [skip] 16_k5_vs_k6_flow: install 'ggalluvial' to draw it\n")
+
+## ---- 17. individual marker genes across the three layers -------------------
+PANEL_GENES <- intersect(c("Sell", "Il7r", "Klrg1", "Tox", "Havcr2", "Eomes"), genes3)
+gene_signal <- function(cr, g)                 # mean over the gene's peaks
+  colMeans(cr$mat[cr$ann$Gene == g, , drop = FALSE])
+panel <- rbindlist(lapply(PANEL_GENES, function(g) rbind(
+  data.table(Gene = g, Layer = "RNA", Sample = colnames(log_rna), v = log_rna[g, ]),
+  data.table(Gene = g, Layer = "H3K27ac", Sample = colnames(ac$mat),
+             v = gene_signal(ac, g)),
+  data.table(Gene = g, Layer = "H3K27me3", Sample = colnames(me3$mat),
+             v = gene_signal(me3, g)))))
+panel[, State := factor(c(Naive = "TN", Arm = "TMEM", Cl13 = "TEX")[
+  sub("_P14_.*", "", Sample)], levels = STATES)]
+panel[, Gene := factor(Gene, levels = PANEL_GENES)]
+panel[, Layer := factor(Layer, levels = names(layers))]
+chk("marker panel has 16 samples per gene and layer",
+    all(panel[, .N, by = .(Gene, Layer)]$N == 16))
+g17 <- ggplot(panel, aes(State, v, color = State)) +
+  geom_jitter(width = 0.14, height = 0, size = 2.2, alpha = 0.8) +
+  stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar",
+               width = 0.55, linewidth = 0.35, color = "grey20") +
+  scale_color_manual(values = state_cols, guide = "none") +
+  facet_grid(Layer ~ Gene, scales = "free_y") +
+  theme_sup + theme(strip.text.x = element_text(face = "italic"),
+                    axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = NULL, y = "log2(normalised signal + 1)",
+       title = "Marker genes: replicates (points) and state mean (bar)")
+save_sup(file.path(out_dir, "17_marker_gene_panels.pdf"), g17, 14, 8)
+
+## ---- 18. Hallmark pathway enrichment per module ----------------------------
+if (requireNamespace("msigdbr", quietly = TRUE)) {
+  hm <- tryCatch(msigdbr::msigdbr(species = "Mus musculus", collection = "H"),
+                 error = function(e)                       # msigdbr < 10
+                   msigdbr::msigdbr(species = "Mus musculus", category = "H"))
+  universe <- deg[baseMean >= MIN_EXPR, ID]   # every gene that could be a DEG
+  hm <- unique(as.data.table(hm)[gene_symbol %in% universe, .(gs_name, gene_symbol)])
+  sets <- split(hm$gene_symbol, hm$gs_name)
+  enr <- rbindlist(lapply(levels(obj$cluster), function(m) {
+    mg <- names(module_of)[module_of == m]
+    rbindlist(lapply(names(sets), function(s) {
+      k <- length(intersect(mg, sets[[s]])); M <- length(sets[[s]])
+      data.table(Cluster = m, Set = s, Overlap = k, SetSize = M,
+                 Fold = (k / length(mg)) / (M / length(universe)),
+                 p = stats::phyper(k - 1, M, length(universe) - M, length(mg),
+                                   lower.tail = FALSE))
+    }))
+  }))
+  enr[, padj := stats::p.adjust(p, method = "BH")]
+  enr_sig <- enr[padj < 0.05 & Overlap >= 5]
+  cat(sprintf("\n  %d module x Hallmark pairs at FDR < 0.05:\n", nrow(enr_sig)))
+  print(enr_sig[order(Cluster, padj),
+                .(Cluster, Set, Overlap, Fold = round(Fold, 1), padj = signif(padj, 2))])
+  chk("hypergeometric universe contains every DEG", all(names(module_of) %in% universe))
+  chk("at least one Hallmark set is enriched", nrow(enr_sig) > 0)
+
+  enr_sig[, Cluster := factor(Cluster, levels = levels(obj$cluster))]
+  pretty_set <- function(s) gsub("_", " ", sub("^HALLMARK_", "", s))
+  ## order the sets by the module they are strongest in, so the dots run
+  ## down the diagonal
+  set_order <- enr_sig[order(as.integer(Cluster), padj), unique(Set)]
+  enr_sig[, SetLab := factor(pretty_set(Set), levels = rev(pretty_set(set_order)))]
+  g18 <- ggplot(enr_sig, aes(Cluster, SetLab)) +
+    geom_point(aes(size = Overlap, fill = -log10(padj)), shape = 21,
+               color = "grey25", stroke = 0.4) +
+    scale_fill_gradient(low = "#deebf7", high = "#08519c", name = "-log10 FDR") +
+    scale_size_area(max_size = 11, name = "genes") +
+    scale_x_discrete(drop = FALSE) +
+    theme_sup + theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+    labs(x = NULL, y = NULL,
+         title = "MSigDB Hallmark sets enriched per module (FDR < 0.05)")
+  save_sup(file.path(out_dir, "18_hallmark_enrichment.pdf"), g18, 10,
+           max(5, 0.42 * nlevels(enr_sig$SetLab) + 2.2))
+} else cat("  [skip] 18_hallmark_enrichment: install 'msigdbr' to draw it\n")
+
+## ---- 19. genome browser tracks ---------------------------------------------
+## GEO hosts one pooled bigWig per mark and state (240-440 MB each).  Only the
+## plotted windows are read, straight from the remote files, and the binned
+## result (a few hundred kb of text) is cached so later runs stay offline.
+TRACK_GENES <- c("Tcf7", "Pdcd1", "Tox")
+track_cache <- file.path(cache_dir, "browser_tracks.tsv.gz")
+N_BINS <- 400
+loci <- rna_uniq[match(TRACK_GENES, Gene.Name), .(Gene = Gene.Name, Chr, Start, End)]
+loci[, flank := pmax(15000L, as.integer(0.12 * (End - Start)))]
+loci[, `:=`(from = Start - flank, to = End + flank)]
+
+fetch_tracks <- function() {
+  gr <- GenomicRanges::GRanges(loci$Chr, IRanges::IRanges(loci$from, loci$to))
+  grid <- CJ(Mark = names(marks), Infection = c("Naive", "Arm", "Cl13"), sorted = FALSE)
+  rbindlist(lapply(seq_len(nrow(grid)), function(i) {
+    url <- sprintf(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE285nnn/GSE285245/",
+                          "suppl/GSE285245_pool_%s_%s.bw"),
+                   grid$Mark[i], grid$Infection[i])
+    message("reading ", basename(url))
+    rbindlist(lapply(seq_len(nrow(loci)), function(j) {
+      ## one window per request: a multi-range import returns the windows in
+      ## the file's chromosome order, not in the order they were asked for
+      v <- NULL
+      for (attempt in 1:6) {                 # the remote open fails now and then
+        v <- tryCatch(suppressWarnings(as.numeric(rtracklayer::import(
+          rtracklayer::BigWigFile(url), which = gr[j], as = "NumericList")[[1]])),
+          error = function(e) NULL)
+        if (!is.null(v)) break
+        Sys.sleep(5)
+      }
+      if (is.null(v)) stop("no answer from ", basename(url))
+      stopifnot(length(v) == loci$to[j] - loci$from[j] + 1L)
+      bin <- cut(seq_along(v), N_BINS, labels = FALSE)
+      data.table(Gene = loci$Gene[j], Mark = grid$Mark[i],
+                 Infection = grid$Infection[i],
+                 pos = loci$from[j] + as.integer(tapply(seq_along(v), bin, mean)),
+                 signal = round(as.numeric(tapply(v, bin, mean)), 3))
+    }))
+  }))
+}
+tracks <- if (file.exists(track_cache)) fread(track_cache) else
+  tryCatch({
+    stopifnot(requireNamespace("rtracklayer", quietly = TRUE))
+    tr <- fetch_tracks(); fwrite(tr, track_cache, sep = "\t"); tr
+  }, error = function(e) {
+    cat("  [skip] 19_browser_tracks: could not read the remote bigWigs (",
+        conditionMessage(e), ")\n"); NULL })
+
+if (!is.null(tracks)) {
+  chk("browser tracks cover every locus, mark and state",
+      nrow(tracks) == length(TRACK_GENES) * 2 * 3 * N_BINS)
+  ## the tracks must tell the same story as the count matrices
+  body_ac <- function(g, inf) {
+    l <- loci[Gene == g]
+    tracks[Gene == g & Mark == "H3K27ac" & Infection == inf &
+             pos >= l$Start & pos <= l$End, mean(signal)]
+  }
+  chk("H3K27ac over Pdcd1 and Tox is higher in TEX than in TN",
+      body_ac("Pdcd1", "Cl13") > body_ac("Pdcd1", "Naive") &&
+        body_ac("Tox", "Cl13") > body_ac("Tox", "Naive"))
+  chk("H3K27ac over Tcf7 is higher in TN than in TEX",
+      body_ac("Tcf7", "Naive") > body_ac("Tcf7", "Cl13"))
+  tracks[, State := factor(c(Naive = "TN", Arm = "TMEM", Cl13 = "TEX")[Infection],
+                           levels = STATES)]
+  row_levels <- c(as.vector(t(outer(names(marks), STATES, paste, sep = "\n"))), "Genes")
+  tracks[, Row := factor(paste(Mark, State, sep = "\n"), levels = row_levels)]
+  locus_lab <- setNames(sprintf("%s  (%s)", loci$Gene, loci$Chr), loci$Gene)
+  tracks[, Locus := factor(locus_lab[Gene], levels = locus_lab)]
+  ## the three states of a mark share one y axis, so heights are comparable
+  ceil <- tracks[, .(signal = max(signal)), by = Mark][
+    , .(Row = factor(paste(Mark, STATES, sep = "\n"), levels = row_levels),
+        signal = signal), by = Mark]
+  ceil <- ceil[, .(Locus = factor(locus_lab, levels = locus_lab), pos = loci$from),
+               by = .(Row, signal)]
+
+  ## gene bodies inside each window, staggered over three lanes
+  gm <- rbindlist(lapply(seq_len(nrow(loci)), function(j)
+    rna_uniq[Chr == loci$Chr[j] & End >= loci$from[j] & Start <= loci$to[j],
+             .(Locus = factor(locus_lab[loci$Gene[j]], levels = locus_lab),
+               Name = Gene.Name, Strand,
+               Start = pmax(Start, loci$from[j]), End = pmin(End, loci$to[j]))]))
+  setorder(gm, Locus, Start)
+  gm[, lane := (seq_len(.N) - 1L) %% 3L, by = Locus]
+  gm[, Row := factor("Genes", levels = row_levels)]
+  gm[, `:=`(x0 = ifelse(Strand == "+", Start, End), x1 = ifelse(Strand == "+", End, Start))]
+
+  g19 <- ggplot(tracks, aes(pos / 1e6)) +
+    geom_area(aes(y = signal, fill = State)) +
+    geom_blank(data = ceil, aes(y = signal)) +
+    geom_segment(data = gm, aes(x = x0 / 1e6, xend = x1 / 1e6, y = lane, yend = lane),
+                 linewidth = 1.1, color = "grey25",
+                 arrow = grid::arrow(length = grid::unit(2, "mm"), type = "closed")) +
+    geom_text(data = gm, aes(x = (Start + End) / 2e6, y = lane + 0.42, label = Name),
+              size = 3.8, fontface = "italic") +
+    geom_blank(data = gm, aes(x = Start / 1e6, y = 2.8)) +
+    scale_fill_manual(values = state_cols, guide = "none") +
+    scale_x_continuous(breaks = scales::breaks_pretty(3)) +
+    facet_grid(Row ~ Locus, scales = "free", switch = "y") +
+    theme_sup + theme(strip.text.y.left = element_text(angle = 0),
+                      strip.placement = "outside", panel.grid = element_blank(),
+                      axis.text.y = element_text(size = 10),
+                      panel.spacing.y = grid::unit(1.5, "mm")) +
+    labs(x = "position (Mb, mm10)", y = NULL,
+         title = "Pooled CUT&RUN signal at a naive locus and two exhaustion loci")
+  save_sup(file.path(out_dir, "19_browser_tracks.pdf"), g19, 14, 9.5)
+}
+
+## ---------------------------------------------------------------------------
+## 16. One-call wrapper
+## ---------------------------------------------------------------------------
+section("16. run_longitudinal wrapper")
 ## The wrapper reproduces sections 5-8 exactly, so its four outputs are the
 ## same figures as 03_module_heatmap.png and 04_module_patterns.pdf.  They are
 ## written to a temp directory and verified there rather than kept as copies.
@@ -649,9 +1185,9 @@ for (f in c("_heatmap.pdf", "_pattern_lines.pdf", "_memberships.txt", "_centroid
   chk(sprintf("wrapper wrote %s", f), file.exists(paste0(wpfx, f)))
 
 ## ---------------------------------------------------------------------------
-## 15. Error handling
+## 17. Error handling
 ## ---------------------------------------------------------------------------
-section("15. Error handling on malformed real input")
+section("17. Error handling on malformed real input")
 err <- function(expr) inherits(tryCatch(expr, error = function(e) e), "error")
 chk("unnamed matrix is rejected",
     err(longitudinal_cluster(unname(deg_mat), rna_meta, sample_col = "SampleID",
@@ -669,7 +1205,7 @@ chk("unknown zscore palette is rejected",
     err(ModuleViz:::.moduleviz_zscore_col_fun("not_a_palette")))
 chk("layers with no shared genes are rejected",
     { fake <- ac$mat[1:100, ]; rownames(fake) <- paste0("peakX_NOGENE", 1:100)
-      err(dual_omics_heatmap(obj, fake, file = tempfile(fileext = ".png"))) })
+      err(dual_heatmap(obj, fake, file = tempfile(fileext = ".png"))) })
 
 ## ---------------------------------------------------------------------------
 section("SUMMARY")

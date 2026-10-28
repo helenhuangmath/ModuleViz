@@ -9,7 +9,7 @@ trajectory plots, and writes output tables.
 run_longitudinal(mat, meta, out_prefix, label_features = NULL,
   top_n_label = 5, annotation_cols = NULL, rank_table = NULL,
   zscore_palette = "rdbu", cluster_palette = "paired",
-  annotation_palette = "set2", heatmap_width = 9, heatmap_height = 13, ...)
+  annotation_palette = "set2", heatmap_width = 8, heatmap_height = 13, ...)
 }
 \arguments{
 \item{mat, meta}{Feature matrix and sample metadata.}

@@ -131,7 +131,7 @@ useful for connecting heatmap patterns to biological interpretations such as
 early induction, sustained activation, transient response, repression, or late
 state-specific expression.
 
-For paired-assay studies, `dual_omics_heatmap()` aligns a secondary assay to
+For paired-assay studies, `dual_heatmap()` aligns a secondary assay to
 primary modules by gene. For example, RNA-defined modules can be shown beside
 ATAC-seq or CUT&RUN signal after mapping peaks to genes. The secondary layer
 can be aggregated per gene using the mean or strongest matching feature. This
