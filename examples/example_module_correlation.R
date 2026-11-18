@@ -56,9 +56,8 @@ cors <- module_correlation_heatmap(
   select       = "top",     # keep the strongest-signal features
   corr_palette = "rdbu",
   file   = file.path(out_dir, "module_gene_correlation.pdf"),
-  title  = "Example time course",
-  width  = 7,
-  height = 6.5
+  width  = 5,
+  height = 5
 )
 
 for (nm in names(cors)) {
@@ -76,8 +75,8 @@ module_correlation_heatmap(
   clusters  = "Cluster1",
   max_genes = 40,
   file   = file.path(out_dir, "single_module.png"),
-  width  = 7.5,
-  height = 7
+  width  = 5,
+  height = 5
 )
 
 ## ---------------------------------------------------------------------------
@@ -89,14 +88,14 @@ print(module_correlation_summary(obj, method = "spearman"))
 ## An unbiased sample of a large module rather than its strongest features:
 invisible(module_correlation_heatmap(
   obj, clusters = "Cluster2", select = "random", max_genes = 30, seed = 42,
-  file = file.path(out_dir, "random_sample.png"), width = 7, height = 6.5))
+  file = file.path(out_dir, "random_sample.png"), width = 5, height = 5))
 
 ## Viridis instead of the diverging default, and a narrower colour range so
 ## differences among already-high correlations are visible:
 invisible(module_correlation_heatmap(
   obj, clusters = "Cluster2", corr_palette = "viridis", corr_limits = c(0, 1),
   max_genes = 40,
-  file = file.path(out_dir, "viridis.png"), width = 7, height = 6.5))
+  file = file.path(out_dir, "viridis.png"), width = 5, height = 5))
 
 ## The raw correlation matrices come back too, for downstream use:
 cm <- cors[["Cluster1"]]$cor

@@ -8,15 +8,17 @@ points, optionally comparing groups.
 \usage{
 pattern_lineplot(obj, file = NULL, width = NULL, height = NULL, ncol = 1,
   palette = "set2", cluster_palette = "paired", group_colors = NULL,
-  base_size = 12,
-  title = "Module patterns", title_fontsize = NULL, xlab = NULL,
-  time_labels = NULL, x_angle = 45, line_width = 1.1, point_size = 2.2)
+  base_size = 10,
+  title = NULL, title_fontsize = NULL, xlab = NULL,
+  time_labels = NULL, x_angle = 0, line_width = 0.7, point_size = 1.5)
 }
 \arguments{
 \item{obj}{A \code{longi} object.}
 \item{file}{Optional PDF output path.}
 \item{width, height}{Optional plot dimensions.}
-\item{ncol}{Facet columns when no group column is present.}
+\item{ncol}{Number of facet columns. The default, 1, stacks the modules in a
+single column in the same order as the heatmap; larger values wrap them into a
+grid.}
 \item{palette}{Palette for the group / condition lines. Defaults to
 \code{"set2"}; \code{"set3"}, \code{"paired"}, \code{"nature"}, and
 \code{"science"} are also available.}
@@ -27,7 +29,7 @@ group lines, e.g. \code{c(Control = "grey70", Stimulated = "firebrick")}.
 Overrides \code{palette} for the levels it names; unnamed levels keep their
 palette colour.}
 \item{base_size}{Base ggplot font size.}
-\item{title}{Plot title; \code{NULL} drops it entirely.}
+\item{title}{Optional plot title; none by default.}
 \item{title_fontsize}{Title size in points. Defaults to \code{base_size}, so the
 title stays proportionate rather than inflating with the base size.}
 \item{xlab}{X-axis label; defaults to the name of \code{time_col}.}
@@ -39,3 +41,12 @@ labels are short enough to sit flat.}
 \item{line_width, point_size}{Line and point size.}
 }
 \value{A \code{ggplot} object.}
+\examples{
+data("heatmap_example", package = "ModuleViz")
+obj <- longitudinal_cluster(heatmap_example$mat, heatmap_example$meta,
+                            time_col = "TimeHr", group_col = "Condition",
+                            k = 4, stability = FALSE)
+pattern_lineplot(obj)
+pattern_lineplot(obj, ncol = 2,
+                 group_colors = c(Control = "grey50", Stimulated = "firebrick"))
+}

@@ -17,3 +17,9 @@ cluster_stability(z, cluster, k, method = "kmeans", nstart = 50,
 \item{n_resample, subsample_frac, seed}{Resampling controls.}
 }
 \value{A data table with cluster size and mean Jaccard stability.}
+\examples{
+data("heatmap_example", package = "ModuleViz")
+z <- zscore_rows(heatmap_example$mat)
+cl <- stats::kmeans(z, centers = 4, nstart = 10)$cluster
+cluster_stability(z, cl, k = 4, n_resample = 5)
+}

@@ -45,7 +45,7 @@
 #' @param square if TRUE (default), draw the heatmap body as a square, sized to
 #'   the largest square that fits the figure after the dendrogram, labels,
 #'   title, and legend.
-#' @param title optional title prefix; the module name and its mean correlation
+#' @param title optional title prefix; the module name and its size
 #'   are appended.
 #' @param seed RNG seed used when `select = "random"`.
 #' @return invisibly, a named list with one entry per module, each holding
@@ -61,11 +61,11 @@ module_correlation_heatmap <- function(obj,
                                        corr_limits = c(-1, 1),
                                        col_fun = NULL,
                                        show_gene_names = NULL,
-                                       label_top_n = 30,
-                                       label_fontsize = 12,
-                                       legend_fontsize = 14,
-                                       title_fontsize = 16,
-                                       file = NULL, width = 6.5, height = 6.5,
+                                       label_top_n = 15,
+                                       label_fontsize = 8,
+                                       legend_fontsize = 9,
+                                       title_fontsize = 11,
+                                       file = NULL, width = 4.5, height = 4.5,
                                        square = TRUE,
                                        title = NULL, seed = 1) {
   stopifnot(inherits(obj, "longi"))
@@ -118,8 +118,8 @@ module_correlation_heatmap <- function(obj,
         keep <- order(apply(abs(subz), 1, max), decreasing = TRUE)[seq_len(max_genes)]
         subz <- subz[sort(keep), , drop = FALSE]
       } else {
-        set.seed(seed)
-        subz <- subz[sort(sample.int(nrow(subz), max_genes)), , drop = FALSE]
+        pick <- .moduleviz_with_seed(seed, sample.int(nrow(subz), max_genes))
+        subz <- subz[sort(pick), , drop = FALSE]
       }
     }
 
@@ -145,16 +145,14 @@ module_correlation_heatmap <- function(obj,
       right_anno <- rowAnnotation(mark = anno_mark(
         at = at, labels = marked,
         labels_gp = gpar(fontsize = label_fontsize, fontface = "italic"),
-        link_width = unit(6, "mm")))
+        link_gp = gpar(lwd = 0.5), link_width = unit(4, "mm")))
     } else if (show_names) {
       marked <- rownames(cm)
     }
 
-    ht_title <- sprintf("%s%s  (n=%d%s, mean r=%.2f)",
+    ht_title <- sprintf("%s%s (n=%d)",
                         if (is.null(title)) "" else paste0(title, " - "),
-                        lev, n_total,
-                        if (n_shown < n_total) sprintf(", showing %d", n_shown) else "",
-                        mean_cor)
+                        lev, n_total)
 
     body <- NULL
     if (square) {
@@ -169,9 +167,9 @@ module_correlation_heatmap <- function(obj,
         in_of(max_text_width(rownames(cm), gp = gpar(fontsize = label_fontsize)))
       } else if (length(marked)) {
         in_of(max_text_width(marked, gp = gpar(fontsize = label_fontsize,
-                                               fontface = "italic"))) + mm(8)
+                                               fontface = "italic"))) + mm(6)
       } else 0
-      horiz <- (if (cluster_genes) mm(10) else 0) + mm(3) + mm(4) + name_w + mm(6)
+      horiz <- mm(3) + mm(4) + name_w + mm(6)
       vert  <- pt(title_fontsize * 1.8) +
                (if (show_names) name_w + mm(2) else 0) +
                pt(legend_fontsize * 3.6) + mm(4) + mm(8)
@@ -193,17 +191,19 @@ module_correlation_heatmap <- function(obj,
         rownames(cm), gp = gpar(fontsize = label_fontsize)),
       column_names_max_height = max_text_width(
         rownames(cm), gp = gpar(fontsize = label_fontsize)),
-      show_row_dend = cluster_genes, show_column_dend = FALSE,
+      ## genes are still ordered by the clustering; the tree itself is not drawn
+      show_row_dend = FALSE, show_column_dend = FALSE,
       left_annotation = rowAnnotation(
         Module = rep(lev, n_shown),
         col = list(Module = cluster_cols[lev]),
         show_annotation_name = FALSE, show_legend = FALSE,
-        width = unit(3, "mm")),
+        simple_anno_size = unit(2.5, "mm")),
       right_annotation = right_anno,
       use_raster = TRUE, raster_quality = 2,
       heatmap_legend_param = c(list(direction = "horizontal",
                                     title_position = "topcenter",
-                                    legend_width = unit(3.5, "cm")),
+                                    legend_width = unit(2.5, "cm"),
+                                    grid_height = unit(2.5, "mm")),
                                .moduleviz_legend_gp(legend_fontsize)))
 
     draw_it <- function() draw(ht, heatmap_legend_side = "bottom")
@@ -251,8 +251,8 @@ module_correlation_summary <- function(obj, method = c("pearson", "spearman"),
         sub <- sub[order(apply(abs(sub), 1, max), decreasing = TRUE)[seq_len(max_genes)], ,
                    drop = FALSE]
       } else {
-        set.seed(seed)
-        sub <- sub[sample.int(nrow(sub), max_genes), , drop = FALSE]
+        pick <- .moduleviz_with_seed(seed, sample.int(nrow(sub), max_genes))
+        sub <- sub[pick, , drop = FALSE]
       }
     }
     cm <- stats::cor(t(sub), method = method)

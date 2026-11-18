@@ -1,5 +1,11 @@
 # ModuleViz: an R package for temporal module discovery and visualization in longitudinal omics data
 
+Hua Huang
+
+* Correspondence: helenhuang.math@gmail.com
+
+## Abstract
+
 ### Summary
 
 Longitudinal transcriptomic and epigenomic studies are increasingly used to
@@ -178,7 +184,6 @@ longitudinal_heatmap(
     obj,
     annotation_cols = c("Condition", "TimeHr"),
     top_n_label = 3,
-    title = "Example longitudinal modules",
     file = "moduleviz_heatmap.pdf"
 )
 
@@ -287,7 +292,7 @@ Documentation: <https://helenhuangmath.github.io/ModuleViz/articles/ModuleViz.ht
 
 License: MIT
 
-Package version described: 0.1.0
+Package version described: 1.0.0
 
 ## Author Contributions
 

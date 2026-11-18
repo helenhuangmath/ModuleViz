@@ -1,84 +1,43 @@
 ## =============================================================================
-## Single-cell-style example: pseudobulk longitudinal modules
+## Single-cell example: pseudobulk longitudinal modules
 ##
-## This example simulates cell-level expression from the bundled matrix, then
-## pseudobulks cells by cell type, condition, time point, and replicate before
-## running the same ModuleViz workflow.
+## Simulates a small single-cell time course, summarises the cells into
+## pseudobulk profiles by sample, cell type, condition, and time point with
+## pseudobulk_cells(), and runs the usual ModuleViz workflow on the result.
+##
+## With real data, replace `sce` by your own SingleCellExperiment or Seurat
+## object holding raw counts.
 ## =============================================================================
 
 library(ModuleViz)
-
-data("heatmap_example")
 
 out_dir <- file.path("examples", "outputs", "single_cell_pseudobulk")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 preview_dir <- file.path("inst", "extdata", "results")
 dir.create(preview_dir, recursive = TRUE, showWarnings = FALSE)
 
-bulk_mat <- heatmap_example$mat
-bulk_meta <- heatmap_example$meta
-genes <- rownames(bulk_mat)
-cell_types <- c("T_cell", "Monocyte", "B_cell")
-cells_per_sample_type <- 25
-
-set.seed(2026)
-cell_meta <- do.call(rbind, lapply(seq_len(nrow(bulk_meta)), function(i) {
-  do.call(rbind, lapply(cell_types, function(ct) {
-    data.frame(
-      CellID = sprintf("%s_%s_Cell%03d", bulk_meta$SampleID[i], ct,
-                       seq_len(cells_per_sample_type)),
-      SampleID = bulk_meta$SampleID[i],
-      Condition = bulk_meta$Condition[i],
-      TimeHr = bulk_meta$TimeHr[i],
-      Replicate = bulk_meta$Replicate[i],
-      CellType = ct,
-      stringsAsFactors = FALSE
-    )
-  }))
-}))
-
-cell_mat <- matrix(NA_real_, nrow = nrow(bulk_mat), ncol = nrow(cell_meta),
-                   dimnames = list(genes, cell_meta$CellID))
-cell_type_effect <- c(T_cell = 0.35, Monocyte = -0.15, B_cell = 0.05)
-
-for (j in seq_len(nrow(cell_meta))) {
-  sample_id <- cell_meta$SampleID[j]
-  ct <- cell_meta$CellType[j]
-  mu <- bulk_mat[, sample_id] + cell_type_effect[[ct]]
-  cell_mat[, j] <- mu + rnorm(length(mu), sd = 0.55)
-}
-
-pseudobulk_group <- paste(cell_meta$CellType, cell_meta$Condition,
-                          cell_meta$TimeHr, cell_meta$Replicate, sep = "|")
-pseudobulk_ids <- unique(pseudobulk_group)
-
-pseudobulk_mat <- sapply(pseudobulk_ids, function(id) {
-  rowMeans(cell_mat[, pseudobulk_group == id, drop = FALSE])
-})
-pseudobulk_mat <- as.matrix(pseudobulk_mat)
-rownames(pseudobulk_mat) <- genes
-colnames(pseudobulk_mat) <- paste0("PB", seq_along(pseudobulk_ids))
-
-parts <- strsplit(pseudobulk_ids, "\\|")
-pseudobulk_meta <- data.frame(
-  SampleID = colnames(pseudobulk_mat),
-  CellType = vapply(parts, `[`, character(1), 1),
-  Condition = vapply(parts, `[`, character(1), 2),
-  TimeHr = as.numeric(vapply(parts, `[`, character(1), 3)),
-  Replicate = as.integer(vapply(parts, `[`, character(1), 4)),
-  stringsAsFactors = FALSE
+sce <- simulate_single_cell_example(
+  cells_per_sample = 25,
+  cell_types = c("T_cell", "Monocyte", "B_cell"),
+  seed = 2026
 )
-pseudobulk_meta$Group <- paste(pseudobulk_meta$CellType,
-                               pseudobulk_meta$Condition, sep = "_")
 
-## Cell-type x condition groups use the qualitative Paired palette; the
-## Condition bar keeps the same grey/red coding as the other gallery figures.
-COND_COLS <- c(Control = "grey70", Stimulated = "#C1272D")
-
-obj <- longitudinal_cluster(
-  pseudobulk_mat,
-  pseudobulk_meta,
+## One profile per cell type x biological sample: counts are summed and
+## converted to log2 CPM.
+pb <- pseudobulk_cells(
+  sce,
+  time_col = "TimeHr",
   sample_col = "SampleID",
+  group_col = "Condition",
+  celltype_col = "CellType",
+  min_cells = 10
+)
+pb$Group <- paste(pb$CellType, pb$Condition, sep = "_")
+
+## Condition and CellType are constant within each Group x TimeHr cell, so
+## they survive replicate aggregation and stay available as annotation bars.
+obj <- longitudinal_cluster(
+  pb,
   time_col = "TimeHr",
   group_col = "Group",
   k = 5,
@@ -88,50 +47,36 @@ obj <- longitudinal_cluster(
   n_resample = 10
 )
 
-## aggregate_replicates = TRUE rebuilds the metadata with only SampleID, Group,
-## and TimeHr, so recover Condition from the group label to get its own bar.
-obj$meta$Condition <- sub("^.*_", "", obj$meta$Group)
-
-longitudinal_heatmap(
-  obj,
-  annotation_cols = c("Group", "Condition", "TimeHr"),
-  annotation_palette = "paired",
-  annotation_colors = list(Condition = COND_COLS),
-  top_n_label = 2,
-  label_features = c("Gene001", "Gene016", "Gene031"),
-  cluster_palette = "spectral",
-  title = "Single-cell pseudobulk temporal modules",
-  file = file.path(out_dir, "single_cell_pseudobulk_heatmap.pdf"),
-  width = 11,
-  height = 10
-)
-longitudinal_heatmap(
-  obj,
-  annotation_cols = c("Group", "Condition", "TimeHr"),
-  annotation_palette = "paired",
-  annotation_colors = list(Condition = COND_COLS),
-  top_n_label = 2,
-  label_features = c("Gene001", "Gene016", "Gene031"),
-  cluster_palette = "spectral",
-  title = "Single-cell pseudobulk temporal modules",
-  file = file.path(preview_dir, "04_single_cell_pseudobulk_heatmap.png"),
-  width = 11,
-  height = 10
-)
+draw_heatmap <- function(file) {
+  longitudinal_heatmap(
+    obj,
+    ## one bar is enough: the paired palette shades control (light) and
+    ## stimulated (dark) within each cell type
+    annotation_cols = "Group",
+    annotation_palette = "paired",
+    top_n_label = 1,
+    label_features = c("Gene001", "Gene016", "Gene031"),
+    cluster_palette = "spectral",
+    file = file,
+    width = 7,
+    height = 5.5
+  )
+}
+draw_heatmap(file.path(out_dir, "single_cell_pseudobulk_heatmap.pdf"))
+draw_heatmap(file.path(preview_dir, "04_single_cell_pseudobulk_heatmap.png"))
 
 p_sc <- pattern_lineplot(
   obj,
   palette = "paired",
-  base_size = 12,
   file = file.path(out_dir, "single_cell_pseudobulk_patterns.pdf"),
-  width = 9,
-  height = 7
+  width = 5,
+  height = 5.5
 )
 ggplot2::ggsave(
   file.path(preview_dir, "05_single_cell_pseudobulk_patterns.png"),
   p_sc,
-  width = 9,
-  height = 7,
+  width = 5,
+  height = 5.5,
   dpi = 300
 )
 

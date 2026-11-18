@@ -300,6 +300,11 @@ LABEL_GENES <- intersect(
     TEX_MARKERS, "Tigit", "Ctla4", "Cd244a", "Eomes", "Nr4a2", "Cd38",
     "Cxcr6", "Gzmk", "Ikzf2"),                                          # exhausted
   rownames(obj$z))
+## The heatmaps carry a shorter list, so the labels stay readable: a few
+## landmark genes per state.  The fold-change scatter (13) uses the same list.
+HEATMAP_GENES <- intersect(
+  c("Tcf7", "Sell", "Ccr7", "Il7r", "Klrg1", "Cx3cr1",
+    "Pdcd1", "Tox", "Lag3", "Havcr2", "Entpd1", "Cd101"), LABEL_GENES)
 cat(sprintf("  %d genes labelled on the figures: %s\n", length(LABEL_GENES),
             paste(sprintf("%s(%s)", LABEL_GENES, peak_of_gene(LABEL_GENES)),
                   collapse = ", ")))
@@ -330,15 +335,12 @@ ZPAL   <- "viridis"   # z-score bodies: sequential, colour-blind safe
 CORPAL <- "rdbu"      # correlations diverge around 0, so use a diverging map
 hm_main <- file.path(out_dir, "03_module_heatmap.png")
 ht <- longitudinal_heatmap(
-  obj, annotation_cols = c("State", "Day"),
-  label_features = LABEL_GENES,
-  rank_table = rank_tab, id_field = "ID", value_field = "value", top_n_label = 3,
+  obj, annotation_cols = "State",
+  label_features = HEATMAP_GENES,
+  rank_table = rank_tab, id_field = "ID", value_field = "value", top_n_label = 0,
   zscore_palette = ZPAL, cluster_palette = "paired", annotation_palette = "set2",
   show_column_names = FALSE,
-  label_fontsize = 14, row_title_fontsize = 16,
-  annotation_name_fontsize = 16, legend_fontsize = 15, title_fontsize = 19,
-  title = "CD8 T cell differentiation\nDEG modules (GSE285248)",
-  file = hm_main, width = 7.5, height = 14)
+  file = hm_main, width = 4.2, height = 6.5)
 chk("main heatmap written", file.exists(hm_main) && file.size(hm_main) > 50000)
 chk("returns a ComplexHeatmap object", inherits(ht, "Heatmap"))
 
@@ -377,9 +379,10 @@ section("8. pattern_lineplot")
 lp <- file.path(out_dir, "04_module_patterns.pdf")
 STATE_LABS <- c("1" = "TN", "2" = "TMEM", "3" = "TEX")
 g <- pattern_lineplot(obj, file = lp, cluster_palette = "paired",
-                      base_size = 15, title_fontsize = 14,
+                      title_fontsize = 14,
                       xlab = "Differentiation state",
                       time_labels = STATE_LABS, x_angle = 0)
+g_patterns <- g   # kept for the README / vignette figure refresh below
 chk("line plot written", file.exists(lp) && file.size(lp) > 5000)
 chk("returns a ggplot", inherits(g, "ggplot"))
 chk("title font size is honoured", g$theme$plot.title$size == 14)
@@ -420,10 +423,7 @@ chk("modules are internally coherent (mean r > 0.3 everywhere)",
 
 cor_pdf <- file.path(out_dir, "06_module_correlation_all.pdf")
 cors <- module_correlation_heatmap(obj, corr_palette = CORPAL, file = cor_pdf,
-                                   label_top_n = 30, label_fontsize = 11,
-                                   legend_fontsize = 14, title_fontsize = 14,
-                                   width = 8.5, height = 7.5,
-                                   title = "CD8 DEG modules")
+                                   width = 4.5, height = 4.5)
 chk("multi-page correlation PDF written",
     file.exists(cor_pdf) && file.size(cor_pdf) > 20000)
 chk("one correlation matrix per module", length(cors) == K)
@@ -436,12 +436,12 @@ chk("correlations stay within [-1,1]",
 chk("every gene in each module is used (no subsampling by default)",
     identical(unname(vapply(cors, function(x) x$n_shown, numeric(1))),
               as.numeric(cor_summary$N)))
-chk("crowded modules label only the top 30",
-    all(vapply(cors, function(x) length(x$labelled) == min(30, x$n_shown),
+chk("crowded modules label only the top 15",
+    all(vapply(cors, function(x) length(x$labelled) == min(15, x$n_shown),
                logical(1))))
 chk("labelled genes are the strongest-signal ones in their module",
     { m <- cors[[1]]; s <- apply(abs(obj$z[rownames(m$cor), , drop = FALSE]), 1, max)
-      setequal(m$labelled, names(sort(s, decreasing = TRUE))[1:30]) })
+      setequal(m$labelled, names(sort(s, decreasing = TRUE))[1:15]) })
 chk("an explicit max_genes cap still works",
     module_correlation_heatmap(obj, clusters = "Cluster5", max_genes = 40,
                                file = tempfile(fileext = ".png"))[[1]]$n_shown == 40)
@@ -455,10 +455,7 @@ chk("summary and heatmap agree on module size",
 cor_png <- file.path(tempdir(), "corr.png")
 tex_mod <- module_of["Pdcd1"]
 module_correlation_heatmap(obj, clusters = tex_mod, corr_palette = CORPAL,
-                           label_top_n = 30, label_fontsize = 9,
-                           legend_fontsize = 12, title_fontsize = 11,
-                           file = cor_png, width = 7.5, height = 7,
-                           title = "Exhaustion module")
+                           file = cor_png, width = 4.5, height = 4.5)
 chk("per-module file is named after the module",
     file.exists(sub("(\\.png)$", paste0("_", tex_mod, "\\1"), cor_png)))
 chk("spearman correlation also runs",
@@ -518,11 +515,9 @@ chk("module sizes match figure 02 / 03 exactly",
 ah <- file.path(out_dir, "07_collapsed_heatmap.png")
 longitudinal_heatmap(obj_c, annotation_cols = "State", zscore_palette = ZPAL,
                      cluster_palette = "paired", annotation_palette = "set2",
-                     label_features = LABEL_GENES,
-                     top_n_label = 2, label_fontsize = 14,
-                     row_title_fontsize = 16, annotation_name_fontsize = 16,
-                     legend_fontsize = 15, column_name_fontsize = 16,
-                     file = ah, width = 6, height = 13)
+                     label_features = HEATMAP_GENES,
+                     top_n_label = 1, column_labels = "sample",
+                     file = ah, width = 3.6, height = 6.5)
 chk("collapsed heatmap written", file.exists(ah) && file.size(ah) > 40000)
 ## (no line plot here: it would be 04_module_patterns.pdf again)
 
@@ -584,11 +579,10 @@ ac_obj <- longitudinal_cluster(ac$mat, ac$meta, sample_col = "SampleID",
 dual_ac <- file.path(out_dir, "08_RNA_vs_H3K27ac.png")
 d_ac <- dual_heatmap(
   obj, ac_obj, primary_name = "RNA", secondary_name = "H3K27ac",
-  aggregate = "mean", label_features = LABEL_GENES,
+  aggregate = "mean", label_features = HEATMAP_GENES,
   zscore_palette = ZPAL, cluster_palette = "paired",
-  show_column_names = FALSE, label_fontsize = 15, row_title_fontsize = 16,
-  legend_fontsize = 15, title_fontsize = 19,
-  file = dual_ac, width = 10, height = 12)
+  show_column_names = FALSE, annotation_cols = "State",
+  file = dual_ac, width = 5.5, height = 6.5)
 chk("RNA + H3K27ac figure written",
     file.exists(dual_ac) && file.size(dual_ac) > 50000)
 chk("secondary layer aligned row-for-row with the primary",
@@ -616,9 +610,8 @@ dual_me3 <- file.path(out_dir, "09_RNA_vs_H3K27me3.png")
 d_me3 <- dual_heatmap(
   obj, me3$mat, primary_name = "RNA", secondary_name = "H3K27me3",
   zscore_palette = ZPAL, cluster_palette = "paired",
-  show_column_names = FALSE, label_fontsize = 15, row_title_fontsize = 16,
-  legend_fontsize = 15, title_fontsize = 19,
-  label_features = LABEL_GENES, file = dual_me3, width = 10, height = 12)
+  show_column_names = FALSE, annotation_cols = "State",
+  label_features = HEATMAP_GENES, file = dual_me3, width = 5.5, height = 6.5)
 chk("RNA + H3K27me3 figure written (raw-matrix secondary path)",
     file.exists(dual_me3) && file.size(dual_me3) > 50000)
 
@@ -676,8 +669,8 @@ chk("all six modules survive the intersection", nlevels(cl3) == K)
 tri_file   <- file.path(out_dir, "10_RNA_H3K27ac_H3K27me3.png")
 state_cols <- setNames(ModuleViz:::.moduleviz_discrete_palette(3, "set2"), STATES)
 tri_col    <- ModuleViz:::.moduleviz_zscore_col_fun(ZPAL)
-tri_leg    <- ModuleViz:::.moduleviz_legend_gp(15)
-tri_marks  <- which(genes3 %in% LABEL_GENES)
+tri_leg    <- ModuleViz:::.moduleviz_legend_gp(9)
+tri_marks  <- which(genes3 %in% HEATMAP_GENES)
 
 tri_panel <- function(nm) {
   L <- layers[[nm]]
@@ -686,37 +679,37 @@ tri_panel <- function(nm) {
     L$z, name = nm, col = tri_col,
     row_split = cl3, cluster_rows = FALSE, cluster_row_slices = FALSE,
     row_title = sprintf("%s\n(n=%d)", levels(cl3), as.integer(table(cl3))),
-    row_title_rot = 0, row_title_gp = grid::gpar(fontsize = 16),
-    row_gap = grid::unit(1.5, "mm"), show_row_names = FALSE,
+    row_title_rot = 0, row_title_gp = grid::gpar(fontsize = 10),
+    row_gap = grid::unit(1, "mm"), show_row_names = FALSE,
     cluster_columns = FALSE, show_column_names = FALSE,
-    column_title = nm, column_title_gp = grid::gpar(fontsize = 19),
+    column_title = nm, column_title_gp = grid::gpar(fontsize = 11),
     top_annotation = HeatmapAnnotation(
       State = L$state, col = list(State = state_cols),
       show_annotation_name = last, show_legend = first,
-      annotation_name_gp = grid::gpar(fontsize = 16),
+      simple_anno_size = grid::unit(3, "mm"),
+      annotation_name_gp = grid::gpar(fontsize = 9),
       annotation_legend_param = tri_leg),
     left_annotation = if (first) rowAnnotation(
       Cluster = cl3,
       col = list(Cluster = ModuleViz:::.moduleviz_cluster_cols(levels(cl3), "paired")),
-      show_annotation_name = FALSE, annotation_legend_param = tri_leg,
-      width = grid::unit(4, "mm")),
+      show_annotation_name = FALSE, show_legend = FALSE,
+      simple_anno_size = grid::unit(2.5, "mm")),
     right_annotation = if (last) rowAnnotation(mark = anno_mark(
       at = tri_marks, labels = genes3[tri_marks],
-      labels_gp = grid::gpar(fontsize = 15, fontface = "italic"),
-      link_width = grid::unit(6, "mm"))),
+      labels_gp = grid::gpar(fontsize = 9, fontface = "italic"),
+      link_gp = grid::gpar(lwd = 0.5), link_width = grid::unit(4, "mm"))),
     ## the layers share one colour scale, so one legend covers all three
     show_heatmap_legend = first,
     use_raster = TRUE, raster_quality = 2,
     heatmap_legend_param = c(list(title = "z-score", direction = "horizontal",
                                   title_position = "topcenter",
-                                  legend_width = grid::unit(4, "cm")), tri_leg))
+                                  legend_width = grid::unit(2.5, "cm"),
+                                  grid_height = grid::unit(2.5, "mm")), tri_leg))
 }
 tri_ht <- Reduce(`+`, lapply(names(layers), tri_panel))
-ModuleViz:::.moduleviz_write_plot(tri_file, 12, 12, function()
+ModuleViz:::.moduleviz_write_plot(tri_file, 7, 6.5, function()
   draw(tri_ht, heatmap_legend_side = "bottom", annotation_legend_side = "bottom",
-       merge_legend = TRUE, ht_gap = grid::unit(3, "mm"),
-       column_title = "RNA + H3K27ac + H3K27me3 (linked by gene)",
-       column_title_gp = grid::gpar(fontsize = 19)))
+       merge_legend = TRUE, ht_gap = grid::unit(3, "mm")))
 chk("three-layer heatmap written",
     file.exists(tri_file) && file.size(tri_file) > 50000)
 
@@ -749,19 +742,32 @@ layer_cols <- setNames(ModuleViz:::.moduleviz_discrete_palette(3, "okabe_ito"),
                        names(layers))
 tri_lp <- file.path(out_dir, "11_three_layer_patterns.pdf")
 g3 <- ggplot(traj_sum, aes(State, z, group = Layer, color = Layer)) +
-  geom_hline(yintercept = 0, linetype = 2, color = "grey70") +
-  geom_line(linewidth = 1.1) +
-  geom_errorbar(aes(ymin = z - sd, ymax = z + sd), width = 0.12, linewidth = 0.6) +
-  geom_point(size = 2.6) +
+  geom_hline(yintercept = 0, linewidth = 0.3, color = "grey75") +
+  geom_line(linewidth = 0.7) +
+  geom_errorbar(aes(ymin = z - sd, ymax = z + sd), width = 0, linewidth = 0.4) +
+  geom_point(size = 1.5) +
   scale_color_manual(values = layer_cols) +
   facet_wrap(~ ClusterF, ncol = 3) +
-  theme_bw(base_size = 16) +
-  theme(panel.grid.minor = element_blank(), legend.position = "top",
-        legend.title = element_blank(), plot.title = element_text(size = 16)) +
-  labs(x = "Differentiation state", y = "mean z-score",
-       title = "Module patterns across RNA and chromatin layers")
-ggsave(tri_lp, g3, width = 10, height = 7)
+  ModuleViz:::.moduleviz_theme(10) +
+  theme(legend.position = "top", legend.title = element_blank()) +
+  labs(x = NULL, y = "Mean z-score")
+ggsave(tri_lp, g3, width = 6, height = 4)
 message("wrote ", tri_lp)
+## Refresh the static figures shown in the README and the CD8 vignette.
+fig_dir <- file.path("docs", "assets", "figures")
+if (dir.exists(fig_dir)) {
+  file.copy(hm_main,  file.path(fig_dir, "cd8_01_module_heatmap.png"), overwrite = TRUE)
+  file.copy(dual_ac,  file.path(fig_dir, "cd8_04_rna_vs_h3k27ac.png"), overwrite = TRUE)
+  file.copy(tri_file, file.path(fig_dir, "cd8_06_multi_heatmap.png"),  overwrite = TRUE)
+  ggsave(file.path(fig_dir, "cd8_03_module_patterns.png"), g_patterns,
+         width = 3.4, height = 6.7, dpi = 300)
+  ggsave(file.path(fig_dir, "cd8_07_multi_patterns.png"), g3,
+         width = 6, height = 4, dpi = 300)
+  tmp_cor <- file.path(fig_dir, "cd8_05_module_correlation.png")
+  module_correlation_heatmap(obj, clusters = tex_mod, corr_palette = CORPAL,
+                             file = tmp_cor, width = 4.5, height = 4.5)
+  file.rename(sub("(\\.png)$", paste0("_", tex_mod, "\\1"), tmp_cor), tmp_cor)
+}
 chk("three-layer line plot written", file.exists(tri_lp) && file.size(tri_lp) > 5000)
 chk("one point per layer x module x state", nrow(traj_sum) == 3 * K * 3)
 
@@ -774,10 +780,12 @@ chk("one point per layer x module x state", nrow(traj_sum) == 3 * K * 3)
 section("15. Supporting figures")
 MOD_COLS  <- ModuleViz:::.moduleviz_cluster_cols(levels(obj$cluster), "paired")
 MARK_COLS <- layer_cols[c("H3K27ac", "H3K27me3")]
-theme_sup <- theme_bw(base_size = 16) +
-  theme(panel.grid.minor = element_blank(), plot.title = element_text(size = 16))
+theme_sup <- ModuleViz:::.moduleviz_theme(10)
+## Supporting figures carry no title: the caption says what they show.  The
+## sizes passed in were chosen for a 16 pt base, so they are scaled to 10 pt.
 save_sup <- function(file, plot, width, height) {
-  ggsave(file, plot, width = width, height = height)
+  if (inherits(plot, "ggplot")) plot <- plot + labs(title = NULL, subtitle = NULL)
+  ggsave(file, plot, width = width * 0.62, height = height * 0.62)
   message("wrote ", file)
   chk(sprintf("%s written", basename(file)),
       file.exists(file) && file.size(file) > 4000)
@@ -850,28 +858,28 @@ chk("H3K27ac change is positively correlated with the RNA change",
 chk("H3K27ac change tracks RNA better than H3K27me3 change",
     fc_r[Mark == "H3K27ac", r] > fc_r[Mark == "H3K27me3", r])
 
-fc_lab <- fc[Gene %in% LABEL_GENES]
+fc_lab <- fc[Gene %in% HEATMAP_GENES]
 g13 <- ggplot(fc, aes(rna, chrom)) +
   geom_hline(yintercept = 0, color = "grey75") +
   geom_vline(xintercept = 0, color = "grey75") +
-  geom_point(aes(color = Cluster), size = 1.3, alpha = 0.65) +
+  geom_point(aes(color = Cluster), size = 0.7, alpha = 0.65) +
   geom_text(data = fc_r, aes(x = -Inf, y = Inf,
                              label = sprintf("r = %.2f  (n = %d)", r, n)),
-            hjust = -0.08, vjust = 1.6, size = 5.5) +
+            hjust = -0.08, vjust = 1.6, size = 3.2) +
   scale_color_manual(values = MOD_COLS) +
   facet_wrap(~ Mark, scales = "free_y") +
-  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1))) +
+  guides(color = guide_legend(override.aes = list(size = 2, alpha = 1))) +
   theme_sup + theme(legend.title = element_blank()) +
   labs(x = "RNA log2 fold change (TEX vs TN)",
        y = "chromatin log2 fold change (TEX vs TN)",
        title = "Expression change vs chromatin change at the same gene")
 g13 <- g13 + if (requireNamespace("ggrepel", quietly = TRUE)) {
-  ggrepel::geom_text_repel(data = fc_lab, aes(label = Gene), size = 4.6,
+  ggrepel::geom_text_repel(data = fc_lab, aes(label = Gene), size = 2.8,
                            fontface = "italic", max.overlaps = Inf,
                            min.segment.length = 0, segment.color = "grey40",
                            seed = 1)
 } else {
-  geom_text(data = fc_lab, aes(label = Gene), size = 4.6, fontface = "italic",
+  geom_text(data = fc_lab, aes(label = Gene), size = 2.8, fontface = "italic",
             vjust = -0.7, check_overlap = TRUE)
 }
 save_sup(file.path(out_dir, "13_foldchange_RNA_vs_chromatin.pdf"), g13, 13, 6.5)
@@ -895,7 +903,7 @@ pca[, Layer := factor(Layer, levels = unique(Layer))]
 chk("PC1 carries most of the variance in every layer",
     all(pca[, ve1[1], by = Layer]$V1 > 40))
 g14 <- ggplot(pca, aes(PC1, PC2, color = State, shape = Cohort)) +
-  geom_point(size = 4, alpha = 0.9) +
+  geom_point(size = 2, alpha = 0.9) +
   scale_color_manual(values = state_cols) +
   facet_wrap(~ Layer, scales = "free") +
   theme_sup + theme(legend.position = "top") +
@@ -966,7 +974,7 @@ if (requireNamespace("ggalluvial", quietly = TRUE)) {
     ggalluvial::geom_alluvium(aes(fill = Module), width = 0.32, alpha = 0.75) +
     ggalluvial::geom_stratum(width = 0.32, fill = "grey96", color = "grey35") +
     geom_text(stat = ggalluvial::StatStratum, aes(label = after_stat(stratum)),
-              size = 4.6, lineheight = 0.9) +
+              size = 2.8, lineheight = 0.9) +
     scale_fill_manual(values = MOD_COLS, guide = "none") +
     scale_x_continuous(breaks = 1:2, expand = c(0.08, 0.08),
                        labels = c(sprintf("k = %d (elbow)", k_sug),
@@ -996,7 +1004,7 @@ panel[, Layer := factor(Layer, levels = names(layers))]
 chk("marker panel has 16 samples per gene and layer",
     all(panel[, .N, by = .(Gene, Layer)]$N == 16))
 g17 <- ggplot(panel, aes(State, v, color = State)) +
-  geom_jitter(width = 0.14, height = 0, size = 2.2, alpha = 0.8) +
+  geom_jitter(width = 0.14, height = 0, size = 1.3, alpha = 0.8) +
   stat_summary(fun = mean, fun.min = mean, fun.max = mean, geom = "crossbar",
                width = 0.55, linewidth = 0.35, color = "grey20") +
   scale_color_manual(values = state_cols, guide = "none") +
@@ -1043,7 +1051,7 @@ if (requireNamespace("msigdbr", quietly = TRUE)) {
     geom_point(aes(size = Overlap, fill = -log10(padj)), shape = 21,
                color = "grey25", stroke = 0.4) +
     scale_fill_gradient(low = "#deebf7", high = "#08519c", name = "-log10 FDR") +
-    scale_size_area(max_size = 11, name = "genes") +
+    scale_size_area(max_size = 6, name = "genes") +
     scale_x_discrete(drop = FALSE) +
     theme_sup + theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
     labs(x = NULL, y = NULL,
@@ -1142,17 +1150,17 @@ if (!is.null(tracks)) {
     geom_area(aes(y = signal, fill = State)) +
     geom_blank(data = ceil, aes(y = signal)) +
     geom_segment(data = gm, aes(x = x0 / 1e6, xend = x1 / 1e6, y = lane, yend = lane),
-                 linewidth = 1.1, color = "grey25",
+                 linewidth = 0.6, color = "grey25",
                  arrow = grid::arrow(length = grid::unit(2, "mm"), type = "closed")) +
     geom_text(data = gm, aes(x = (Start + End) / 2e6, y = lane + 0.42, label = Name),
-              size = 3.8, fontface = "italic") +
+              size = 2.6, fontface = "italic") +
     geom_blank(data = gm, aes(x = Start / 1e6, y = 2.8)) +
     scale_fill_manual(values = state_cols, guide = "none") +
     scale_x_continuous(breaks = scales::breaks_pretty(3)) +
     facet_grid(Row ~ Locus, scales = "free", switch = "y") +
     theme_sup + theme(strip.text.y.left = element_text(angle = 0),
                       strip.placement = "outside", panel.grid = element_blank(),
-                      axis.text.y = element_text(size = 10),
+                      axis.text.y = element_text(size = 8),
                       panel.spacing.y = grid::unit(1.5, "mm")) +
     labs(x = "position (Mb, mm10)", y = NULL,
          title = "Pooled CUT&RUN signal at a naive locus and two exhaustion loci")
