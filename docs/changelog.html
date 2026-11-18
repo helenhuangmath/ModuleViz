@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Release notes &mdash; ModuleViz 1.0.0 documentation</title>
+<link rel="stylesheet" href="site.css">
+<style>
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+</head>
+<body>
+<button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">&#9776; <span>ModuleViz</span></button>
+<nav class="side" aria-label="Documentation">
+  <div class="side-head">
+    <a class="brand" href="index.html">ModuleViz</a>
+    <div class="version">1.0.0</div>
+    <input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off">
+  </div>
+  <div id="search-results" class="search-results" hidden></div>
+  <div class="side-nav" data-root="">
+<ul class="nav"><li><a href="install.html">Install ModuleViz</a></li>
+<li><a href="tutorial.html">Tutorial</a></li>
+<li><a href="functions.html">Function guide</a></li>
+<li><a href="multiomics.html">Multi-omics analysis</a></li>
+<li><a href="coherence.html">Module coherence</a></li>
+<li><a href="singlecell.html">Single-cell data</a></li>
+<li><a href="cd8.html">Published data example</a></li>
+<li><a href="public-data.html">Public time-course data</a></li>
+<li><a href="formats.html">Input and output formats</a></li>
+<li><a href="qa.html">Common Q &amp; A</a></li>
+<li><a href="vignettes.html">Vignettes</a></li>
+<li><a href="reference/index.html">Function reference</a></li>
+<li class="current"><a href="changelog.html">Release notes</a><ul>
+<li><a href="#moduleviz-100">ModuleViz 1.0.0</a>
+<ul>
+<li><a href="#new-features">New features</a></li>
+<li><a href="#bug-fixes">Bug fixes</a></li>
+<li><a href="#package">Package</a></li>
+</ul></li>
+<li><a href="#moduleviz-010">ModuleViz 0.1.0</a>
+<ul>
+<li><a href="#new-features-1">New features</a></li>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#initial-release">Initial release</a></li>
+</ul></li>
+</ul></li></ul>
+  </div>
+</nav>
+<div class="main">
+  <div class="content">
+    <div class="crumbs">
+      <span><a href="index.html">Home</a> &raquo; Release notes</span>
+      <a class="source" href="https://github.com/helenhuangmath/ModuleViz">View on GitHub</a>
+    </div>
+    <hr>
+    <article>
+<h1>Release notes</h1>
+
+<h2 id="moduleviz-100">ModuleViz 1.0.0</h2>
+<h3 id="new-features">New features</h3>
+<ul>
+<li><strong>Single-cell data.</strong> <code>pseudobulk_cells()</code> summarises a <code>SingleCellExperiment</code>, a <code>Seurat</code> object, or a (sparse) count matrix with per-cell metadata into pseudobulk profiles by sample, cell type, condition, and time point, returning a <code>SummarizedExperiment</code> that <code>longitudinal_cluster()</code> accepts directly. Counts are summed and converted to log2 CPM (<code>fun = "sum"</code>), or log-normalised values are averaged (<code>fun = "mean"</code>). <code>n_bins</code> cuts a continuous ordering such as pseudotime into bins for data without discrete time points.</li>
+<li><strong>Bioconductor containers.</strong> <code>longitudinal_cluster()</code>, <code>run_longitudinal()</code>, and the layers of <code>multi_cluster()</code> accept a <code>SummarizedExperiment</code>; sample metadata is taken from <code>colData</code> and the assay is chosen with <code>assay</code>.</li>
+<li><strong>Module enrichment.</strong> <code>module_enrichment()</code> tests every module of a <code>longi</code> or <code>multi_longi</code> object for over-representation of user-supplied gene sets (a named list, a two-column data frame, or a GMT file) with a hypergeometric test. <code>longitudinal_heatmap()</code>, <code>multi_heatmap()</code>, and <code>dual_heatmap()</code> gain <code>enrichment</code>, which prints the top terms beside each module (<code>enrichment_top_n</code>, <code>enrichment_padj</code>, <code>enrichment_fontsize</code>). <code>enrichment_dotplot()</code> draws the same table as a dot plot.</li>
+<li><strong>More clustering algorithms.</strong> Besides <code>"kmeans"</code> (still the default), <code>"hierarchical"</code>, and <code>"pam"</code>, <code>method</code> now accepts <code>"clara"</code> (PAM on sub-samples, for tens of thousands of features) and <code>"fuzzy"</code> (fuzzy c-means, which adds a <code>Membership</code> score to the membership table). <code>choose_k()</code> supports all of them.</li>
+<li><strong>Publication-style figure defaults.</strong> Every plot now draws with less text and smaller, consistent type (9-11 pt), sized for a journal column rather than a slide. Heatmaps print only the time point under each column (<code>column_labels = "time"</code>; <code>"sample"</code> restores the full sample names), show the group as a single top bar, drop the redundant module legend, and leave the stability bar off unless <code>show_stability = TRUE</code>. <code>multi_heatmap()</code> gives every layer the same panel width (<code>layer_widths</code>) and no longer adds an overall title; <code>dual_heatmap()</code> gains <code>annotation_cols</code> / <code>annotation_colors</code>. Line and dot plots use one clean theme (no grid, no strip boxes), have no title by default, and keep x labels horizontal. <code>module_correlation_heatmap()</code> labels 15 features by default and omits the dendrogram. Font sizes, titles, labels, and figure sizes can still be set through the existing arguments.</li>
+<li><strong>Trend plots.</strong> <code>pattern_lineplot()</code> and <code>multi_lineplot()</code> stack the modules in a single column by default, matching the heatmap's row order; <code>ncol</code> wraps them into a grid in every case (it was previously ignored when the object had a group column). <code>multi_lineplot()</code> distinguishes groups by line type and gains <code>split_groups = TRUE</code> for the earlier one-column-per-group layout.</li>
+<li><code>time_col</code> may be a factor (level order) or character (order of first appearance) as well as numeric.</li>
+<li><code>select_variable_features()</code> keeps the most variable features of a matrix or <code>SummarizedExperiment</code>, and <code>simulate_single_cell_example()</code> generates a small single-cell time course for examples and tests.</li>
+<li>Heatmaps can be written to <code>.svg</code>, <code>.tiff</code>, and <code>.jpeg</code> as well as <code>.pdf</code> and <code>.png</code>.</li>
+</ul>
+<h3 id="bug-fixes">Bug fixes</h3>
+<ul>
+<li><code>aggregate_replicates = TRUE</code> no longer turns a non-numeric time column into <code>NA</code>, no longer breaks on group names containing <code>|</code>, and now keeps every metadata column that is constant within a group-by-time cell instead of dropping all but the sample, group, and time columns.</li>
+<li><code>pattern_lineplot()</code> showed integer codes on the x axis for non-numeric time points without a group column, and <code>NA</code> with one; both now show the labels in order.</li>
+<li>Sample IDs that are numbers or factors were used as column positions rather than names when reordering the matrix.</li>
+<li><code>dist_method = "correlation"</code> failed when a feature was constant (undefined correlation); such features are now treated as uncorrelated.</li>
+<li><code>choose_k()</code> failed for a single candidate <code>k</code> or when no <code>k</code> in <code>k_range</code> was usable; its plot title no longer says "k-means" for other methods.</li>
+<li>Clustering with <code>k</code> equal to one or to the number of features, a single time point, or a module that is empty at one time point no longer errors.</li>
+<li><code>resolve_labels()</code> matched explicit features by substring before trying a whole-token match, so <code>"Il2"</code> also labelled <code>Il2ra</code> and <code>Il21</code>; unmatched features are now reported.</li>
+<li><code>multi_lineplot()</code> failed when layers stored time in different types.</li>
+<li>Random-number use no longer changes the session's RNG state: <code>seed</code> is applied locally, and <code>seed = NULL</code> defers to the caller's <code>set.seed()</code>.</li>
+<li>Features with missing or non-finite values are reported when dropped, and missing metadata columns, duplicated sample IDs, missing time values, and non-numeric input now produce clear errors.</li>
+<li><code>.Rbuildignore</code> patterns were double-escaped and did not match, so <code>docs/</code> and local build artifacts were included in the source tarball.</li>
+</ul>
+<h3 id="package">Package</h3>
+<ul>
+<li>Meets Bioconductor submission checks: every exported function has a runnable example, the source tarball is below 5 MB, and dependencies on <code>SummarizedExperiment</code>, <code>S4Vectors</code>, <code>Matrix</code>, and <code>withr</code> are declared.</li>
+<li><code>heatmap_example</code> is no longer lazy-loaded; use <code>data("heatmap_example")</code>.</li>
+<li>The deprecated alias <code>dual_omics_heatmap()</code> has been removed; use <code>dual_heatmap()</code>.</li>
+</ul>
+<h2 id="moduleviz-010">ModuleViz 0.1.0</h2>
+<h3 id="new-features-1">New features</h3>
+<ul>
+<li><code>multi_cluster()</code>, <code>multi_heatmap()</code>, and <code>multi_lineplot()</code> extend the paired heatmap to any number of layers, for example RNA + ATAC + H3K27ac + H3K27me3. Layers can be <code>longi</code> objects or raw matrices with per-layer or shared metadata. Each layer is collapsed to one row per gene and drawn as its own panel with a shared module split and one z-score legend. <code>cluster_by</code> chooses which layer defines the modules, or <code>"joint"</code> clusters the concatenated profiles of all layers. <code>gene_set = "reference"</code> keeps genes missing from some layers and draws those cells in grey. <code>multi_lineplot()</code> draws each module's trajectory in every layer, with error bars across replicates.</li>
+<li><code>dual_omics_heatmap()</code> is renamed <code>dual_heatmap()</code> and is now the two-layer case of <code>multi_heatmap()</code>. Its arguments and return value are unchanged, and the two layers now share a single z-score legend. The old name still works but is deprecated.</li>
+<li>Heatmaps use larger default text and are slightly narrower: gene labels are 15 pt (from 10), module names 16 pt (from 10), sample names 13 pt, annotation names and legends 14 pt, and titles 17 pt. Default widths are 8 in for <code>longitudinal_heatmap()</code> (from 9), 10.5 in for <code>dual_heatmap()</code> (from 12), and 6.5 in for <code>module_correlation_heatmap()</code> (from 7), whose labels, legend, and title also grow to 12, 14, and 16 pt.</li>
+<li>Heatmap row titles now give only the module size (<code>n=</code>). Module stability remains available as the <code>Stability</code> bar in <code>longitudinal_heatmap()</code> and in the object's <code>stability</code> table.</li>
+<li><code>multi_heatmap()</code> separates the data-type panels with a 10 mm gap, adjustable with <code>layer_gap</code>.</li>
+<li><code>module_correlation_heatmap()</code> draws a square heatmap body by default, sized to fit the figure after the labels, title, and legend (<code>square = FALSE</code> lets it stretch as before).</li>
+<li><code>write_memberships()</code> also accepts <code>multi_longi</code> objects.</li>
+<li><code>module_correlation_heatmap()</code> draws a gene-gene correlation heatmap for each temporal module, exposing modules that are averaging over more than one programme. Large modules are subsampled (<code>max_genes</code>, <code>select</code>); a <code>.pdf</code> destination collects every module as one multi-page file, any other extension writes one file per module.</li>
+<li><code>module_correlation_summary()</code> returns the mean within-module correlation for every module without drawing anything.</li>
+<li><code>longitudinal_heatmap()</code> and <code>dual_heatmap()</code> gain <code>show_column_names</code>, for datasets whose sample IDs are long or uninformative and whose annotation bars already identify each column.</li>
+<li>All heatmaps gain <code>legend_fontsize</code> and <code>title_fontsize</code>, so legend and title text can be scaled up for print alongside the existing <code>label_fontsize</code>, <code>row_title_fontsize</code>, <code>column_name_fontsize</code>, and <code>annotation_name_fontsize</code>.</li>
+<li><code>choose_k()</code> gains <code>chosen_k</code>, which marks the module count actually used as a solid line beside the dashed elbow, keeping the diagnostic figure consistent with the rest of an analysis when the reported <code>k</code> differs from the heuristic, and <code>annotate_k = FALSE</code> for a bare elbow curve with no markers or subtitle.</li>
+<li><code>pattern_lineplot()</code> gains <code>group_colors</code>, a named vector of explicit colours for the group lines, matching what <code>annotation_colors</code> already does for heatmap annotation bars.</li>
+<li><code>longitudinal_heatmap()</code> now warns when an entry of <code>annotation_cols</code> is not present in the object's metadata instead of dropping it silently. This bites after <code>aggregate_replicates = TRUE</code>, which rebuilds the metadata with only the sample, group, and time columns.</li>
+<li><code>pattern_lineplot()</code> gains <code>title</code>, <code>title_fontsize</code>, <code>xlab</code>, <code>time_labels</code>, <code>x_angle</code>, <code>line_width</code>, and <code>point_size</code>. <code>time_labels</code> relabels the x axis when the ordering column is an integer rank (<code>1, 2, 3</code> -&gt; <code>TN, TMEM, TEX</code>), and the title no longer inflates with <code>base_size</code>.</li>
+<li><code>module_correlation_heatmap()</code> now uses every feature in a module by default (<code>max_genes = Inf</code>) and labels the strongest <code>label_top_n = 30</code> via link lines when printing all names would be unreadable. Ordering is computed on the correlation matrix directly rather than by re-correlating correlation profiles, which was needlessly slow for modules of ~1000 features.</li>
+</ul>
+<h3 id="documentation">Documentation</h3>
+<ul>
+<li>New main vignette, <code>vignette("ModuleViz")</code>: a full user guide covering input requirements, the clustering and module-ordering rules, stability, palettes, every plot type, paired omics, and an FAQ, with evaluated figures throughout.</li>
+<li>New vignette <code>vignette("cd8-exhaustion-published-data")</code>: an end-to-end walkthrough on published GEO data (GSE285248 RNA-seq + GSE285245 CUT&amp;RUN).</li>
+<li>New <code>examples/example_module_correlation.R</code>.</li>
+</ul>
+<h3 id="initial-release">Initial release</h3>
+<ul>
+<li>Initial package release.</li>
+<li>Adds temporal module clustering, ordered longitudinal heatmaps, module trajectory plots, membership exports, dual-omics heatmaps, public real-data loading helpers, examples, and a tutorial vignette.</li>
+</ul>
+
+    </article>
+    <footer>
+      <div class="prevnext"><a class="btn prev" href="reference/write_memberships.html" title="write_memberships">&larr; Previous</a></div>
+      <hr>
+      <p>&copy; Copyright 2026, Hua Huang. ModuleViz 1.0.0 is distributed under the MIT license.</p>
+      <p>Built with R and pandoc from the package README, NEWS, and help pages.</p>
+    </footer>
+  </div>
+</div>
+<script src="search-index.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

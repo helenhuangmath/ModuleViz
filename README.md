@@ -6,6 +6,8 @@
 
 Source: `vignettes/ModuleViz.Rmd`
 
+Documentation and tutorial: <https://helenhuangmath.github.io/ModuleViz/>
+
 ## Introduction
 
 `ModuleViz` is an R package for clustering and visualizing longitudinal

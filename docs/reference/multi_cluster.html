@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>multi_cluster &mdash; ModuleViz 1.0.0 documentation</title>
+<link rel="stylesheet" href="../site.css">
+<style>
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+</head>
+<body>
+<button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">&#9776; <span>ModuleViz</span></button>
+<nav class="side" aria-label="Documentation">
+  <div class="side-head">
+    <a class="brand" href="../index.html">ModuleViz</a>
+    <div class="version">1.0.0</div>
+    <input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off">
+  </div>
+  <div id="search-results" class="search-results" hidden></div>
+  <div class="side-nav" data-root="../">
+<ul class="nav"><li><a href="../install.html">Install ModuleViz</a></li>
+<li><a href="../tutorial.html">Tutorial</a></li>
+<li><a href="../functions.html">Function guide</a></li>
+<li><a href="../multiomics.html">Multi-omics analysis</a></li>
+<li><a href="../coherence.html">Module coherence</a></li>
+<li><a href="../singlecell.html">Single-cell data</a></li>
+<li><a href="../cd8.html">Published data example</a></li>
+<li><a href="../public-data.html">Public time-course data</a></li>
+<li><a href="../formats.html">Input and output formats</a></li>
+<li><a href="../qa.html">Common Q &amp; A</a></li>
+<li><a href="../vignettes.html">Vignettes</a></li>
+<li class="open"><a href="../reference/index.html">Function reference</a><ul><li><a href="../reference/choose_k.html">choose_k</a></li><li><a href="../reference/cluster_stability.html">cluster_stability</a></li><li><a href="../reference/dual_heatmap.html">dual_heatmap</a></li><li><a href="../reference/heatmap_example.html">heatmap_example</a></li><li><a href="../reference/load_real_timecourse_example.html">load_real_timecourse_example</a></li><li><a href="../reference/longitudinal_cluster.html">longitudinal_cluster</a></li><li><a href="../reference/longitudinal_heatmap.html">longitudinal_heatmap</a></li><li><a href="../reference/module_correlation_heatmap.html">module_correlation_heatmap</a></li><li><a href="../reference/module_enrichment.html">module_enrichment</a></li><li><a href="../reference/ModuleViz-package.html">ModuleViz-package</a></li><li class="current"><a href="../reference/multi_cluster.html">multi_cluster</a><ul><li><a href="#description">Description</a></li><li><a href="#usage">Usage</a></li><li><a href="#arguments">Arguments</a></li><li><a href="#details">Details</a></li><li><a href="#value">Value</a></li><li><a href="#examples">Examples</a></li></ul></li><li><a href="../reference/multi_heatmap.html">multi_heatmap</a></li><li><a href="../reference/multi_lineplot.html">multi_lineplot</a></li><li><a href="../reference/pattern_lineplot.html">pattern_lineplot</a></li><li><a href="../reference/pseudobulk_cells.html">pseudobulk_cells</a></li><li><a href="../reference/run_longitudinal.html">run_longitudinal</a></li><li><a href="../reference/select_variable_features.html">select_variable_features</a></li><li><a href="../reference/simulate_single_cell_example.html">simulate_single_cell_example</a></li><li><a href="../reference/write_memberships.html">write_memberships</a></li></ul></li>
+<li><a href="../changelog.html">Release notes</a></li></ul>
+  </div>
+</nav>
+<div class="main">
+  <div class="content">
+    <div class="crumbs">
+      <span><a href="../index.html">Home</a> &raquo; <a href="index.html">Function reference</a> &raquo; multi_cluster</span>
+      <a class="source" href="https://github.com/helenhuangmath/ModuleViz">View on GitHub</a>
+    </div>
+    <hr>
+    <article>
+<h1>multi_cluster</h1>
+<p class="ref-title">Cluster several omics layers into shared modules, linked by gene</p>
+
+
+
+
+
+
+<h2 id="description">Description</h2>
+
+<p>Align any number of omics layers (for example RNA, ATAC, H3K27ac, and
+H3K27me3) by gene and assign every gene to one temporal module. Each layer is
+z-scored within itself and collapsed to one row per gene, so layers with
+different feature types (genes, peaks, CUT&amp;RUN regions) line up row for row.
+</p>
+
+
+<h2 id="usage">Usage</h2>
+
+<pre class="sourceCode r"><code>multi_cluster(layers, meta = NULL, sample_col = "SampleID",
+  time_col = "TimeHr", group_col = NULL, cluster_by = 1, gene_of = NULL,
+  aggregate = c("mean", "top"), gene_set = c("intersect", "reference"),
+  balance_layers = TRUE, ...)
+</code></pre>
+
+
+<h2 id="arguments">Arguments</h2>
+
+<table role = "presentation">
+<tr><td><code id="layers">layers</code></td>
+<td>
+<p>Named list of at least two layers. Each entry is a <code>longi</code>
+object or a raw features x samples matrix. Names become panel titles.</p>
+</td></tr>
+<tr><td><code id="meta">meta</code></td>
+<td>
+<p>Sample metadata for raw-matrix layers: one data frame shared by all
+layers, or a named list with one data frame per layer. <code>longi</code> layers carry
+their own metadata.</p>
+</td></tr>
+<tr><td><code id="sample_col">sample_col</code>, <code id="time_col">time_col</code>, <code id="group_col">group_col</code></td>
+<td>
+<p>Metadata columns for raw-matrix layers,
+as in <code>longitudinal_cluster()</code>.</p>
+</td></tr>
+<tr><td><code id="cluster_by">cluster_by</code></td>
+<td>
+<p>Which layer defines the modules: a layer name or index
+(default: the first layer), or <code>"joint"</code> to cluster the concatenated
+per-gene profiles of every layer together.</p>
+</td></tr>
+<tr><td><code id="gene_of">gene_of</code></td>
+<td>
+<p>Function mapping row IDs to gene symbols, either one function for
+every layer or a list with one per layer (by name or position). By default the
+first layer's IDs are used as-is and every other layer takes the text after the
+last underscore, so <code>peak1243_Pdcd1</code> maps to <code>Pdcd1</code>.</p>
+</td></tr>
+<tr><td><code id="aggregate">aggregate</code></td>
+<td>
+<p>How to collapse several features per gene: <code>"mean"</code>
+averages them, <code>"top"</code> keeps the feature with the strongest |z|.</p>
+</td></tr>
+<tr><td><code id="gene_set">gene_set</code></td>
+<td>
+<p><code>"intersect"</code> keeps genes present in every layer;
+<code>"reference"</code> keeps every row of the <code>cluster_by</code> layer and leaves
+layers without that gene as <code>NA</code>.</p>
+</td></tr>
+<tr><td><code id="balance_layers">balance_layers</code></td>
+<td>
+<p>Joint clustering only: weight each layer's columns by
+1/sqrt(number of columns) so a layer with many samples does not dominate the
+distance.</p>
+</td></tr>
+<tr><td><code id="...">...</code></td>
+<td>
+<p>Passed to <code>longitudinal_cluster()</code> (<code>k</code>, <code>method</code>,
+<code>stability</code>, ...) when the clustering layer is a raw matrix, and always
+for <code>cluster_by = "joint"</code>.</p>
+</td></tr>
+</table>
+
+
+<h2 id="details">Details</h2>
+
+<p>With <code>cluster_by</code> set to a layer, that layer alone defines the modules and
+row order and the other layers are displayed in the same order, as in
+<code>dual_heatmap()</code>. With <code>cluster_by = "joint"</code> a module groups
+genes whose trajectories agree across all layers. Joint clustering needs a time
+column in every layer's metadata. To collapse replicates, pass per-layer
+<code>longitudinal_cluster(..., aggregate_replicates = TRUE)</code> objects.
+</p>
+
+
+<h2 id="value">Value</h2>
+
+<p>An object of class <code>multi_longi</code>: a list with <code>layers</code>
+(per-layer aligned z-score matrix and metadata), <code>cluster</code>, <code>genes</code>,
+<code>membership</code>, <code>stability</code>, <code>reference</code> (the <code>longi</code> object
+the modules came from), and <code>params</code>.</p>
+
+
+<h2 id="examples">Examples</h2>
+
+<pre class="sourceCode r"><code>data("heatmap_example", package = "ModuleViz")
+mat &lt;- heatmap_example$mat
+atac &lt;- mat[rep(rownames(mat), each = 2), ]
+rownames(atac) &lt;- paste0("peak", seq_len(nrow(atac)), "_", rownames(atac))
+x &lt;- multi_cluster(list(RNA = mat, ATAC = atac),
+                         meta = heatmap_example$meta, sample_col = "SampleID",
+                         time_col = "TimeHr", group_col = "Condition",
+                         k = 4, stability = FALSE)
+x
+</code></pre>
+
+
+    </article>
+    <footer>
+      <div class="prevnext"><a class="btn prev" href="../reference/ModuleViz-package.html" title="ModuleViz-package">&larr; Previous</a><a class="btn next" href="../reference/multi_heatmap.html" title="multi_heatmap">Next &rarr;</a></div>
+      <hr>
+      <p>&copy; Copyright 2026, Hua Huang. ModuleViz 1.0.0 is distributed under the MIT license.</p>
+      <p>Built with R and pandoc from the package README, NEWS, and help pages.</p>
+    </footer>
+  </div>
+</div>
+<script src="../search-index.js"></script>
+<script src="../site.js"></script>
+</body>
+</html>

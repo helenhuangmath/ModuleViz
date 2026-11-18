@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>multi_heatmap &mdash; ModuleViz 1.0.0 documentation</title>
+<link rel="stylesheet" href="../site.css">
+<style>
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+</head>
+<body>
+<button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">&#9776; <span>ModuleViz</span></button>
+<nav class="side" aria-label="Documentation">
+  <div class="side-head">
+    <a class="brand" href="../index.html">ModuleViz</a>
+    <div class="version">1.0.0</div>
+    <input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off">
+  </div>
+  <div id="search-results" class="search-results" hidden></div>
+  <div class="side-nav" data-root="../">
+<ul class="nav"><li><a href="../install.html">Install ModuleViz</a></li>
+<li><a href="../tutorial.html">Tutorial</a></li>
+<li><a href="../functions.html">Function guide</a></li>
+<li><a href="../multiomics.html">Multi-omics analysis</a></li>
+<li><a href="../coherence.html">Module coherence</a></li>
+<li><a href="../singlecell.html">Single-cell data</a></li>
+<li><a href="../cd8.html">Published data example</a></li>
+<li><a href="../public-data.html">Public time-course data</a></li>
+<li><a href="../formats.html">Input and output formats</a></li>
+<li><a href="../qa.html">Common Q &amp; A</a></li>
+<li><a href="../vignettes.html">Vignettes</a></li>
+<li class="open"><a href="../reference/index.html">Function reference</a><ul><li><a href="../reference/choose_k.html">choose_k</a></li><li><a href="../reference/cluster_stability.html">cluster_stability</a></li><li><a href="../reference/dual_heatmap.html">dual_heatmap</a></li><li><a href="../reference/heatmap_example.html">heatmap_example</a></li><li><a href="../reference/load_real_timecourse_example.html">load_real_timecourse_example</a></li><li><a href="../reference/longitudinal_cluster.html">longitudinal_cluster</a></li><li><a href="../reference/longitudinal_heatmap.html">longitudinal_heatmap</a></li><li><a href="../reference/module_correlation_heatmap.html">module_correlation_heatmap</a></li><li><a href="../reference/module_enrichment.html">module_enrichment</a></li><li><a href="../reference/ModuleViz-package.html">ModuleViz-package</a></li><li><a href="../reference/multi_cluster.html">multi_cluster</a></li><li class="current"><a href="../reference/multi_heatmap.html">multi_heatmap</a><ul><li><a href="#description">Description</a></li><li><a href="#usage">Usage</a></li><li><a href="#arguments">Arguments</a></li><li><a href="#value">Value</a></li><li><a href="#examples">Examples</a></li></ul></li><li><a href="../reference/multi_lineplot.html">multi_lineplot</a></li><li><a href="../reference/pattern_lineplot.html">pattern_lineplot</a></li><li><a href="../reference/pseudobulk_cells.html">pseudobulk_cells</a></li><li><a href="../reference/run_longitudinal.html">run_longitudinal</a></li><li><a href="../reference/select_variable_features.html">select_variable_features</a></li><li><a href="../reference/simulate_single_cell_example.html">simulate_single_cell_example</a></li><li><a href="../reference/write_memberships.html">write_memberships</a></li></ul></li>
+<li><a href="../changelog.html">Release notes</a></li></ul>
+  </div>
+</nav>
+<div class="main">
+  <div class="content">
+    <div class="crumbs">
+      <span><a href="../index.html">Home</a> &raquo; <a href="index.html">Function reference</a> &raquo; multi_heatmap</span>
+      <a class="source" href="https://github.com/helenhuangmath/ModuleViz">View on GitHub</a>
+    </div>
+    <hr>
+    <article>
+<h1>multi_heatmap</h1>
+<p class="ref-title">Draw several omics layers side by side, linked by gene</p>
+
+
+
+
+
+
+<h2 id="description">Description</h2>
+
+<p>One heatmap panel per layer (for example RNA | ATAC | H3K27ac | H3K27me3), all
+sharing the module split and row order from <code>multi_cluster()</code>. The
+layers share one z-score colour scale, so one legend covers every panel; each
+panel has its own metadata annotation bars, coloured consistently across
+layers.
+</p>
+
+
+<h2 id="usage">Usage</h2>
+
+<pre class="sourceCode r"><code>multi_heatmap(x, annotation_cols = NULL, annotation_colors = NULL,
+  label_features = NULL, top_n_label = 0, col_fun = NULL,
+  zscore_palette = c("rdbu", "viridis"), zscore_limits = c(-2, 2),
+  cluster_palette = "paired", annotation_palette = "set2",
+  na_col = "grey85", label_fontsize = 9, row_title_fontsize = 10,
+  column_name_fontsize = 9, annotation_name_fontsize = 9,
+  legend_fontsize = 9, title_fontsize = 11, show_column_names = TRUE,
+  layer_gap = 5, title = NULL, file = NULL, width = NULL, height = 6.5, ...,
+  enrichment = NULL, enrichment_top_n = 3, enrichment_padj = 0.05,
+  enrichment_fontsize = 9, column_labels = c("time", "sample"),
+  layer_widths = c("equal", "samples"))
+</code></pre>
+
+
+<h2 id="arguments">Arguments</h2>
+
+<table role = "presentation">
+<tr><td><code id="enrichment">enrichment</code></td>
+<td>
+<p>Optional module enrichment table from
+<code>module_enrichment</code> (or any data frame with <code>Cluster</code>,
+<code>Term</code>, and <code>Padj</code> columns). The top terms of every module are
+printed to the right of the last panel.</p>
+</td></tr>
+<tr><td><code id="enrichment_top_n">enrichment_top_n</code></td>
+<td>
+<p>Number of enriched terms shown per module.</p>
+</td></tr>
+<tr><td><code id="enrichment_padj">enrichment_padj</code></td>
+<td>
+<p>Adjusted p-value cutoff for a term to be shown.</p>
+</td></tr>
+<tr><td><code id="enrichment_fontsize">enrichment_fontsize</code></td>
+<td>
+<p>Font size of the enrichment text.</p>
+</td></tr>
+<tr><td><code id="x">x</code></td>
+<td>
+<p>A <code>multi_longi</code> object, or a named list of layers, which is passed
+to <code>multi_cluster()</code> together with <code>...</code>.</p>
+</td></tr>
+<tr><td><code id="annotation_cols">annotation_cols</code></td>
+<td>
+<p>Metadata columns shown as top bars on each layer.
+Defaults to each layer's group column (plus the time column when the time
+points are not printed under the columns); <code>character(0)</code> for none.</p>
+</td></tr>
+<tr><td><code id="annotation_colors">annotation_colors</code></td>
+<td>
+<p>Optional named list mapping annotation to colours.</p>
+</td></tr>
+<tr><td><code id="label_features">label_features</code></td>
+<td>
+<p>Genes or IDs to label on the right of the last panel.</p>
+</td></tr>
+<tr><td><code id="top_n_label">top_n_label</code></td>
+<td>
+<p>Automatic labels per module, ranked by the largest |z| across
+all layers (0 = none).</p>
+</td></tr>
+<tr><td><code id="col_fun">col_fun</code></td>
+<td>
+<p>Optional z-score colour function. Overrides <code>zscore_palette</code>.</p>
+</td></tr>
+<tr><td><code id="zscore_palette">zscore_palette</code></td>
+<td>
+<p><code>"rdbu"</code> (default) or <code>"viridis"</code>, shared by every
+layer.</p>
+</td></tr>
+<tr><td><code id="zscore_limits">zscore_limits</code></td>
+<td>
+<p>Length-2 z-score range at which the colour scale saturates.</p>
+</td></tr>
+<tr><td><code id="cluster_palette">cluster_palette</code></td>
+<td>
+<p>Discrete module colour palette.</p>
+</td></tr>
+<tr><td><code id="annotation_palette">annotation_palette</code></td>
+<td>
+<p>Discrete palette for categorical metadata bars.</p>
+</td></tr>
+<tr><td><code id="na_col">na_col</code></td>
+<td>
+<p>Colour for genes missing from a layer (<code>gene_set = "reference"</code>).</p>
+</td></tr>
+<tr><td><code id="label_fontsize">label_fontsize</code>, <code id="row_title_fontsize">row_title_fontsize</code>, <code id="column_name_fontsize">column_name_fontsize</code></td>
+<td>
+<p>Text sizes for
+gene labels, module names, and sample names.</p>
+</td></tr>
+<tr><td><code id="annotation_name_fontsize">annotation_name_fontsize</code>, <code id="legend_fontsize">legend_fontsize</code>, <code id="title_fontsize">title_fontsize</code></td>
+<td>
+<p>Text sizes for
+annotation names, legends, and panel / figure titles.</p>
+</td></tr>
+<tr><td><code id="show_column_names">show_column_names</code></td>
+<td>
+<p>Show column labels along the bottom of every layer.</p>
+</td></tr>
+<tr><td><code id="column_labels">column_labels</code></td>
+<td>
+<p><code>"time"</code> (default) prints only the time point under
+each column; <code>"sample"</code> prints the full sample names.</p>
+</td></tr>
+<tr><td><code id="layer_gap">layer_gap</code></td>
+<td>
+<p>Gap between the layer panels, in mm.</p>
+</td></tr>
+<tr><td><code id="layer_widths">layer_widths</code></td>
+<td>
+<p><code>"equal"</code> (default) gives every layer the same panel
+width; <code>"samples"</code> makes each panel as wide as its number of samples.</p>
+</td></tr>
+<tr><td><code id="title">title</code></td>
+<td>
+<p>Optional overall title; none by default, since each panel is
+already headed by its layer name.</p>
+</td></tr>
+<tr><td><code id="file">file</code></td>
+<td>
+<p>Optional PDF or PNG output path.</p>
+</td></tr>
+<tr><td><code id="width">width</code>, <code id="height">height</code></td>
+<td>
+<p>Size in inches; <code>width</code> defaults to 2.5 + 2 per layer.</p>
+</td></tr>
+<tr><td><code id="...">...</code></td>
+<td>
+<p>Passed to <code>multi_cluster()</code> when <code>x</code> is a list.</p>
+</td></tr>
+</table>
+
+
+<h2 id="value">Value</h2>
+
+<p>The <code>multi_longi</code> object invisibly, with the drawn
+<code>HeatmapList</code> in <code>$heatmap</code>.</p>
+
+
+<h2 id="examples">Examples</h2>
+
+<pre class="sourceCode r"><code>data("heatmap_example", package = "ModuleViz")
+mat &lt;- heatmap_example$mat
+atac &lt;- mat[rep(rownames(mat), each = 2), ]
+rownames(atac) &lt;- paste0("peak", seq_len(nrow(atac)), "_", rownames(atac))
+k27 &lt;- -mat
+rownames(k27) &lt;- paste0("region", seq_len(nrow(k27)), "_", rownames(k27))
+res &lt;- multi_heatmap(list(RNA = mat, ATAC = atac, H3K27me3 = k27),
+                           meta = heatmap_example$meta,
+                           sample_col = "SampleID", time_col = "TimeHr",
+                           group_col = "Condition", k = 4, stability = FALSE,
+                           file = tempfile(fileext = ".pdf"))
+</code></pre>
+
+
+    </article>
+    <footer>
+      <div class="prevnext"><a class="btn prev" href="../reference/multi_cluster.html" title="multi_cluster">&larr; Previous</a><a class="btn next" href="../reference/multi_lineplot.html" title="multi_lineplot">Next &rarr;</a></div>
+      <hr>
+      <p>&copy; Copyright 2026, Hua Huang. ModuleViz 1.0.0 is distributed under the MIT license.</p>
+      <p>Built with R and pandoc from the package README, NEWS, and help pages.</p>
+    </footer>
+  </div>
+</div>
+<script src="../search-index.js"></script>
+<script src="../site.js"></script>
+</body>
+</html>

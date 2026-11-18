@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>module_enrichment &mdash; ModuleViz 1.0.0 documentation</title>
+<link rel="stylesheet" href="../site.css">
+<style>
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+</head>
+<body>
+<button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">&#9776; <span>ModuleViz</span></button>
+<nav class="side" aria-label="Documentation">
+  <div class="side-head">
+    <a class="brand" href="../index.html">ModuleViz</a>
+    <div class="version">1.0.0</div>
+    <input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off">
+  </div>
+  <div id="search-results" class="search-results" hidden></div>
+  <div class="side-nav" data-root="../">
+<ul class="nav"><li><a href="../install.html">Install ModuleViz</a></li>
+<li><a href="../tutorial.html">Tutorial</a></li>
+<li><a href="../functions.html">Function guide</a></li>
+<li><a href="../multiomics.html">Multi-omics analysis</a></li>
+<li><a href="../coherence.html">Module coherence</a></li>
+<li><a href="../singlecell.html">Single-cell data</a></li>
+<li><a href="../cd8.html">Published data example</a></li>
+<li><a href="../public-data.html">Public time-course data</a></li>
+<li><a href="../formats.html">Input and output formats</a></li>
+<li><a href="../qa.html">Common Q &amp; A</a></li>
+<li><a href="../vignettes.html">Vignettes</a></li>
+<li class="open"><a href="../reference/index.html">Function reference</a><ul><li><a href="../reference/choose_k.html">choose_k</a></li><li><a href="../reference/cluster_stability.html">cluster_stability</a></li><li><a href="../reference/dual_heatmap.html">dual_heatmap</a></li><li><a href="../reference/heatmap_example.html">heatmap_example</a></li><li><a href="../reference/load_real_timecourse_example.html">load_real_timecourse_example</a></li><li><a href="../reference/longitudinal_cluster.html">longitudinal_cluster</a></li><li><a href="../reference/longitudinal_heatmap.html">longitudinal_heatmap</a></li><li><a href="../reference/module_correlation_heatmap.html">module_correlation_heatmap</a></li><li class="current"><a href="../reference/module_enrichment.html">module_enrichment</a><ul><li><a href="#description">Description</a></li><li><a href="#usage">Usage</a></li><li><a href="#arguments">Arguments</a></li><li><a href="#details">Details</a></li><li><a href="#value">Value</a></li><li><a href="#see-also">See Also</a></li><li><a href="#examples">Examples</a></li></ul></li><li><a href="../reference/ModuleViz-package.html">ModuleViz-package</a></li><li><a href="../reference/multi_cluster.html">multi_cluster</a></li><li><a href="../reference/multi_heatmap.html">multi_heatmap</a></li><li><a href="../reference/multi_lineplot.html">multi_lineplot</a></li><li><a href="../reference/pattern_lineplot.html">pattern_lineplot</a></li><li><a href="../reference/pseudobulk_cells.html">pseudobulk_cells</a></li><li><a href="../reference/run_longitudinal.html">run_longitudinal</a></li><li><a href="../reference/select_variable_features.html">select_variable_features</a></li><li><a href="../reference/simulate_single_cell_example.html">simulate_single_cell_example</a></li><li><a href="../reference/write_memberships.html">write_memberships</a></li></ul></li>
+<li><a href="../changelog.html">Release notes</a></li></ul>
+  </div>
+</nav>
+<div class="main">
+  <div class="content">
+    <div class="crumbs">
+      <span><a href="../index.html">Home</a> &raquo; <a href="index.html">Function reference</a> &raquo; module_enrichment</span>
+      <a class="source" href="https://github.com/helenhuangmath/ModuleViz">View on GitHub</a>
+    </div>
+    <hr>
+    <article>
+<h1>module_enrichment</h1>
+<p class="ref-title">Gene-set enrichment of temporal modules</p>
+
+
+
+
+
+
+<h2 id="description">Description</h2>
+
+<p><code>module_enrichment()</code> tests every module for over-representation of each
+gene set with a one-sided hypergeometric test. The result can be passed to the
+<code>enrichment</code> argument of <code>longitudinal_heatmap</code>,
+<code>multi_heatmap</code>, and <code>dual_heatmap</code> to print the top
+terms beside each module, or drawn on its own with <code>enrichment_dotplot()</code>.
+</p>
+
+
+<h2 id="usage">Usage</h2>
+
+<pre class="sourceCode r"><code>module_enrichment(obj, gene_sets, universe = NULL, gene_of = NULL,
+  min_size = 5, max_size = 500, min_overlap = 2, p_adjust_method = "BH")
+
+enrichment_dotplot(enrichment, top_n = 5, padj_cutoff = 0.05,
+  base_size = 10, title = NULL, file = NULL, width = NULL,
+  height = NULL)
+</code></pre>
+
+
+<h2 id="arguments">Arguments</h2>
+
+<table role = "presentation">
+<tr><td><code id="obj">obj</code></td>
+<td>
+<p>A <code>longi</code> or <code>multi_longi</code> object.</p>
+</td></tr>
+<tr><td><code id="gene_sets">gene_sets</code></td>
+<td>
+<p>Gene sets to test: a named list of gene vectors, a two-column
+data frame (term, gene), or the path to a GMT file.</p>
+</td></tr>
+<tr><td><code id="universe">universe</code></td>
+<td>
+<p>Background genes. Defaults to every gene in <code>obj</code>, which
+is appropriate when the object holds all tested genes. Supply the full set of
+measured genes when <code>obj</code> was built from a pre-selected subset such as
+differentially expressed genes.</p>
+</td></tr>
+<tr><td><code id="gene_of">gene_of</code></td>
+<td>
+<p>Optional function mapping feature IDs to gene symbols, for
+objects whose rows are not genes, e.g.
+<code>function(id) sub("^.*_", "", id)</code> for <code>peak12_Cd8a</code>. Ignored for
+<code>multi_longi</code> objects, which already carry gene symbols.</p>
+</td></tr>
+<tr><td><code id="min_size">min_size</code>, <code id="max_size">max_size</code></td>
+<td>
+<p>Gene sets with fewer or more genes in the universe
+are skipped.</p>
+</td></tr>
+<tr><td><code id="min_overlap">min_overlap</code></td>
+<td>
+<p>Module / gene-set pairs sharing fewer genes are not tested.</p>
+</td></tr>
+<tr><td><code id="p_adjust_method">p_adjust_method</code></td>
+<td>
+<p>Multiple-testing correction passed to
+<code>p.adjust</code>, applied across all tested pairs.</p>
+</td></tr>
+<tr><td><code id="enrichment">enrichment</code></td>
+<td>
+<p>The table returned by <code>module_enrichment()</code>, or any data
+frame with <code>Cluster</code>, <code>Term</code>, <code>Padj</code>, and
+<code>FoldEnrichment</code> columns (for example, results converted from another
+enrichment tool).</p>
+</td></tr>
+<tr><td><code id="top_n">top_n</code></td>
+<td>
+<p>Number of terms shown per module, ranked by adjusted p-value.</p>
+</td></tr>
+<tr><td><code id="padj_cutoff">padj_cutoff</code></td>
+<td>
+<p>Terms with a larger adjusted p-value are not shown.</p>
+</td></tr>
+<tr><td><code id="base_size">base_size</code></td>
+<td>
+<p>ggplot base font size.</p>
+</td></tr>
+<tr><td><code id="title">title</code></td>
+<td>
+<p>Optional plot title; none by default.</p>
+</td></tr>
+<tr><td><code id="file">file</code></td>
+<td>
+<p>Optional output path (any <code>ggsave()</code> format).</p>
+</td></tr>
+<tr><td><code id="width">width</code>, <code id="height">height</code></td>
+<td>
+<p>Plot size in inches; scaled to the content when
+<code>NULL</code>.</p>
+</td></tr>
+</table>
+
+
+<h2 id="details">Details</h2>
+
+<p>The test needs no annotation package: any collection of gene sets works,
+including pathway databases exported as GMT, transcription-factor targets, or
+custom marker lists, for any organism. Gene identifiers in <code>gene_sets</code>
+must use the same naming as the features of <code>obj</code>.
+</p>
+<p>The choice of <code>universe</code> matters. Testing modules of pre-selected genes
+against only those genes asks &quot;is this set concentrated in this module rather
+than the others?&quot;, whereas a universe of all measured genes asks &quot;is this set
+enriched among the genes of this module at all?&quot;.
+</p>
+
+
+<h2 id="value">Value</h2>
+
+<p><code>module_enrichment()</code> returns a <code>data.table</code> with one row per tested
+module / gene-set pair: <code>Cluster</code>, <code>Term</code>, <code>Overlap</code>,
+<code>ModuleSize</code>, <code>SetSize</code>, <code>Universe</code>, <code>FoldEnrichment</code>,
+<code>PValue</code>, <code>Padj</code>, and <code>Genes</code> (the shared genes), ordered by
+module and p-value.
+</p>
+<p><code>enrichment_dotplot()</code> returns a ggplot object, also saved when
+<code>file</code> is supplied.
+</p>
+
+
+<h2 id="see-also">See Also</h2>
+
+<p><code>longitudinal_heatmap</code>, <code>multi_heatmap</code></p>
+
+
+<h2 id="examples">Examples</h2>
+
+<pre class="sourceCode r"><code>data("heatmap_example", package = "ModuleViz")
+obj &lt;- longitudinal_cluster(heatmap_example$mat, heatmap_example$meta,
+                            time_col = "TimeHr", group_col = "Condition",
+                            k = 4, stability = FALSE)
+genes &lt;- rownames(heatmap_example$mat)
+sets &lt;- list(Early_response = genes[1:15], Mid_response = genes[16:30],
+             Late_response = genes[31:45],
+             Housekeeping = genes[seq(2, 60, by = 4)])
+enr &lt;- module_enrichment(obj, sets, min_size = 3)
+head(enr)
+
+enrichment_dotplot(enr)
+
+## top terms beside each module of the heatmap
+longitudinal_heatmap(obj, enrichment = enr)
+</code></pre>
+
+
+    </article>
+    <footer>
+      <div class="prevnext"><a class="btn prev" href="../reference/module_correlation_heatmap.html" title="module_correlation_heatmap">&larr; Previous</a><a class="btn next" href="../reference/ModuleViz-package.html" title="ModuleViz-package">Next &rarr;</a></div>
+      <hr>
+      <p>&copy; Copyright 2026, Hua Huang. ModuleViz 1.0.0 is distributed under the MIT license.</p>
+      <p>Built with R and pandoc from the package README, NEWS, and help pages.</p>
+    </footer>
+  </div>
+</div>
+<script src="../search-index.js"></script>
+<script src="../site.js"></script>
+</body>
+</html>
