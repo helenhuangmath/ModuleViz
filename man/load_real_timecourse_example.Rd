@@ -27,3 +27,12 @@ load_real_timecourse_example(dataset = c("sorghum_leaf", "sorghum_root",
 \code{load_real_timecourse_example()} returns a list with \code{mat}, \code{meta},
 column-name fields, source text, and a citation hint.
 }
+\examples{
+available_real_timecourse_datasets()
+
+if (requireNamespace("timecoursedata", quietly = TRUE)) {
+    ex <- load_real_timecourse_example("influenza_mouse", top_n_features = 200)
+    dim(ex$mat)
+    head(ex$meta)
+}
+}

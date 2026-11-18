@@ -16,4 +16,16 @@ A list with two elements:
 \source{
 Simulated example data generated for package tests and tutorials.
 }
+\usage{
+data("heatmap_example")
+}
+\value{
+A list with the elements \code{mat} (numeric matrix, 60 features by 16 samples)
+and \code{meta} (data frame of sample metadata).
+}
 \keyword{datasets}
+\examples{
+data("heatmap_example", package = "ModuleViz")
+dim(heatmap_example$mat)
+head(heatmap_example$meta)
+}

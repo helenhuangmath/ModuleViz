@@ -8,12 +8,12 @@ mean silhouette width, and a simple distance-to-line elbow suggestion.
 \usage{
 choose_k(z, k_range = 2:20, method = "kmeans", nstart = 25,
   hclust_method = "ward.D2", dist_method = "euclidean", seed = 100,
-  file = NULL, chosen_k = NULL, annotate_k = TRUE, base_size = 11)
+  file = NULL, chosen_k = NULL, annotate_k = TRUE, base_size = 10)
 }
 \arguments{
 \item{z}{Row-z-scored matrix.}
 \item{k_range}{Integer vector of module counts to test.}
-\item{method, nstart, hclust_method, dist_method, seed}{Clustering controls.}
+\item{method, nstart, hclust_method, dist_method, seed}{Clustering controls, as in \code{\link{longitudinal_cluster}}.}
 \item{file}{Optional PDF diagnostic plot path.}
 \item{chosen_k}{Optional module count actually used downstream. When supplied it
 is drawn as a solid line beside the dashed elbow, keeping the diagnostic figure
@@ -29,4 +29,11 @@ The elbow is a heuristic, not an answer. Prefer the \code{k} that separates
 programmes you can interpret: a \code{k} that merges two biologically distinct
 modules is worse than one that splits a module in two, because a merged module
 reports the average of programmes that do not agree.
+}
+\examples{
+data("heatmap_example", package = "ModuleViz")
+z <- zscore_rows(heatmap_example$mat)
+diag <- choose_k(z, k_range = 2:6)
+diag
+attr(diag, "suggested_k")
 }

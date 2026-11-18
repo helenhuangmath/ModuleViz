@@ -37,6 +37,10 @@ The main functions are:
 - `multi_lineplot()`: plot each module's trajectory in every layer.
 - `dual_heatmap()`: the two-layer shortcut that aligns ATAC or CUT&RUN
   to RNA-defined modules.
+- `module_enrichment()` / `enrichment_dotplot()`: test modules for gene-set
+  enrichment and print the top terms beside each module of a heatmap.
+- `pseudobulk_cells()`: summarise single-cell data (`SingleCellExperiment`,
+  `Seurat`, or a count matrix) into pseudobulk profiles for the same workflow.
 - `module_correlation_heatmap()`: inspect gene-gene correlation within modules.
 - `module_correlation_summary()`: summarize within-module coherence.
 - `choose_k()`: calculate module-number diagnostics.
@@ -46,25 +50,22 @@ The main functions are:
 
 ## Installation
 
-`ModuleViz` is currently available from GitHub. Install the required
-Bioconductor dependencies first:
+`ModuleViz` 1.0.0 is available from GitHub. `BiocManager` installs it together
+with its CRAN and Bioconductor dependencies:
 
 ```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install(c("ComplexHeatmap", "circlize"))
-install.packages(c("cluster", "data.table", "ggplot2", "RColorBrewer",
-                   "remotes"))
-
-remotes::install_github("helenhuangmath/ModuleViz")
+BiocManager::install("helenhuangmath/ModuleViz")
 ```
 
-Optional packages are used for vignettes, examples, and package checks:
+Optional packages are used for single-cell input, vignettes, examples, and
+package checks:
 
 ```r
-BiocManager::install(c("BiocStyle", "timecoursedata"))
-install.packages(c("knitr", "rmarkdown", "testthat"))
+BiocManager::install(c("SingleCellExperiment", "BiocStyle", "timecoursedata"))
+install.packages(c("SeuratObject", "knitr", "rmarkdown", "testthat"))
 ```
 
 For local development from a checked-out repository:
@@ -103,7 +104,6 @@ longitudinal_heatmap(
     annotation_cols = c("Condition", "TimeHr"),
     top_n_label = 3,
     cluster_palette = "paired",
-    title = "Example longitudinal modules",
     file = "moduleviz_heatmap.pdf"
 )
 ```
@@ -200,8 +200,8 @@ longitudinal_heatmap(
     cluster_palette = "paired",
     annotation_palette = "set2",
     file = "moduleviz_heatmap.pdf",
-    width = 9,
-    height = 12
+    width = 5,
+    height = 6.5
 )
 ```
 
@@ -309,9 +309,20 @@ names(obj)
 head(obj$membership)
 ```
 
-Supported clustering methods are `"kmeans"`, `"hierarchical"`, and `"pam"`.
+Five clustering methods are available through `method`:
+
+| `method` | Notes |
+|---|---|
+| `"kmeans"` | Default. Fast; `nstart` random starts. |
+| `"hierarchical"` | Deterministic; `hclust_method` linkage, `dist_method` distance. |
+| `"pam"` | Partitioning around medoids; more robust to outliers. |
+| `"clara"` | PAM on sub-samples; scales to tens of thousands of features. |
+| `"fuzzy"` | Fuzzy c-means; adds a `Membership` score (0-1) per feature. |
+
 Set `dist_method = "correlation"` when trajectory shape is more important than
-amplitude.
+amplitude. `time_col` may be numeric, a factor (level order), or character
+(order of first appearance). A `SummarizedExperiment` can be passed instead of
+`mat` and `meta`; its `colData` is used as the sample metadata.
 
 ### `cluster_stability()`
 
@@ -391,16 +402,19 @@ each module.
 ```r
 p <- pattern_lineplot(
     obj,
-    palette = "set2",
-    base_size = 12,
-    title = "Module trajectories"
+    palette = "set2"
 )
 
 p
 ```
 
 When `group_col` was supplied to `longitudinal_cluster()`, each group is drawn
-as a separate colored line.
+as a separate colored line. Modules are stacked in one column by default, in
+the same order as the heatmap; `ncol` wraps them into a grid:
+
+```r
+pattern_lineplot(obj, ncol = 2)
+```
 
 ### `module_correlation_summary()`
 
@@ -489,7 +503,9 @@ multi_lineplot(res, file = "multi_lineplot.pdf")
 Each layer can be a `longi` object or a raw matrix. Raw matrices take their
 sample metadata from `meta`, either one shared table or a named list with one
 table per layer. See [Multi-Omics Analysis](#multi-omics-analysis) for the
-resulting figures.
+resulting figures. `multi_lineplot()` stacks the modules in one column and
+separates groups by line type; use `ncol` for a grid of modules or
+`split_groups = TRUE` for one column of panels per group.
 
 `cluster_by` names the layer that defines the modules. With
 `cluster_by = "joint"`, the per-gene profiles of every layer are concatenated
@@ -510,8 +526,43 @@ centroids and stability estimates.
 write_memberships(obj, prefix = "moduleviz")
 ```
 
-The exported membership table is the usual input for downstream gene set,
-pathway, or motif enrichment analyses.
+The exported membership table can be used with any downstream gene set,
+pathway, or motif enrichment tool; `module_enrichment()` covers the common
+over-representation case directly.
+
+### `module_enrichment()` and `enrichment_dotplot()`
+
+`module_enrichment()` tests every module for over-representation of gene sets
+with a hypergeometric test. Gene sets are supplied as a named list, a
+two-column data frame (term, gene), or a GMT file, so any collection works for
+any organism.
+
+```r
+gene_sets <- list(
+    Early_response = rownames(mat)[1:15],
+    Mid_response   = rownames(mat)[16:30],
+    Late_response  = rownames(mat)[31:45]
+)
+enr <- module_enrichment(obj, gene_sets, min_size = 3)
+
+# top terms printed beside each module
+longitudinal_heatmap(obj, enrichment = enr, enrichment_top_n = 3)
+
+# or as a dot plot
+enrichment_dotplot(enr)
+```
+
+`multi_heatmap()` and `dual_heatmap()` take the same `enrichment` argument.
+Supply `universe` (all measured genes) when the object holds only pre-selected
+genes, and `gene_of` when its rows are peaks rather than genes. Any data frame
+with `Cluster`, `Term`, and `Padj` columns, such as converted results from
+another enrichment tool, can also be shown beside the heatmap.
+
+### `pseudobulk_cells()`
+
+`pseudobulk_cells()` summarises single cells into pseudobulk profiles and
+returns a `SummarizedExperiment` that `longitudinal_cluster()` accepts
+directly. See [Single-Cell Data](#single-cell-data).
 
 ### `run_longitudinal()`
 
@@ -700,15 +751,51 @@ H3K27ac rises and falls with expression in every module. H3K27me3 is gained as
 expression falls in the naive-high modules and stays close to zero in the
 memory- and exhaustion-induced modules.
 
-## Single-Cell Pseudobulk Example
+## Single-Cell Data
 
-Single-cell data can be summarized into pseudobulk profiles by sample, cell
-type, condition, time point, and replicate. The resulting matrix can be analyzed
-with the same `ModuleViz` functions.
+`ModuleViz` clusters features across an ordered set of samples, so single cells
+are first summarised into pseudobulk profiles. `pseudobulk_cells()` accepts a
+`SingleCellExperiment`, a `Seurat` object, or a (sparse) count matrix with
+per-cell metadata, groups the cells by the columns you name, and returns a
+`SummarizedExperiment` with summed counts and log2 CPM.
 
 ```r
-source("examples/example_single_cell_pseudobulk.R")
+# sce: a SingleCellExperiment (or Seurat object) with raw counts
+sce <- simulate_single_cell_example(cells_per_sample = 20)
+
+pb <- pseudobulk_cells(
+    sce,
+    time_col     = "TimeHr",
+    sample_col   = "SampleID",     # keeps biological replicates separate
+    group_col    = "Condition",
+    celltype_col = "CellType",     # one set of profiles per cell type
+    min_cells    = 10
+)
+
+pb <- select_variable_features(pb, n = 2000)
+pb$Group <- paste(pb$CellType, pb$Condition, sep = "_")
+
+obj_sc <- longitudinal_cluster(
+    pb,
+    time_col = "TimeHr",
+    group_col = "Group",
+    k = 5,
+    aggregate_replicates = TRUE
+)
+
+longitudinal_heatmap(obj_sc,
+                     annotation_cols = c("CellType", "Condition", "TimeHr"))
+pattern_lineplot(obj_sc)
 ```
+
+- For log-normalised data, use `fun = "mean"` to average values instead of
+  summing counts.
+- For data without discrete time points, pass a continuous ordering such as
+  pseudotime as `time_col` and set `n_bins`; cells are split into equal-sized
+  bins along it and the bin index becomes the time axis.
+- Reading a `Seurat` object needs the `SeuratObject` package.
+
+A complete script is in `examples/example_single_cell_pseudobulk.R`.
 
 ![Single-cell pseudobulk heatmap](inst/extdata/results/04_single_cell_pseudobulk_heatmap.png)
 
@@ -769,8 +856,11 @@ folder is merged into `main`:
 
 ## Package Checks
 
-Before Bioconductor submission, run checks from a clean R/Bioconductor
-environment with all required and suggested dependencies installed:
+Version 1.0.0 passes `R CMD check` with no errors, warnings, or notes, and
+`BiocCheck` reports only the version number (Bioconductor requires `0.99.z` for
+a new submission; see `BIOCONDUCTOR_SUBMISSION.md`). To repeat the checks, use
+a current R/Bioconductor environment with all required and suggested
+dependencies installed:
 
 ```bash
 R CMD build .

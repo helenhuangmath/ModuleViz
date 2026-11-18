@@ -6,10 +6,10 @@ Convenience wrapper that clusters features, draws the heatmap, draws module
 trajectory plots, and writes output tables.
 }
 \usage{
-run_longitudinal(mat, meta, out_prefix, label_features = NULL,
+run_longitudinal(mat, meta = NULL, out_prefix, label_features = NULL,
   top_n_label = 5, annotation_cols = NULL, rank_table = NULL,
   zscore_palette = "rdbu", cluster_palette = "paired",
-  annotation_palette = "set2", heatmap_width = 8, heatmap_height = 13, ...)
+  annotation_palette = "set2", heatmap_width = 5, heatmap_height = 6.5, ...)
 }
 \arguments{
 \item{mat, meta}{Feature matrix and sample metadata.}
@@ -21,3 +21,11 @@ run_longitudinal(mat, meta, out_prefix, label_features = NULL,
 \item{...}{Passed to \code{longitudinal_cluster()}.}
 }
 \value{The \code{longi} object invisibly.}
+\examples{
+data("heatmap_example", package = "ModuleViz")
+prefix <- file.path(tempdir(), "moduleviz_example")
+obj <- run_longitudinal(heatmap_example$mat, heatmap_example$meta,
+                        out_prefix = prefix, time_col = "TimeHr",
+                        group_col = "Condition", k = 4, stability = FALSE)
+list.files(tempdir(), pattern = "moduleviz_example")
+}

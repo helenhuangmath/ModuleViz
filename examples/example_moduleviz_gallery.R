@@ -43,27 +43,23 @@ obj <- longitudinal_cluster(
 
 longitudinal_heatmap(
   obj,
-  annotation_cols = c("Condition", "TimeHr"),
   annotation_colors = list(Condition = COND_COLS),
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
-  top_n_label = 2,
+  top_n_label = 1,
   cluster_palette = "spectral",
-  title = "ModuleViz longitudinal heatmap",
   file = file.path(out_dir, "01_longitudinal_clustered_heatmap.pdf"),
-  width = 8,
-  height = 9
+  width = 4.2,
+  height = 5
 )
 longitudinal_heatmap(
   obj,
-  annotation_cols = c("Condition", "TimeHr"),
   annotation_colors = list(Condition = COND_COLS),
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
-  top_n_label = 2,
+  top_n_label = 1,
   cluster_palette = "spectral",
-  title = "ModuleViz longitudinal heatmap",
   file = file.path(preview_dir, "01_longitudinal_clustered_heatmap.png"),
-  width = 8,
-  height = 9
+  width = 4.2,
+  height = 5
 )
 
 ## ---- 2. module line/pattern plots ------------------------------------------
@@ -71,15 +67,14 @@ p_lines <- pattern_lineplot(
   obj,
   file = file.path(out_dir, "02_module_line_patterns.pdf"),
   group_colors = COND_COLS,
-  base_size = 13,
-  width = 7,
-  height = 6
+  width = 4.4,
+  height = 4.6
 )
 ggplot2::ggsave(
   file.path(preview_dir, "02_module_line_patterns.png"),
   p_lines,
-  width = 7,
-  height = 6,
+  width = 4.4,
+  height = 4.6,
   dpi = 300
 )
 
@@ -102,34 +97,41 @@ rownames(atac) <- paste0(
   rep(genes, each = 2)
 )
 atac <- atac + matrix(rnorm(length(atac), sd = 0.35), nrow = nrow(atac))
+## Passing the secondary layer as a "longi" object carries its sample metadata
+## along, so its columns get the same short time labels as the RNA panel.
+atac_obj <- longitudinal_cluster(atac, meta, sample_col = "SampleID",
+                                 time_col = "TimeHr", group_col = "Condition",
+                                 k = 4, stability = FALSE)
 
 dual_heatmap(
   primary = obj,
-  secondary = atac,
+  secondary = atac_obj,
   primary_name = "RNA",
   secondary_name = "ATAC",
   gene_of_primary = function(id) id,
   gene_of_secondary = function(id) sub("^.*_", "", id),
   aggregate = "mean",
+  annotation_colors = list(Condition = COND_COLS),
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   cluster_palette = "spectral",
   file = file.path(out_dir, "03_rna_atac_side_by_side_heatmap.pdf"),
-  width = 11,
-  height = 9
+  width = 6,
+  height = 5
 )
 dual_heatmap(
   primary = obj,
-  secondary = atac,
+  secondary = atac_obj,
   primary_name = "RNA",
   secondary_name = "ATAC",
   gene_of_primary = function(id) id,
   gene_of_secondary = function(id) sub("^.*_", "", id),
   aggregate = "mean",
+  annotation_colors = list(Condition = COND_COLS),
   label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
   cluster_palette = "spectral",
   file = file.path(preview_dir, "03_rna_atac_side_by_side_heatmap.png"),
-  width = 11,
-  height = 9
+  width = 6,
+  height = 5
 )
 
 ## ---- 4. several layers side by side: RNA + ATAC + H3K27ac + H3K27me3 ------
@@ -156,16 +158,17 @@ for (f in c(file.path(out_dir, "06_multi_heatmap.pdf"),
     annotation_colors = list(Condition = COND_COLS),
     label_features = c("Gene001", "Gene016", "Gene031", "Gene046"),
     cluster_palette = "spectral",
-    show_column_names = FALSE,
     file = f,
-    height = 9
+    width = 9,
+    height = 5
   )
 }
 
 ## ---- 5. module trajectories in every layer ----------------------------------
 for (f in c(file.path(out_dir, "07_multi_lineplot.pdf"),
             file.path(preview_dir, "07_multi_lineplot.png"))) {
-  multi_lineplot(multi, base_size = 13, file = f, width = 8, height = 8)
+  ## one column per condition keeps each panel to one line per layer
+  multi_lineplot(multi, split_groups = TRUE, file = f, width = 5.4, height = 5.6)
 }
 
 message("Example plots written to: ", normalizePath(out_dir))

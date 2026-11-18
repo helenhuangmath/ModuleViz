@@ -1,3 +1,94 @@
+# ModuleViz 1.0.0
+
+## New features
+
+* **Single-cell data.** `pseudobulk_cells()` summarises a
+  `SingleCellExperiment`, a `Seurat` object, or a (sparse) count matrix with
+  per-cell metadata into pseudobulk profiles by sample, cell type, condition,
+  and time point, returning a `SummarizedExperiment` that
+  `longitudinal_cluster()` accepts directly. Counts are summed and converted to
+  log2 CPM (`fun = "sum"`), or log-normalised values are averaged
+  (`fun = "mean"`). `n_bins` cuts a continuous ordering such as pseudotime into
+  bins for data without discrete time points.
+* **Bioconductor containers.** `longitudinal_cluster()`, `run_longitudinal()`,
+  and the layers of `multi_cluster()` accept a `SummarizedExperiment`; sample
+  metadata is taken from `colData` and the assay is chosen with `assay`.
+* **Module enrichment.** `module_enrichment()` tests every module of a `longi`
+  or `multi_longi` object for over-representation of user-supplied gene sets (a
+  named list, a two-column data frame, or a GMT file) with a hypergeometric
+  test. `longitudinal_heatmap()`, `multi_heatmap()`, and `dual_heatmap()` gain
+  `enrichment`, which prints the top terms beside each module
+  (`enrichment_top_n`, `enrichment_padj`, `enrichment_fontsize`).
+  `enrichment_dotplot()` draws the same table as a dot plot.
+* **More clustering algorithms.** Besides `"kmeans"` (still the default),
+  `"hierarchical"`, and `"pam"`, `method` now accepts `"clara"` (PAM on
+  sub-samples, for tens of thousands of features) and `"fuzzy"` (fuzzy c-means,
+  which adds a `Membership` score to the membership table). `choose_k()`
+  supports all of them.
+* **Publication-style figure defaults.** Every plot now draws with less text
+  and smaller, consistent type (9-11 pt), sized for a journal column rather
+  than a slide. Heatmaps print only the time point under each column
+  (`column_labels = "time"`; `"sample"` restores the full sample names), show
+  the group as a single top bar, drop the redundant module legend, and leave
+  the stability bar off unless `show_stability = TRUE`. `multi_heatmap()` gives
+  every layer the same panel width (`layer_widths`) and no longer adds an
+  overall title; `dual_heatmap()` gains `annotation_cols` /
+  `annotation_colors`. Line and dot plots use one clean theme (no grid, no
+  strip boxes), have no title by default, and keep x labels horizontal.
+  `module_correlation_heatmap()` labels 15 features by default and omits the
+  dendrogram. Font sizes, titles, labels, and figure sizes can still be set
+  through the existing arguments.
+* **Trend plots.** `pattern_lineplot()` and `multi_lineplot()` stack the modules
+  in a single column by default, matching the heatmap's row order; `ncol` wraps
+  them into a grid in every case (it was previously ignored when the object had
+  a group column). `multi_lineplot()` distinguishes groups by line type and
+  gains `split_groups = TRUE` for the earlier one-column-per-group layout.
+* `time_col` may be a factor (level order) or character (order of first
+  appearance) as well as numeric.
+* `select_variable_features()` keeps the most variable features of a matrix or
+  `SummarizedExperiment`, and `simulate_single_cell_example()` generates a small
+  single-cell time course for examples and tests.
+* Heatmaps can be written to `.svg`, `.tiff`, and `.jpeg` as well as `.pdf` and
+  `.png`.
+
+## Bug fixes
+
+* `aggregate_replicates = TRUE` no longer turns a non-numeric time column into
+  `NA`, no longer breaks on group names containing `|`, and now keeps every
+  metadata column that is constant within a group-by-time cell instead of
+  dropping all but the sample, group, and time columns.
+* `pattern_lineplot()` showed integer codes on the x axis for non-numeric time
+  points without a group column, and `NA` with one; both now show the labels in
+  order.
+* Sample IDs that are numbers or factors were used as column positions rather
+  than names when reordering the matrix.
+* `dist_method = "correlation"` failed when a feature was constant (undefined
+  correlation); such features are now treated as uncorrelated.
+* `choose_k()` failed for a single candidate `k` or when no `k` in `k_range`
+  was usable; its plot title no longer says "k-means" for other methods.
+* Clustering with `k` equal to one or to the number of features, a single time
+  point, or a module that is empty at one time point no longer errors.
+* `resolve_labels()` matched explicit features by substring before trying a
+  whole-token match, so `"Il2"` also labelled `Il2ra` and `Il21`; unmatched
+  features are now reported.
+* `multi_lineplot()` failed when layers stored time in different types.
+* Random-number use no longer changes the session's RNG state: `seed` is
+  applied locally, and `seed = NULL` defers to the caller's `set.seed()`.
+* Features with missing or non-finite values are reported when dropped, and
+  missing metadata columns, duplicated sample IDs, missing time values, and
+  non-numeric input now produce clear errors.
+* `.Rbuildignore` patterns were double-escaped and did not match, so `docs/`
+  and local build artifacts were included in the source tarball.
+
+## Package
+
+* Meets Bioconductor submission checks: every exported function has a runnable
+  example, the source tarball is below 5 MB, and dependencies on
+  `SummarizedExperiment`, `S4Vectors`, `Matrix`, and `withr` are declared.
+* `heatmap_example` is no longer lazy-loaded; use `data("heatmap_example")`.
+* The deprecated alias `dual_omics_heatmap()` has been removed; use
+  `dual_heatmap()`.
+
 # ModuleViz 0.1.0
 
 ## New features
@@ -74,7 +165,7 @@
   walkthrough on published GEO data (GSE285248 RNA-seq + GSE285245 CUT&RUN).
 * New `examples/example_module_correlation.R`.
 
-# Initial release
+## Initial release
 
 * Initial package release.
 * Adds temporal module clustering, ordered longitudinal heatmaps, module

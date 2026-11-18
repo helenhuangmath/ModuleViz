@@ -13,17 +13,27 @@ multi_heatmap(x, annotation_cols = NULL, annotation_colors = NULL,
   label_features = NULL, top_n_label = 0, col_fun = NULL,
   zscore_palette = c("rdbu", "viridis"), zscore_limits = c(-2, 2),
   cluster_palette = "paired", annotation_palette = "set2",
-  na_col = "grey85", label_fontsize = 15, row_title_fontsize = 16,
-  column_name_fontsize = 13, annotation_name_fontsize = 14,
-  legend_fontsize = 14, title_fontsize = 17, show_column_names = TRUE,
-  layer_gap = 10, title = NULL, file = NULL, width = NULL,
-  height = 13, ...)
+  na_col = "grey85", label_fontsize = 9, row_title_fontsize = 10,
+  column_name_fontsize = 9, annotation_name_fontsize = 9,
+  legend_fontsize = 9, title_fontsize = 11, show_column_names = TRUE,
+  layer_gap = 5, title = NULL, file = NULL, width = NULL, height = 6.5, ...,
+  enrichment = NULL, enrichment_top_n = 3, enrichment_padj = 0.05,
+  enrichment_fontsize = 9, column_labels = c("time", "sample"),
+  layer_widths = c("equal", "samples"))
 }
 \arguments{
+\item{enrichment}{Optional module enrichment table from
+\code{\link{module_enrichment}} (or any data frame with \code{Cluster},
+\code{Term}, and \code{Padj} columns). The top terms of every module are
+printed to the right of the last panel.}
+\item{enrichment_top_n}{Number of enriched terms shown per module.}
+\item{enrichment_padj}{Adjusted p-value cutoff for a term to be shown.}
+\item{enrichment_fontsize}{Font size of the enrichment text.}
 \item{x}{A \code{multi_longi} object, or a named list of layers, which is passed
 to \code{multi_cluster()} together with \code{...}.}
 \item{annotation_cols}{Metadata columns shown as top bars on each layer.
-Defaults to each layer's group and time columns; \code{character(0)} for none.}
+Defaults to each layer's group column (plus the time column when the time
+points are not printed under the columns); \code{character(0)} for none.}
 \item{annotation_colors}{Optional named list mapping annotation to colours.}
 \item{label_features}{Genes or IDs to label on the right of the last panel.}
 \item{top_n_label}{Automatic labels per module, ranked by the largest |z| across
@@ -39,12 +49,16 @@ layer.}
 gene labels, module names, and sample names.}
 \item{annotation_name_fontsize, legend_fontsize, title_fontsize}{Text sizes for
 annotation names, legends, and panel / figure titles.}
-\item{show_column_names}{Show sample names along the bottom of every layer.}
+\item{show_column_names}{Show column labels along the bottom of every layer.}
+\item{column_labels}{\code{"time"} (default) prints only the time point under
+each column; \code{"sample"} prints the full sample names.}
 \item{layer_gap}{Gap between the layer panels, in mm.}
-\item{title}{Overall title. \code{NULL} gives "A + B + C (linked by gene)";
-\code{FALSE} drops it.}
+\item{layer_widths}{\code{"equal"} (default) gives every layer the same panel
+width; \code{"samples"} makes each panel as wide as its number of samples.}
+\item{title}{Optional overall title; none by default, since each panel is
+already headed by its layer name.}
 \item{file}{Optional PDF or PNG output path.}
-\item{width, height}{Size in inches; \code{width} defaults to 3.5 + 3.5 per layer.}
+\item{width, height}{Size in inches; \code{width} defaults to 2.5 + 2 per layer.}
 \item{...}{Passed to \code{multi_cluster()} when \code{x} is a list.}
 }
 \value{The \code{multi_longi} object invisibly, with the drawn

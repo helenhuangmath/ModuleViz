@@ -48,8 +48,8 @@ especially `ComplexHeatmap`.
 The current `DESCRIPTION` already includes a `biocViews` field:
 
 ```text
-Software, GeneExpression, Transcriptomics, RNASeq, TimeCourse, Clustering,
-Visualization
+Software, GeneExpression, Transcriptomics, RNASeq, SingleCell, Epigenetics,
+TimeCourse, Clustering, GeneSetEnrichment, Visualization
 ```
 
 Before submission, confirm these terms are valid leaf terms for the current
@@ -110,8 +110,8 @@ Current package-specific notes:
   in `Suggests`.
 - `timecoursedata` appears to be used for public-data examples and should remain
   in `Suggests` unless required at runtime.
-- Consider changing `Version: 0.1.0` to `Version: 0.99.0` before formal
-  Bioconductor submission.
+- The package is versioned `1.0.0`; change it to `0.99.0` for the formal
+  Bioconductor submission (see Pre-Submission Action Items).
 
 ## Documentation Checklist
 
@@ -170,23 +170,20 @@ Also run the test suite:
 testthat::test_dir("tests/testthat")
 ```
 
-Current local validation note:
+Validation status (2026-11-17, R 4.5.3, Bioconductor 3.22, BiocCheck 1.46.3):
 
-`R CMD check --no-manual .` was attempted in this workspace, but the check could
-not proceed because this local R environment does not have required packages
-installed:
-
-- `circlize`
-- `ComplexHeatmap`
-- `ggplot2`
-
-It also lacks suggested packages used for a complete check:
-
-- `BiocStyle`
-- `timecoursedata`
-
-Run the checks again after installing required and suggested dependencies in a
-fresh R/Bioconductor environment.
+- `R CMD build` succeeds and builds all three vignettes; the source tarball is
+  3.8 MB (limit 5 MB).
+- `R CMD check --no-manual`: `Status: OK` (0 errors, 0 warnings, 0 notes).
+- `testthat`: 177 expectations, 0 failures.
+- `BiocCheck` (`new-package = TRUE`): the only error and warning are the
+  version number. Bioconductor requires new submissions to be versioned
+  `0.99.z`; this release is `1.0.0`. Remaining notes are stylistic (line
+  length, indentation, function length, `suppressWarnings()`), the suggested
+  R version (4.5.0; the package declares 4.3.0), and optional ORCID / funder
+  fields.
+- Not checked locally: Bioc-devel mailing list subscription and the support
+  site "Watched Tags" entry, which the maintainer sets up by hand.
 
 ## Bioconductor Submission Process
 
@@ -223,8 +220,8 @@ Repository: https://github.com/helenhuangmath/ModuleViz
 
 Type: Software
 
-biocViews: Software, GeneExpression, Transcriptomics, RNASeq, TimeCourse,
-Clustering, Visualization
+biocViews: Software, GeneExpression, Transcriptomics, RNASeq, SingleCell,
+Epigenetics, TimeCourse, Clustering, GeneSetEnrichment, Visualization
 
 Maintainer: Hua Huang <helenhuang.math@gmail.com>
 
@@ -235,13 +232,6 @@ draws ComplexHeatmap-based module heatmaps, summarizes module trajectories with
 line plots, and supports paired RNA/chromatin visualizations aligned by gene.
 The package is intended for RNA-seq, ATAC-seq, CUT&RUN, pseudobulk single-cell,
 and related genomic time-course workflows.
-
-Why Bioconductor:
-The package targets high-throughput genomic time-course analysis and depends on
-Bioconductor visualization infrastructure through ComplexHeatmap. It provides
-reproducible examples and vignettes for genomic use cases and is designed to
-fit into existing R/Bioconductor workflows using matrix-like omics data and
-sample metadata.
 
 Major functionality:
 - longitudinal_cluster(): cluster features into temporal modules
@@ -258,31 +248,6 @@ Package status:
 - Vignettes and examples are included.
 - testthat tests are included.
 - Local/tooling artifacts have been removed.
-
-Additional notes:
-This is a new Bioconductor software package submission. I am the package
-maintainer listed in DESCRIPTION and will support the package through the
-Bioconductor review process and support channels.
-```
-
-## Pre-Submission Action Items
-
-Complete these before opening the submission issue:
-
-- Install all required and suggested dependencies in a current Bioconductor
-  devel environment.
-- Run `R CMD build`.
-- Run `R CMD check --no-manual` on the built tarball.
-- Run `BiocCheck::BiocCheck(".")`.
-- Confirm that all vignettes build successfully.
-- Confirm that `examples/validate_real_data.R` is either intended for package
-  distribution or move it to a non-default branch / ignore it if it is only a
-  local validation script.
-- Confirm that committed PNG figures are necessary package assets and not
-  oversized generated output.
-- Confirm `biocViews` terms against the current Bioconductor vocabulary.
-- Consider changing version to `0.99.0` for new package submission.
-- Merge the current PR into `main` only after review of the package changes.
 
 ## Official References
 

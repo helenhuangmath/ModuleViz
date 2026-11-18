@@ -1,15 +1,9 @@
-citHeader("To cite ModuleViz in publications, please use:")
-
-citEntry(
-  entry = "Manual",
+bibentry(
+  bibtype = "Manual",
+  header = "To cite ModuleViz in publications, please use:",
   title = "ModuleViz: an R package for temporal module discovery and visualization in longitudinal omics data",
-  author = personList(as.person("Hua Huang")),
+  author = person("Hua", "Huang"),
   year = "2026",
-  note = "R package version 0.1.0",
-  url = "https://github.com/helenhuangmath/ModuleViz",
-  textVersion = paste(
-    "Hua Huang (2026). ModuleViz: an R package for temporal module discovery",
-    "and visualization in longitudinal omics data. R package version 0.1.0.",
-    "https://github.com/helenhuangmath/ModuleViz"
-  )
+  note = "R package version 1.0.0",
+  url = "https://github.com/helenhuangmath/ModuleViz"
 )
