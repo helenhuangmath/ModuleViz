@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Function reference &mdash; ModuleViz 1.0.0 documentation</title>
+<link rel="stylesheet" href="../site.css">
+<style>
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+</head>
+<body>
+<button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">&#9776; <span>ModuleViz</span></button>
+<nav class="side" aria-label="Documentation">
+  <div class="side-head">
+    <a class="brand" href="../index.html">ModuleViz</a>
+    <div class="version">1.0.0</div>
+    <input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off">
+  </div>
+  <div id="search-results" class="search-results" hidden></div>
+  <div class="side-nav" data-root="../">
+<ul class="nav"><li><a href="../install.html">Install ModuleViz</a></li>
+<li><a href="../tutorial.html">Tutorial</a></li>
+<li><a href="../functions.html">Function guide</a></li>
+<li><a href="../multiomics.html">Multi-omics analysis</a></li>
+<li><a href="../coherence.html">Module coherence</a></li>
+<li><a href="../singlecell.html">Single-cell data</a></li>
+<li><a href="../cd8.html">Published data example</a></li>
+<li><a href="../public-data.html">Public time-course data</a></li>
+<li><a href="../formats.html">Input and output formats</a></li>
+<li><a href="../qa.html">Common Q &amp; A</a></li>
+<li><a href="../vignettes.html">Vignettes</a></li>
+<li class="current"><a href="../reference/index.html">Function reference</a><ul><li><a href="../reference/choose_k.html">choose_k</a></li><li><a href="../reference/cluster_stability.html">cluster_stability</a></li><li><a href="../reference/dual_heatmap.html">dual_heatmap</a></li><li><a href="../reference/heatmap_example.html">heatmap_example</a></li><li><a href="../reference/load_real_timecourse_example.html">load_real_timecourse_example</a></li><li><a href="../reference/longitudinal_cluster.html">longitudinal_cluster</a></li><li><a href="../reference/longitudinal_heatmap.html">longitudinal_heatmap</a></li><li><a href="../reference/module_correlation_heatmap.html">module_correlation_heatmap</a></li><li><a href="../reference/module_enrichment.html">module_enrichment</a></li><li><a href="../reference/ModuleViz-package.html">ModuleViz-package</a></li><li><a href="../reference/multi_cluster.html">multi_cluster</a></li><li><a href="../reference/multi_heatmap.html">multi_heatmap</a></li><li><a href="../reference/multi_lineplot.html">multi_lineplot</a></li><li><a href="../reference/pattern_lineplot.html">pattern_lineplot</a></li><li><a href="../reference/pseudobulk_cells.html">pseudobulk_cells</a></li><li><a href="../reference/run_longitudinal.html">run_longitudinal</a></li><li><a href="../reference/select_variable_features.html">select_variable_features</a></li><li><a href="../reference/simulate_single_cell_example.html">simulate_single_cell_example</a></li><li><a href="../reference/write_memberships.html">write_memberships</a></li></ul></li>
+<li><a href="../changelog.html">Release notes</a></li></ul>
+  </div>
+</nav>
+<div class="main">
+  <div class="content">
+    <div class="crumbs">
+      <span><a href="../index.html">Home</a> &raquo; Function reference</span>
+      <a class="source" href="https://github.com/helenhuangmath/ModuleViz">View on GitHub</a>
+    </div>
+    <hr>
+    <article>
+<h1>Function reference</h1>
+<p>One page per help topic, generated from the package's <code>man/</code> files (version 1.0.0). Each page lists usage, arguments, return value, and runnable examples. The same pages are available in R with <code>?topic</code>.</p>
+<p>For worked examples of each function, see the <a href="../functions.html">Function guide</a>.</p>
+<table><thead><tr><th>Help page</th><th>Covers</th><th>Title</th></tr></thead><tbody>
+<tr><td><a href="choose_k.html">choose_k</a></td><td><code>choose_k</code></td><td>Choose a module count with elbow and silhouette diagnostics</td></tr>
+<tr><td><a href="cluster_stability.html">cluster_stability</a></td><td><code>cluster_stability</code></td><td>Assess cluster stability by row resampling</td></tr>
+<tr><td><a href="dual_heatmap.html">dual_heatmap</a></td><td><code>dual_heatmap</code></td><td>Draw paired omics heatmaps aligned by gene</td></tr>
+<tr><td><a href="heatmap_example.html">heatmap_example</a></td><td><code>heatmap_example</code></td><td>Example longitudinal expression dataset</td></tr>
+<tr><td><a href="load_real_timecourse_example.html">load_real_timecourse_example</a></td><td><code>load_real_timecourse_example</code>, <code>available_real_timecourse_datasets</code></td><td>Load supported public time-course example datasets</td></tr>
+<tr><td><a href="longitudinal_cluster.html">longitudinal_cluster</a></td><td><code>longitudinal_cluster</code>, <code>zscore_rows</code>, <code>collapse_columns</code></td><td>Cluster longitudinal features into temporal modules</td></tr>
+<tr><td><a href="longitudinal_heatmap.html">longitudinal_heatmap</a></td><td><code>longitudinal_heatmap</code>, <code>resolve_labels</code></td><td>Draw an ordered longitudinal heatmap</td></tr>
+<tr><td><a href="module_correlation_heatmap.html">module_correlation_heatmap</a></td><td><code>module_correlation_heatmap</code>, <code>module_correlation_summary</code></td><td>Gene-gene correlation heatmaps per temporal module</td></tr>
+<tr><td><a href="module_enrichment.html">module_enrichment</a></td><td><code>module_enrichment</code>, <code>enrichment_dotplot</code></td><td>Gene-set enrichment of temporal modules</td></tr>
+<tr><td><a href="ModuleViz-package.html">ModuleViz-package</a></td><td><code>ModuleViz-package</code>, <code>ModuleViz</code></td><td>Longitudinal Omics Heatmaps and Temporal Module Plots</td></tr>
+<tr><td><a href="multi_cluster.html">multi_cluster</a></td><td><code>multi_cluster</code></td><td>Cluster several omics layers into shared modules, linked by gene</td></tr>
+<tr><td><a href="multi_heatmap.html">multi_heatmap</a></td><td><code>multi_heatmap</code></td><td>Draw several omics layers side by side, linked by gene</td></tr>
+<tr><td><a href="multi_lineplot.html">multi_lineplot</a></td><td><code>multi_lineplot</code></td><td>Plot module trajectories across omics layers</td></tr>
+<tr><td><a href="pattern_lineplot.html">pattern_lineplot</a></td><td><code>pattern_lineplot</code></td><td>Plot mean module trajectories</td></tr>
+<tr><td><a href="pseudobulk_cells.html">pseudobulk_cells</a></td><td><code>pseudobulk_cells</code></td><td>Summarise single cells into pseudobulk profiles</td></tr>
+<tr><td><a href="run_longitudinal.html">run_longitudinal</a></td><td><code>run_longitudinal</code></td><td>Run the full single-omics longitudinal workflow</td></tr>
+<tr><td><a href="select_variable_features.html">select_variable_features</a></td><td><code>select_variable_features</code></td><td>Keep the most variable features</td></tr>
+<tr><td><a href="simulate_single_cell_example.html">simulate_single_cell_example</a></td><td><code>simulate_single_cell_example</code></td><td>Simulate a small single-cell time course</td></tr>
+<tr><td><a href="write_memberships.html">write_memberships</a></td><td><code>write_memberships</code></td><td>Write module membership and summary tables</td></tr>
+</tbody></table>
+    </article>
+    <footer>
+      <div class="prevnext"><a class="btn prev" href="../vignettes.html" title="Vignettes">&larr; Previous</a><a class="btn next" href="../reference/choose_k.html" title="choose_k">Next &rarr;</a></div>
+      <hr>
+      <p>&copy; Copyright 2026, Hua Huang. ModuleViz 1.0.0 is distributed under the MIT license.</p>
+      <p>Built with R and pandoc from the package README, NEWS, and help pages.</p>
+    </footer>
+  </div>
+</div>
+<script src="../search-index.js"></script>
+<script src="../site.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<link rel="stylesheet" href="{{ROOT}}site.css">
+<style>
+{{HIGHLIGHT}}
+</style>
+</head>
+<body>
+<button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">&#9776; <span>ModuleViz</span></button>
+<nav class="side" aria-label="Documentation">
+  <div class="side-head">
+    <a class="brand" href="{{ROOT}}index.html">ModuleViz</a>
+    <div class="version">{{VERSION}}</div>
+    <input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off">
+  </div>
+  <div id="search-results" class="search-results" hidden></div>
+  <div class="side-nav" data-root="{{ROOT}}">
+{{NAV}}
+  </div>
+</nav>
+<div class="main">
+  <div class="content">
+    <div class="crumbs">
+      <span><a href="{{ROOT}}index.html">Home</a>{{CRUMBS}}</span>
+      <a class="source" href="{{REPO}}">View on GitHub</a>
+    </div>
+    <hr>
+    <article>
+{{H1}}
+{{BODY}}
+    </article>
+    <footer>
+      <div class="prevnext">{{PREV}}{{NEXT}}</div>
+      <hr>
+      <p>&copy; Copyright {{YEAR}}, Hua Huang. ModuleViz {{VERSION}} is distributed under the MIT license.</p>
+      <p>Built with R and pandoc from the package README, NEWS, and help pages.</p>
+    </footer>
+  </div>
+</div>
+<script src="{{ROOT}}search-index.js"></script>
+<script src="{{ROOT}}site.js"></script>
+</body>
+</html>

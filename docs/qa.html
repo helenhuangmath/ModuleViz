@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Common Q &amp; A &mdash; ModuleViz 1.0.0 documentation</title>
+<link rel="stylesheet" href="site.css">
+<style>
+
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+</head>
+<body>
+<button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">&#9776; <span>ModuleViz</span></button>
+<nav class="side" aria-label="Documentation">
+  <div class="side-head">
+    <a class="brand" href="index.html">ModuleViz</a>
+    <div class="version">1.0.0</div>
+    <input id="search" type="search" placeholder="Search docs" aria-label="Search docs" autocomplete="off">
+  </div>
+  <div id="search-results" class="search-results" hidden></div>
+  <div class="side-nav" data-root="">
+<ul class="nav"><li><a href="install.html">Install ModuleViz</a></li>
+<li><a href="tutorial.html">Tutorial</a></li>
+<li><a href="functions.html">Function guide</a></li>
+<li><a href="multiomics.html">Multi-omics analysis</a></li>
+<li><a href="coherence.html">Module coherence</a></li>
+<li><a href="singlecell.html">Single-cell data</a></li>
+<li><a href="cd8.html">Published data example</a></li>
+<li><a href="public-data.html">Public time-course data</a></li>
+<li><a href="formats.html">Input and output formats</a></li>
+<li class="current"><a href="qa.html">Common Q &amp; A</a><ul>
+<li><a href="#installation">Installation</a>
+<ul>
+<li><a href="#biocmanagerinstallhelenhuangmathmoduleviz-fails-what-is-missing"><code>BiocManager::install("helenhuangmath/ModuleViz")</code> fails. What is missing?</a></li>
+<li><a href="#can-i-install-with-biocmanagerinstallmoduleviz">Can I install with <code>BiocManager::install("ModuleViz")</code>?</a></li>
+</ul></li>
+<li><a href="#input">Input</a>
+<ul>
+<li><a href="#do-i-need-to-z-score-my-matrix-first">Do I need to z-score my matrix first?</a></li>
+<li><a href="#which-features-should-i-cluster">Which features should I cluster?</a></li>
+<li><a href="#my-time-variable-is-not-numeric-does-that-work">My time variable is not numeric. Does that work?</a></li>
+<li><a href="#how-are-replicates-handled">How are replicates handled?</a></li>
+</ul></li>
+<li><a href="#clustering">Clustering</a>
+<ul>
+<li><a href="#how-do-i-choose-the-number-of-modules">How do I choose the number of modules?</a></li>
+<li><a href="#which-clustering-method-should-i-use">Which clustering method should I use?</a></li>
+<li><a href="#what-do-the-module-numbers-mean">What do the module numbers mean?</a></li>
+<li><a href="#how-do-i-read-the-stability-values">How do I read the stability values?</a></li>
+<li><a href="#a-module-looks-like-two-patterns-mixed-together-what-should-i-do">A module looks like two patterns mixed together. What should I do?</a></li>
+</ul></li>
+<li><a href="#multi-omics">Multi-omics</a>
+<ul>
+<li><a href="#how-are-peaks-matched-to-genes">How are peaks matched to genes?</a></li>
+<li><a href="#several-peaks-map-to-one-gene-which-one-is-shown">Several peaks map to one gene. Which one is shown?</a></li>
+<li><a href="#what-happens-to-genes-missing-from-one-layer">What happens to genes missing from one layer?</a></li>
+<li><a href="#can-modules-be-defined-from-all-layers-together">Can modules be defined from all layers together?</a></li>
+</ul></li>
+<li><a href="#single-cell-data">Single-cell data</a>
+<ul>
+<li><a href="#can-i-cluster-single-cells-directly">Can I cluster single cells directly?</a></li>
+<li><a href="#my-data-has-pseudotime-not-time-points">My data has pseudotime, not time points.</a></li>
+<li><a href="#my-data-is-already-log-normalised">My data is already log-normalised.</a></li>
+</ul></li>
+<li><a href="#enrichment">Enrichment</a>
+<ul>
+<li><a href="#which-gene-universe-is-used">Which gene universe is used?</a></li>
+<li><a href="#can-i-show-results-from-another-enrichment-tool-beside-the-heatmap">Can I show results from another enrichment tool beside the heatmap?</a></li>
+</ul></li>
+<li><a href="#figures">Figures</a>
+<ul>
+<li><a href="#how-do-i-change-colours">How do I change colours?</a></li>
+<li><a href="#how-do-i-label-specific-genes">How do I label specific genes?</a></li>
+</ul></li>
+</ul></li>
+<li><a href="vignettes.html">Vignettes</a></li>
+<li><a href="reference/index.html">Function reference</a></li>
+<li><a href="changelog.html">Release notes</a></li></ul>
+  </div>
+</nav>
+<div class="main">
+  <div class="content">
+    <div class="crumbs">
+      <span><a href="index.html">Home</a> &raquo; Common Q &amp; A</span>
+      <a class="source" href="https://github.com/helenhuangmath/ModuleViz">View on GitHub</a>
+    </div>
+    <hr>
+    <article>
+<h1>Common Q &amp; A</h1>
+
+<h2 id="installation">Installation</h2>
+<h3 id="biocmanagerinstallhelenhuangmathmoduleviz-fails-what-is-missing"><code>BiocManager::install("helenhuangmath/ModuleViz")</code> fails. What is missing?</h3>
+<p>Installing from a GitHub repository needs the <code>remotes</code> package. Run <code>install.packages("remotes")</code> and try again. See <a href="install.html">Install ModuleViz</a>.</p>
+<h3 id="can-i-install-with-biocmanagerinstallmoduleviz">Can I install with <code>BiocManager::install("ModuleViz")</code>?</h3>
+<p>Not yet. <code>ModuleViz</code> is not on Bioconductor, so use the GitHub form.</p>
+<h2 id="input">Input</h2>
+<h3 id="do-i-need-to-z-score-my-matrix-first">Do I need to z-score my matrix first?</h3>
+<p>No. <code>longitudinal_cluster()</code> z-scores each feature across samples. If the matrix is already z-scored, pass <code>is_zscore = TRUE</code>.</p>
+<h3 id="which-features-should-i-cluster">Which features should I cluster?</h3>
+<p>Select features before clustering, using differential analysis, a variance filter, or another criterion that suits the experiment. <code>select_variable_features()</code> keeps the most variable features of a matrix or a <code>SummarizedExperiment</code>.</p>
+<h3 id="my-time-variable-is-not-numeric-does-that-work">My time variable is not numeric. Does that work?</h3>
+<p>Yes. <code>time_col</code> can be numeric, a factor (the level order is used), or character (the order of first appearance is used).</p>
+<h3 id="how-are-replicates-handled">How are replicates handled?</h3>
+<p>Set <code>aggregate_replicates = TRUE</code> in <code>longitudinal_cluster()</code> to average replicates within each group and time point before clustering.</p>
+<h2 id="clustering">Clustering</h2>
+<h3 id="how-do-i-choose-the-number-of-modules">How do I choose the number of modules?</h3>
+<p><code>choose_k()</code> reports the within-cluster sum of squares and the mean silhouette width over a range of <code>k</code>, and suggests an elbow. Treat the elbow as a diagnostic. Prefer the <code>k</code> that separates programmes you can interpret: a <code>k</code> that merges two distinct modules is worse than one that splits a module in two. Check the result with <code>cluster_stability()</code> and the <a href="coherence.html">module coherence</a> plots.</p>
+<h3 id="which-clustering-method-should-i-use">Which clustering method should I use?</h3>
+<table>
+<thead>
+<tr>
+<th><code>method</code></th>
+<th>Use it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"kmeans"</code></td>
+<td>The default. Fast.</td>
+</tr>
+<tr>
+<td><code>"hierarchical"</code></td>
+<td>You want a deterministic result.</td>
+</tr>
+<tr>
+<td><code>"pam"</code></td>
+<td>Outliers are a concern.</td>
+</tr>
+<tr>
+<td><code>"clara"</code></td>
+<td>There are tens of thousands of features.</td>
+</tr>
+<tr>
+<td><code>"fuzzy"</code></td>
+<td>You want a membership score per feature.</td>
+</tr>
+</tbody>
+</table>
+<p>Set <code>dist_method = "correlation"</code> when the shape of a trajectory matters more than its amplitude.</p>
+<h3 id="what-do-the-module-numbers-mean">What do the module numbers mean?</h3>
+<p>Modules are ordered by the time point at which their centroid peaks. <code>Cluster1</code> is the earliest-peaking module and the last cluster is the latest-peaking one.</p>
+<h3 id="how-do-i-read-the-stability-values">How do I read the stability values?</h3>
+<p><code>cluster_stability()</code> subsamples features, reclusters, and reports the best Jaccard overlap with the original module. High values mean the module survives subsampling. Interpret values below about 0.6 with caution.</p>
+<h3 id="a-module-looks-like-two-patterns-mixed-together-what-should-i-do">A module looks like two patterns mixed together. What should I do?</h3>
+<p>Draw it with <code>module_correlation_heatmap()</code>. Visible sub-blocks suggest the module should be split, which usually means increasing <code>k</code>.</p>
+<h2 id="multi-omics">Multi-omics</h2>
+<h3 id="how-are-peaks-matched-to-genes">How are peaks matched to genes?</h3>
+<p>By row name. The first layer's row IDs are taken as gene symbols, and the other layers use the text after the last underscore (<code>peak12_Pdcd1</code> maps to <code>Pdcd1</code>). Supply <code>gene_of</code> for a different naming scheme.</p>
+<h3 id="several-peaks-map-to-one-gene-which-one-is-shown">Several peaks map to one gene. Which one is shown?</h3>
+<p><code>aggregate = "mean"</code> averages them, and <code>aggregate = "top"</code> keeps the strongest feature.</p>
+<h3 id="what-happens-to-genes-missing-from-one-layer">What happens to genes missing from one layer?</h3>
+<p><code>gene_set = "intersect"</code> keeps only genes present in every layer. <code>gene_set = "reference"</code> keeps every gene of the reference layer and draws the missing rows in grey.</p>
+<h3 id="can-modules-be-defined-from-all-layers-together">Can modules be defined from all layers together?</h3>
+<p>Yes. <code>cluster_by = "joint"</code> clusters the concatenated per-gene profiles of all layers, so a module groups genes whose expression and chromatin trajectories agree. Otherwise <code>cluster_by</code> names the layer that defines the modules.</p>
+<h2 id="single-cell-data">Single-cell data</h2>
+<h3 id="can-i-cluster-single-cells-directly">Can I cluster single cells directly?</h3>
+<p>No. <code>ModuleViz</code> clusters features across an ordered set of samples, so cells are first summarised with <code>pseudobulk_cells()</code>.</p>
+<h3 id="my-data-has-pseudotime-not-time-points">My data has pseudotime, not time points.</h3>
+<p>Pass the pseudotime column as <code>time_col</code> and set <code>n_bins</code>. Cells are split into equal-sized bins along it, and the bin index becomes the time axis.</p>
+<h3 id="my-data-is-already-log-normalised">My data is already log-normalised.</h3>
+<p>Use <code>fun = "mean"</code> in <code>pseudobulk_cells()</code> to average values instead of summing counts.</p>
+<h2 id="enrichment">Enrichment</h2>
+<h3 id="which-gene-universe-is-used">Which gene universe is used?</h3>
+<p>Supply <code>universe</code> (all measured genes) when the object holds only pre-selected genes. Supply <code>gene_of</code> when the rows are peaks and not genes.</p>
+<h3 id="can-i-show-results-from-another-enrichment-tool-beside-the-heatmap">Can I show results from another enrichment tool beside the heatmap?</h3>
+<p>Yes. Any data frame with <code>Cluster</code>, <code>Term</code>, and <code>Padj</code> columns can be passed to the <code>enrichment</code> argument of <code>longitudinal_heatmap()</code>, <code>multi_heatmap()</code>, and <code>dual_heatmap()</code>.</p>
+<h2 id="figures">Figures</h2>
+<h3 id="how-do-i-change-colours">How do I change colours?</h3>
+<p>Use <code>zscore_palette</code> for the heatmap body (for example <code>"rdbu"</code> or <code>"viridis"</code>), <code>cluster_palette</code> for the module bar, and <code>annotation_palette</code> for the sample annotation. Use <code>annotation_colors</code> when exact metadata colours are needed.</p>
+<h3 id="how-do-i-label-specific-genes">How do I label specific genes?</h3>
+<p>Use <code>label_features</code> in <code>multi_heatmap()</code> and <code>dual_heatmap()</code>, or <code>top_n_label</code> in <code>longitudinal_heatmap()</code> to label the strongest features of each module. <code>resolve_labels()</code> shows which rows will be labelled.</p>
+
+    </article>
+    <footer>
+      <div class="prevnext"><a class="btn prev" href="formats.html" title="Input and output formats">&larr; Previous</a><a class="btn next" href="vignettes.html" title="Vignettes">Next &rarr;</a></div>
+      <hr>
+      <p>&copy; Copyright 2026, Hua Huang. ModuleViz 1.0.0 is distributed under the MIT license.</p>
+      <p>Built with R and pandoc from the package README, NEWS, and help pages.</p>
+    </footer>
+  </div>
+</div>
+<script src="search-index.js"></script>
+<script src="site.js"></script>
+</body>
+</html>
